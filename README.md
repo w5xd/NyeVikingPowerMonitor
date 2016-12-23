@@ -8,6 +8,8 @@ instead bought an Arduino UNO single-board computer and its mating Proto Shield 
 See http://arduino.cc. I built a replacement for the Power Monitor's original circuit board. 
 This repo documents the hardware and software used.
 
+Don't know about the Nye Viking Power Monitor? Here is a demonstration: http://www.youtube.com/watch?v=muCM9BKhpKA
+
 # Files
 NyeVikingBrain1.png is the circuit diagram of the new interface.
 <br/>NyeVikingBrain2.png is the layout of the circuit onto the Proto Shield prototyping circuit board.
