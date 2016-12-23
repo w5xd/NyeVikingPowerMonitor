@@ -707,6 +707,23 @@ namespace SwrMeter {
 }
 
 namespace {
+	class MeterFilter {
+	public:
+		MeterFilter() : value(0) {}
+		int apply(int s)
+		{
+			int ret = s + value;
+			ret /= 2;
+			// move half way from last requested position to new position.
+			// except...
+			if (ret == value) // sample didn't change filter value? use s
+				ret = s;
+			value = ret;
+			return ret;
+		}
+	private:
+		int value;
+	};
 	const unsigned HoldADCDefaultMsec = 1000; // stay in high power mode for a full second
 	const unsigned INTERNAL_MIN = 4; // 1.1V reference gives a couple of counts for "zero" power
 
@@ -722,15 +739,28 @@ namespace {
 	enum {ADC_DEFAULT, ADC_INTERNAL} AdcMode(ADC_DEFAULT);
 	unsigned long AdcModeSwitchedTime;
 
+uint16_t setAnalogReferenceDefault()
+{
+	analogReference(DEFAULT); // go to 5 V reference
+	uint16_t ret;
+	for (unsigned i = 0; i < ADC_DISCARD; i++)
+		ret = analogRead(HoldTimePotAnalogPinIn); // 100 usec. user is advised to ignore
+	AdcMode = ADC_DEFAULT;
+	return ret;
+}
+
+void setAnalogReferenceInternal()
+{
+	analogReference(INTERNAL); // go to 1.1 V reference
+	for (unsigned i = 0; i < ADC_DISCARD; i++)
+		analogRead(HoldTimePotAnalogPinIn); // 100 usec. user is advised to ignore
+	AdcMode = ADC_INTERNAL;
+}
+
 void sample()
 {
 	if ((AdcMode == ADC_DEFAULT) && millis() - AdcModeSwitchedTime > HoldADCDefaultMsec)
-	{	// switching references empirically determined takes more than 5msec
-		analogReference(INTERNAL); // go to 1.1 V reference
-		for (unsigned i = 0; i < ADC_DISCARD; i++)
-			analogRead(HoldTimePotAnalogPinIn); // 100 usec. user is advised to ignore
-		AdcMode = ADC_INTERNAL;
-	}
+		setAnalogReferenceInternal();// switching references empirically determined takes more than 5msec
 
 	/* SWR should be calculated with coincident FWD and REV measurements.
 	 * But we have to digitize them serially. There will always be at least
@@ -765,11 +795,7 @@ void sample()
 			// 12V corresponds to about 400W.
 			// Once either FOR or REFL causes this switch, the other is read at the
 			// same resolution until the power level is reduced.
-
-			analogReference(DEFAULT); // go to 5 V reference
-			for (unsigned i = 0; i < ADC_DISCARD; i++)
-				analogRead(HoldTimePotAnalogPinIn); // 100 usec. user is advised to ignore
-			AdcMode = ADC_DEFAULT;
+			setAnalogReferenceDefault();
 			AdcModeSwitchedTime = millis();
 		}
 	}
@@ -876,10 +902,8 @@ uint8_t DisplaySwr()
 	uint16_t swrCoded = (uint16_t)displayValue;
 	uint16_t v = MeterInvert<SwrMeter::PWR_ENTRIES>::TableLookup(swrCoded, SwrMeter::PwmToSwr);
 	v = MeterInvert<SwrMeter::PWR_ENTRIES>::map(v);
-	static int meterFilter;	// don't jerk the meter around too quickly
-	meterFilter += v;
-	meterFilter /= 2;
-	analogWrite(SwrMeterPinOut, meterFilter);
+	static MeterFilter meterFilter;	// don't jerk the meter around too quickly
+	analogWrite(SwrMeterPinOut, meterFilter.apply(v));
 	return (uint8_t)v;
 }
 
@@ -926,7 +950,6 @@ DisplayPower_t getPeakPwr()
 
 DisplayPower_t getPeakHoldPwr()
 {
-
 	// calculate the peak
 	AcquiredVolts_t f;
 	AcquiredVolts_t r;
@@ -940,12 +963,7 @@ DisplayPower_t getPeakHoldPwr()
 		// Read the hold pot
 		uint16_t holdPot = (uint16_t)analogRead(HoldTimePotAnalogPinIn);
 		if ((holdPot >= MAXED_ADC) && AdcMode == ADC_INTERNAL)
-		{
-			analogReference(DEFAULT); // go to 5 V reference
-			for (unsigned i = 0; i < ADC_DISCARD; i++)
-				holdPot = analogRead(HoldTimePotAnalogPinIn); // 100 usec. user is advised to ignore
-			AdcMode = ADC_DEFAULT;
-		}
+			holdPot = setAnalogReferenceDefault();
 		holdPot *= AdcMode == ADC_DEFAULT ? 50 : 11;
 		// range is 0 to 50 * 1024 = 51000
 		// lets make 51000 map to 25 seconds, which is 25000 msec
@@ -1312,10 +1330,8 @@ void DisplayPwr(DisplayPower_t v)
 	}
 	uint16_t m = MeterInvert<PwrMeter::PWR_ENTRIES>::TableLookup(toDisplay, PwrMeter::PwmToPwr);
 	v = MeterInvert<PwrMeter::PWR_ENTRIES>::map(m);
-	static int meterFilter;
-	meterFilter += v;
-	meterFilter /= 2;
-	analogWrite(RfMeterPinOut, meterFilter);
+	static MeterFilter meterFilter;
+	analogWrite(RfMeterPinOut, meterFilter.apply(v));
 }
 
 void Lockout(DisplayPower_t p)
@@ -1394,12 +1410,7 @@ void doAloSetup()
 	}
 
 	if (AdcMode != ADC_DEFAULT)
-	{
-		analogReference(DEFAULT); // go to 5 V reference
-		for (unsigned i = 0; i < ADC_DISCARD; i++)
-			analogRead(HoldTimePotAnalogPinIn); // 100 usec. user is advised to ignore
-		AdcMode = ADC_DEFAULT;
-	}
+		setAnalogReferenceDefault();
 
 	int holdPot = analogRead(HoldTimePotAnalogPinIn);
 	holdPot /= 2;
@@ -1497,12 +1508,7 @@ void doCalibrateSetup()
 	else
 	{
 		if (AdcMode != ADC_DEFAULT)
-		{
-			analogReference(DEFAULT); // go to 5 V reference
-			for (unsigned i = 0; i < ADC_DISCARD; i++)
-				analogRead(HoldTimePotAnalogPinIn); // 100 usec. user is advised to ignore
-			AdcMode = ADC_DEFAULT;
-		}
+			setAnalogReferenceDefault();
 
 		int holdPot = analogRead(HoldTimePotAnalogPinIn);
 		holdPot /= 2;
