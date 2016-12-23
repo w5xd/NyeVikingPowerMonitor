@@ -15,49 +15,6 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
  * Runs like the original analog circuit board, but on Arduino.
 
  * This code was tested with the RFM-003 (as opposed to the RFM-005).
- * The difference between the two, according to the schematic in their (common) manual,
- * is that the former has a full scale power meter reading of 300 vs 500 in the latter.
- *
- * Without an RFM-005 to test with, the following is speculation.
- *
- * Their circuit diagrams are published to be identical, therefore the only published
- * distinction between it and the RFM-003 is the meter marking--no components are
- * marked different on their circuit diagrams. There are several unlabeled potentiometers
- * that presumably are adjusted differently between the two. P3 sets the overall scale
- * factor for power readings. Use of this code with the RFM-005 assumes that P3
- * was adjusted differently at the factory for the RFM-003 vs RFM-005.
- *
- * There are also two different couplers, but the documentation indicates they are
- * interchangeable. I tested only with the "K" model with 5000W limit  as opposed to
- * the "C" model with its 500W limit (C-1.8-30K versus C-1.8-30C.) Again speculation,
- * but the code below should work with either coupler without change. The full
- * scale readings would simply be a factor of ten lower for the lower power coupler.
- *
- * To use this Arduino circuit and code with the RFM-005, more speculation.
- *
- * Since the couplers are documented as "interchangeable" I assume the voltages
- * coupler connector are, for some power in watts, the same voltage in volts
- * regardless of which meter full scale you have. That is, 26V is 1500W (as I measured)
- * regardless which meter you happen to have. That would mean that support of the
- * RFM-005 needs only an overall gain factor change. While the NominalCouplerResistance
- * below could be increased to accomplish that gain change in software, the 3.5V limit
- * of the LM324 would prevent the reading of powers above about 3000W.
- *
- * A better solution would be to leave the code below alone, and instead change the
- * 1M/100K voltage dividers in the input circuit. (There are two--one for forward power
- * and the other for reflected.) The 1:11 specified for the RFM-003 should be changed
- * by a factor of  SQRT(5000 / 3000), which is 1.29 * 11, which is 14:1. That is,
- * the 1M in series with L1/L2 should be increased to 1.3M, leaving the 100K resistor
- * unchanged. This change in the voltage divider would reduce the 5000W voltage at the
- * LM324 to 3.5V or so, and would reduce the overall system gain such that the meter
- * readings should be close enough that the EEPROM calibration included below should
- * be able to get the final accuracy to within 5% or so.
- *
- * The values in the PwmToPwr array below would, for the RFM-005, no longer correspond
- * to the labeled values on the meter, but the overall system still "works." That is,
- * a 300W signal from the 5000W coupler gives a full scale 300W reading on the RFM-003.
- * With an RFM-005, and with the 1M resistor (above) changed to 1.3M, a 500W signal
- * would be required to deflect the meter full scale, which happens to be labeled 500W.
  */
 
 typedef uint16_t AcquiredVolts_t; // maxes at ADC max (1024) * 50 -- using 5VDC reference
