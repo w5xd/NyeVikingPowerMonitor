@@ -8,12 +8,12 @@ instead bought an Arduino UNO single-board computer and its mating Proto Shield 
 See http://arduino.cc. I built a replacement for the Power Monitor's original circuit board. 
 This repo documents the hardware and software used.
 
-## Files
+# Files
 NyeVikingBrain1.png is the circuit diagram of the new interface.
 <br/>NyeVikingBrain2.png is the layout of the circuit onto the Proto Shield prototyping circuit board.
 <br/>PowerMeter.cpp is the source code.
 
-## Construction
+# Construction
 The original instrument has a single circuit board. This project consists of three circuit boards
 bolted together. The final assembly is still much smaller than the original. 
 The first two are of commercial manufacture:
@@ -39,13 +39,13 @@ other with several headers. I ran a pair of 4-40 screws through all three boards
 together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to the back panel.
 </p>
 
-## Power
+# Power
 I disconnected the old Ni-Cd battery back and require external 12VDC in the new design. A subsequent project
 could restore battery power but likely would require a physical modification to the UNO board to remove
 or disable its 5VDC linear power regulator. Note that the accuracy of the 5V supply is used for the ADC
 converts in this design. I also replaced the front panel incandecent lamps with LED equivalents.
 
- ##Calibration
+ #Calibration
  <p>The code supports four settings in EEPROM. These (roughly) correspond to 
  potentiometers on the original analog board. The EEPROM settings are:
  <br/>ALO SWR lock-out threshold
@@ -62,7 +62,7 @@ converts in this design. I also replaced the front panel incandecent lamps with 
  one additional feature. When it detects power levels below 1/10 of full scale, it 
  multiplies the value by 10 and flashes the LOW LED.
  
-## RFM-005 support?
+# RFM-005 support?
  The difference between the two meters, according to the schematic in their (common) manual,
  is that the former has a full scale power meter reading of 300 vs 500 in the latter.
  
