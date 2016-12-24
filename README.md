@@ -42,7 +42,7 @@ together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to
 </p>
 <p>Disassembly hint.</p><p>The box splits into a clam shell by removing the four screws from the right hand side,
 the four screws from the left hand side, and the outer-most four screws from the back panel. Do NOT remove the
-front panel nor the bottom panel screws.</p>
+front panel screws nor the bottom panel screws.</p>
 <h2>Power</h2>
 I disconnected the old Ni-Cd battery back and require external 12VDC in the new design. A subsequent project
 could restore battery power but likely would require a physical modification to the UNO board to remove
