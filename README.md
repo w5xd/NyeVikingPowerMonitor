@@ -10,12 +10,12 @@ This repo documents the hardware and software used.
 
 Don't know about the Nye Viking Power Monitor? Here is a demonstration: http://www.youtube.com/watch?v=muCM9BKhpKA
 
-# Files
+<h2>Files</h2>
 NyeVikingBrain1.png is the circuit diagram of the new interface.
 <br/>NyeVikingBrain2.png is the layout of the circuit onto the Proto Shield prototyping circuit board.
 <br/>PowerMeter.cpp is the source code.
 
-# Construction
+<h2>Construction</h2>
 The original instrument has a single circuit board. This project consists of three circuit boards
 bolted together. The final assembly is still much smaller than the original. 
 The first two are of commercial manufacture:
@@ -40,14 +40,16 @@ This pair connects to each
 other with several headers. I ran a pair of 4-40 screws through all three boards and fastened them 
 together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to the back panel.
 </p>
-
-# Power
+<p>Disassembly hint.</p><p>The box splits into a clam shell by removing the four screws from the right hand side,
+the four screws from the left hand side, and the outer-most four screws from the back panel. Do NOT remove the
+front panel nor the bottom panel screws.</p>
+<h2>Power</h2>
 I disconnected the old Ni-Cd battery back and require external 12VDC in the new design. A subsequent project
 could restore battery power but likely would require a physical modification to the UNO board to remove
 or disable its 5VDC linear power regulator. Note that the accuracy of the 5V supply is used for the ADC
 converts in this design. I also replaced the front panel incandecent lamps with LED equivalents.
 
- #Calibration
+ <h2>Calibration</h2>
  <p>The code supports four settings in EEPROM. These (roughly) correspond to 
  potentiometers on the original analog board. The EEPROM settings are:
  <br/>ALO SWR lock-out threshold
@@ -59,12 +61,12 @@ converts in this design. I also replaced the front panel incandecent lamps with 
  followed by turning the front panel HOLD pot. See the code for full instructions.
  </p>
  
- ##Added low-low power feature
+ <h2>Added low-low power feature</h2>
  While the code (nearly) duplicates the original behavior of the analog board, there is
  one additional feature. When it detects power levels below 1/10 of full scale, it 
  multiplies the value by 10 and flashes the LOW LED.
  
-# RFM-005 support?
+<h2>RFM-005 support? </h2>
  The difference between the two meters, according to the schematic in their (common) manual,
  is that the former has a full scale power meter reading of 300 vs 500 in the latter.
  
