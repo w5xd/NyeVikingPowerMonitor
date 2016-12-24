@@ -1017,14 +1017,6 @@ DisplayPower_t getPeakHoldPwr()
 	unsigned long now = millis();
 	if ((ret > peakHold) || (now - HoldPeakRecordedAtMillis > HoldTimePot))
 	{
-		// Read the hold pot
-		uint16_t holdPot = (uint16_t)analogRead(HoldTimePotAnalogPinIn);
-		if ((holdPot >= MAXED_ADC) && AdcMode == ADC_INTERNAL)
-			holdPot = setAnalogReferenceDefault();
-		holdPot *= AdcMode == ADC_DEFAULT ? 50 : 11;
-		// range is 0 to 50 * 1024 = 51000
-		// lets make 51000 map to 25 seconds, which is 25000 msec
-		HoldTimePot = holdPot / 2;
 		HoldPeakRecordedAtMillis = now;
 		digitalWrite(SampleLedPinOut,  ret > 0 ? HIGH : LOW);
 		digitalWrite(HoldLedPinOut, ret > 0 ? HIGH : LOW);
@@ -1035,6 +1027,15 @@ DisplayPower_t getPeakHoldPwr()
 		digitalWrite(SampleLedPinOut,  LOW);
 		ret = peakHold;
 	}
+
+	// Read the hold pot
+	uint16_t holdPot = (uint16_t)analogRead(HoldTimePotAnalogPinIn);
+	if ((holdPot >= MAXED_ADC) && AdcMode == ADC_INTERNAL)
+		holdPot = setAnalogReferenceDefault();
+	holdPot *= AdcMode == ADC_DEFAULT ? 50 : 11;
+	// range is 0 to 50 * 1024 = 51000
+	// lets make 51000 map to 25 seconds, which is 25000 msec
+	HoldTimePot = holdPot / 2;
 	return ret;
 }
 
