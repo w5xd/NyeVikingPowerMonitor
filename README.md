@@ -110,4 +110,8 @@ converts in this design. I also replaced the front panel incandecent lamps with 
  a 300W signal from the 5000W coupler gives a full scale 300W reading on the RFM-003.
  With an RFM-005, and with the 1M resistor (above) changed to 1.3M, a 500W signal
  would be required to deflect the meter full scale, which happens to be labeled 500W.
+ 
+ The Forward/Reflected calibration step centers around the 100W meter reading on the RFM-003.
+ On the RFM-005, it would center around
+ <br/>(SQRT(100) * SQRT(500) / SQRT (300)) ** 2 = 167W
   

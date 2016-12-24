@@ -58,7 +58,8 @@ const unsigned PWR_BREAKTOHIGH_POINT = 250u * PWR_SCALE;
 const unsigned PWR_BREAKTOLOWLOW_POINT = 20u * PWR_SCALE;
 const unsigned ADC_DISCARD = 50; // 5.6 msec
 
-const long TimerLoopIntervalMicroSec = 1500; // input filter is 750Hz. Won't quite keep up with nyquist
+const long TimerLoopIntervalMicroSec = 1500; // 670KHz. analog input filter is 750Hz.
+const unsigned MeterUpdateIntervalMsec =	125; // 8Hz
 const unsigned long FrontPanelLampsOnMsec = 90000; // stay on 90 seconds per RFM documentation
 const unsigned long HoldPwrLampsOnMsec = 500;
 const unsigned HoldHighLedMsec = 400;
@@ -166,14 +167,21 @@ void setup() {
 }
 
 #if defined(DEBUG_SERIAL)
-static bool printDebug;
+static bool printDebug; // flag that gets set once when a character comes in on the Serial
 #endif
+
+namespace Alo {
+	void CheckAloPwr();
+	void CheckAloSwr(uint8_t);
+	void doAloSetup();
+}
 
 namespace {
 	void sample();
 	uint8_t DisplaySwr();
 	void FrontPanelLamps();
 	enum SetupMode_t {METER_NORMAL, ALO_SETUP, CALIBRATE_SETUP};
+	enum EEPROM_ASSIGNMENTS {EEPROM_SWR_LOCK, EEPROM_PWR_LOCK, EEPROM_FWD_CALIBRATION, EEPROM_REFL_CALIBRATION};
 
 	// Voltages are in acquisition units.
 	// Max is 50 * ADC max, which is 2**10.
@@ -185,11 +193,6 @@ namespace {
 	DisplayPower_t getAveragePwr();
 	void DisplayPwr(DisplayPower_t);
 
-	void CheckAloPwr();
-	void CheckAloSwr(uint8_t);
-	void doAloSetup();
-
-	const unsigned SwrUpdateIntervalMsec =	125;
 	const unsigned NominalCouplerResistance = 3353u; // my own meter gives zero calibration correction with this
 	const uint32_t NominalCouplerResistanceMultiplier = 0x20000u;
 	const unsigned NominalCouplerResistanceRecip =
@@ -219,12 +222,16 @@ namespace {
 	AcquiredVolts_t fwdCalibration = 0x8000; // this fixed point 1.0 multiplier
 	AcquiredVolts_t revCalibration = 0x8000; // ditto
 
+	uint32_t calibrateScaleFwd(uint32_t v)
+	{
+		v *= revCalibration;
+		v /= 0x8000u;
+		return v;
+	}
+
 	AcquiredVolts_t calibrateFwd(AcquiredVolts_t v)
 	{
-		uint32_t t = v;
-		t *= fwdCalibration;
-		t /= 0x8000u; // implemented as shift
-		return (AcquiredVolts_t) t;
+		return (AcquiredVolts_t) calibrateScaleFwd(v);
 	}
 
 	DisplayPower_t calibrateFwdPower(DisplayPower_t w)
@@ -237,6 +244,18 @@ namespace {
 		return (DisplayPower_t)t;
 	}
 
+	uint32_t calibrateScaleRev(uint32_t v)
+	{
+		v *= revCalibration;
+		v /= 0x8000u;
+		return v;
+	}
+
+	AcquiredVolts_t calibrateRev(AcquiredVolts_t v)
+	{
+		return (AcquiredVolts_t) calibrateScaleRev(v);
+	}
+
 	DisplayPower_t calibrateRevPower(DisplayPower_t w)
 	{
 		uint64_t t = w;
@@ -246,17 +265,10 @@ namespace {
 		t /= 0x8000u;
 		return (DisplayPower_t)t;
 	}
-
-	AcquiredVolts_t calibrateRev(AcquiredVolts_t v)
-	{
-		uint32_t t = v;
-		t *= revCalibration;
-		t /= 0x8000u;
-		return (AcquiredVolts_t) t;
-	}
 }
 
-void loop() {
+void loop()
+{
   // throttle to one loop every TimerLoopIntervalMicroSec
   previousMicrosec = micros();
 
@@ -300,7 +312,7 @@ void loop() {
   // dispatch per MeterMode
   if (MeterMode == ALO_SETUP)
   {
-	  doAloSetup();
+	  Alo::doAloSetup();
 	  if (MeterMode != ALO_SETUP)
 	  {
 			digitalWrite(SenseLedPinOut, LOW);
@@ -329,7 +341,7 @@ void loop() {
   }
 
   // Update the displays less frequently than loop() can excute
-  if (now - SwrUpdateTime >= SwrUpdateIntervalMsec)
+  if (now - SwrUpdateTime >= MeterUpdateIntervalMsec)
   {
 #if defined(DEBUG_SERIAL)
 	  if (Serial.available() > 0)
@@ -350,9 +362,9 @@ void loop() {
 		pwr = getPeakHoldPwr();
 	  DisplayPwr(pwr);
 	  if (BackPanelAloSwitchSwr)
-		  CheckAloSwr(swr);
+		  Alo::CheckAloSwr(swr);
 	  else
-		  CheckAloPwr();
+		  Alo::CheckAloPwr();
   }
 
   unsigned long nowusec = micros();
@@ -367,22 +379,64 @@ void loop() {
 
 namespace movingAverage {
 	// A dot-length at 13wpm is 92msec
-	// run moving average over 128msec for cheap divide
-	const int PWR_TO_AVERAGE = 8; // takes up 512 bytes out of 2048 total
+	// run moving average over power of 2 samples for cheap divide
+	// 256 sample moving average
+	// * 1.5 msec sample interval = 384msec history length
+	const int PWR_TO_AVERAGE = 8; // takes up 512 bytes out of 2048 total on UNO
 	const int NUM_TO_AVERAGE = 1 << PWR_TO_AVERAGE;
 	int curIndex;
+
 	// The "acquisition" units for power are what we get from the ADC, times
 	// ten times the voltage reference that we used to acquire it (50 or 11)
 	// The ADC is 10 bits, so multiplying by 50 still keeps us within 16 bit unsigned
 
 	// NOTE. The Arduino compiler development environment did NOT generate any errors
-	// when these arrays were only a "little" too big to fit in SRAM.
+	// when these arrays were only a "little" too big to fit in 2KB SRAM.
 	// That just makes the Arduino crash mysteriously when you run this sketch...
 
 	AcquiredVolts_t fwdHistory[NUM_TO_AVERAGE]; // units are ADC converter units
 	AcquiredVolts_t revHistory[NUM_TO_AVERAGE];
 	uint64_t fwdTotal;
 	uint64_t revTotal;
+
+	class AvgSinceLastCheck
+	{
+	public:
+		AvgSinceLastCheck() : lastIndex(0){}
+
+		// expect to be called at meter update frequency: 8Hz
+		void getCalibratedSums(uint32_t &f, uint32_t &r)
+		{
+			f = 0; r = 0;
+			// backwards from newest sample
+			// stop at sample we used last time called
+			unsigned count = 0;
+			for (int i = curIndex; i != lastIndex;  )
+			{
+				f += fwdHistory[i];
+				r += revHistory[i];
+				count += 1;
+				if (--i < 0)
+					i = NUM_TO_AVERAGE - 1;
+			}
+			// optimize the divide by count to nearby power of two
+			// Only the ratio of f and r will be used later
+			for (;;)
+			{
+				count >>= 1;
+				if (count == 0)
+					break;
+				f >>= 1;
+				r >>= 1;
+			}
+			f = calibrateScaleFwd(f);
+			r = calibrateScaleRev(r);
+			lastIndex = curIndex;
+		}
+
+	private:
+		int lastIndex;
+	};
 
 	void clear()
 	{
@@ -395,7 +449,7 @@ namespace movingAverage {
 		revTotal = 0;
 	}
 
-	void inline apply(AcquiredVolts_t f, AcquiredVolts_t r)
+	void apply(AcquiredVolts_t f, AcquiredVolts_t r)
 	{
 		fwdTotal -= (long)fwdHistory[curIndex] * fwdHistory[curIndex];
 		revTotal -= (long)revHistory[curIndex] * revHistory[curIndex];
@@ -841,7 +895,7 @@ public:
 	private:
 		uint16_t addr;
 	};
-	static unsigned map(unsigned i);
+	static unsigned map(unsigned i)	{ return i << (PWM_MAX_PWR - PWRENTRIES); }
 	static unsigned TableLookup(uint16_t value, FLASH table)
 	{
 		// binary search the table
@@ -873,15 +927,13 @@ public:
 	}
 };
 
-template <int PWRENTRIES> unsigned MeterInvert<PWRENTRIES>::map(unsigned i)
-{ return i << (PWM_MAX_PWR - PWRENTRIES);	}
-
 uint8_t DisplaySwr()
 {
-	AcquiredVolts_t f;
-	AcquiredVolts_t r;
+	static movingAverage::AvgSinceLastCheck average;
 	unsigned long displayValue = 1;
-	movingAverage::getPeaks(f,r);
+	uint32_t f;
+	uint32_t r;
+	average.getCalibratedSums(f,r);
 	if (f)
 	{
 		if (r < f)
@@ -892,8 +944,13 @@ uint8_t DisplaySwr()
 			fplusr <<= SWR_SCALE_PWR; // convert to display units
 			uint32_t fminusr = f;
 			fminusr -= r;
-			displayValue = fplusr / fminusr;
-			if (displayValue > INFINITE_SWR << SWR_SCALE_PWR)
+			if (fminusr != 0)
+			{
+				displayValue = fplusr / fminusr;
+				if (displayValue > INFINITE_SWR << SWR_SCALE_PWR)
+					displayValue = INFINITE_SWR << SWR_SCALE_PWR;
+			}
+			else
 				displayValue = INFINITE_SWR << SWR_SCALE_PWR;
 		}
 		else
@@ -1333,6 +1390,9 @@ void DisplayPwr(DisplayPower_t v)
 	static MeterFilter meterFilter;
 	analogWrite(RfMeterPinOut, meterFilter.apply(v));
 }
+}
+
+namespace Alo {
 
 void Lockout(DisplayPower_t p)
 {
@@ -1347,7 +1407,7 @@ void Lockout(DisplayPower_t p)
 
 void CheckAloSwr(uint8_t swr)
 {
-	uint8_t aloLimit = EEPROM.read(0);
+	uint8_t aloLimit = EEPROM.read((int)EEPROM_SWR_LOCK);
 	if (swr >= aloLimit)
 	{
 		digitalWrite(SenseLedPinOut, HIGH);
@@ -1367,7 +1427,7 @@ void CheckAloPwr()
 	movingAverage::getPeaks(f,r);
 	DisplayPower_t ref = VoltsToWatts(calibrateRev(r));
 	uint8_t v = MeterInvert<PwrMeter::PWR_ENTRIES>::TableLookup(ref, PwrMeter::PwmToPwr);
-	if (v >= EEPROM.read(1))
+	if (v >= EEPROM.read((int)EEPROM_PWR_LOCK))
 	{
 		digitalWrite(SenseLedPinOut, HIGH);
 		Lockout(VoltsToWatts(calibrateFwd(f)));
@@ -1385,8 +1445,8 @@ void doAloSetup()
 	if (digitalRead(PeakSwitchPinIn) == LOW)
 	{	// at top of function, but happens last...
 		MeterMode = METER_NORMAL;
-		EEPROM.update(0, swr);
-		EEPROM.update(1, pwr);
+		EEPROM.update((int)EEPROM_SWR_LOCK, swr);
+		EEPROM.update((int)EEPROM_PWR_LOCK, pwr);
 		return;
 	}
 
@@ -1402,8 +1462,8 @@ void doAloSetup()
 
 	if (digitalRead(AverageSwitchPinIn) == HIGH)
 	{	// read EEPROM settings
-		analogWrite(SwrMeterPinOut, EEPROM.read(0));
-		analogWrite(RfMeterPinOut, EEPROM.read(1));
+		analogWrite(SwrMeterPinOut, EEPROM.read((int)EEPROM_SWR_LOCK));
+		analogWrite(RfMeterPinOut, EEPROM.read((int)EEPROM_PWR_LOCK));
 		digitalWrite(LowLedPinOut, HIGH);
 		digitalWrite(HighLedPinOut, LOW);
 		return;
@@ -1461,9 +1521,9 @@ void SetCalibrationConstantsFromEEPROM()
 	fwdCalibration = 0x8000; // this fixed point 1.0 multiplier
 	revCalibration = 0x8000; // ditto
 
-	uint8_t fCal = EEPROM.read(2);
+	uint8_t fCal = EEPROM.read((int)EEPROM_FWD_CALIBRATION);
 	fwdCalibration += EpromByteToCaliOffset(fCal);
-	uint8_t reflectedCal = EEPROM.read(3);
+	uint8_t reflectedCal = EEPROM.read((int)EEPROM_REFL_CALIBRATION);
     revCalibration += EpromByteToCaliOffset(reflectedCal);
 }
 
@@ -1481,10 +1541,10 @@ void doCalibrateSetup()
 		MeterMode = METER_NORMAL;
 		if ((forwardCal >= LOWEST_VALID_CALIBRATION) &&
 				(forwardCal <= HIGHEST_VALID_CALIBRATION))
-			EEPROM.update(2, forwardCal);
+			EEPROM.update((int)EEPROM_FWD_CALIBRATION, forwardCal);
 		if ((reflectedCal >= LOWEST_VALID_CALIBRATION) &&
 				(reflectedCal <= HIGHEST_VALID_CALIBRATION))
-			EEPROM.update(3, reflectedCal);
+			EEPROM.update((int)EEPROM_REFL_CALIBRATION, reflectedCal);
 		SetCalibrationConstantsFromEEPROM();
 		return;
 	}
@@ -1502,7 +1562,8 @@ void doCalibrateSetup()
 
 	if (digitalRead(AverageSwitchPinIn) == HIGH)
 	{	// read EEPROM settings
-		analogWrite(RfMeterPinOut, EEPROM.read(BackPanelPwrSwitchFwd ? 2 : 3));
+		analogWrite(RfMeterPinOut, EEPROM.read(
+				BackPanelPwrSwitchFwd ? EEPROM_FWD_CALIBRATION : EEPROM_REFL_CALIBRATION));
 		return;
 	}
 	else
