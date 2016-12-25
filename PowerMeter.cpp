@@ -1,6 +1,7 @@
 // Do not remove the include below
 #include "Arduino.h"
 #include <avr/pgmspace.h>
+#include <avr/power.h>
 #include <EEPROM.h>
 
 //#define DEBUG_SERIAL
@@ -309,6 +310,13 @@ void loop()
 	  BackPanelAloSwitchSwrPrev = BackPanelAloSwitchSwr;
   }
 
+  if ((digitalRead(coupler7dot5VPinIn) == LOW) ||
+		  (MeterMode != METER_NORMAL))
+  {
+	  coupler7dot5LastHeardMillis = now;
+	  digitalWrite(PanelLampsPinOut,	HIGH);
+  }
+
   // dispatch per MeterMode
   if (MeterMode == ALO_SETUP)
   {
@@ -326,12 +334,6 @@ void loop()
 	  if (MeterMode != CALIBRATE_SETUP)
 			digitalWrite(AloLockPinOut, LOW);
 	  return;
-  }
-
-  if (digitalRead(coupler7dot5VPinIn) == LOW)
-  {
-	  coupler7dot5LastHeardMillis = now;
-	  digitalWrite(PanelLampsPinOut,	HIGH);
   }
 
   if (digitalRead(AloLockPinOut) == HIGH &&
