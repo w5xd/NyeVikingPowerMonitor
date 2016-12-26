@@ -43,6 +43,10 @@ together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to
 <p>Disassembly hint.</p><p>The box splits into a clam shell by removing the four screws from the right hand side,
 the four screws from the left hand side, and the outer-most four screws from the back panel. Do NOT remove the
 front panel screws nor the bottom panel screws.</p>
+<p>Errata:
+<br/>The 4.7K resistor from D8 to the base of the 2n3053 should be 470 ohms if you're going to retain the
+original incandescent 1813 lamps. The 4.7K value works fine with LED replacement lamps that fit the
+same sockets.</p>
 <h2>Power</h2>
 I disconnected the old Ni-Cd battery back and require external 12VDC in the new design. A subsequent project
 could restore battery power but likely would require a physical modification to the UNO board to remove
