@@ -49,11 +49,7 @@ together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to
 the four screws from the left hand side, and the outer-most four screws from the back panel. Do NOT remove the
 front panel screws nor the bottom panel screws.</p>
 <h2>Power</h2>
-I disconnected the old Ni-Cd battery back and require external 12VDC in the new design. A subsequent project
-could restore battery power but likely would require a physical modification to the UNO board to remove
-or disable its 5VDC linear power regulator. Note that the accuracy of the 5V supply is used for the ADC
-converts in this design. I also replaced the front panel incandecent lamps with LED equivalents.
-
+<i>This is a work in progress.</i>
  <h2>Calibration</h2>
  <p>The code supports four settings in EEPROM. These (roughly) correspond to 
  potentiometers on the original analog board. The EEPROM settings are:
