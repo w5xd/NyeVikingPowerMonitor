@@ -78,10 +78,11 @@ only program their Arduino once, it should not be too big a burden to remember
 that the one and only time they connect the USB to program it, remove the
 battieres!</p>
 <p>The battery is converted to 5VDC using an LTC3525 step-up converted. This 
-device is limited to 6VDC input, but really is designed to take lower-than-5VDC
+device is limited to 6VDC input, but is designed to take lower-than-5VDC
 at its input. The original pack of four AA NiCd cells would nominally be at
-4.8V. Alkaline AA cells cannot be used in a battery of four, but three of
-them would work fine in this circuit. The LTC3525 will drain them all the
+4.8V. Alkaline AA cells cannot be used here in a battery of four, but three of
+them in series (or even in parallel!) would work fine in this circuit. 
+The LTC3525 will drain them all the
 way down to below 1V. Here is a commercially available board that has
 the LTC3525 along with the other (tiny) parts needed to make
 a 5VDC step-up: <a href='http://moderndevice.com/product/jeelabs-aa-power-board/'>JeeLabs AA Power Board</a>.
@@ -107,20 +108,22 @@ current drain down below 1mA.</p>
  one additional feature. When it detects power levels below 1/10 of full scale, it 
  multiplies the value by 10 and flashes the LOW LED.
  
- <h2>Hardware changes from the no-battery branch</h3>
+ <h2>Hardware changes from the no-battery branch</h2>
+ The differences in the circuit design for this battery enabled design,
+ compared to the original, external power only design, are:
  <ol>
- <li> A battery module is added. See the circuit diagram.
+ <li> A battery module is added. 
   <li>A new switch is added to the back panel. Use the existing .25" hole that
  allowed access to the old ALO pot. Use a momentary SPST NC switch. 
  Wire that new switch to pull D3 down.
  <li>An internally accessible DPDT switch is added to prevent simultaneous
  operation of the external 12VDC and internal battery back power supplies.
  <li>The ALO TRIP SWR/REV function that used to be on D3 is now wired to A0.
- <li>Substitute an OP495 OP-AMP for the LM324. It goes rail-to-rail and also
+ <li>Substitute an LMC6044 CMOS op-amp for the LM324. It goes rail-to-rail and also
  draws little enough power supply current for battery operation.
  <li>The input network becomes 1:7.6@500Hz for both forward and reflected. 
  This has a little less noise, and a little better resolution--taking advantage
- of the wider voltage swing of the OP495.
+ of the wider voltage swing of the LMC6044.
  <li>Of course, if you modify your hardware per this branch, you must also
  upload the program as compiled from this branch.
  </ol>
