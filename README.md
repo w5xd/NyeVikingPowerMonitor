@@ -49,7 +49,34 @@ together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to
 the four screws from the left hand side, and the outer-most four screws from the back panel. Do NOT remove the
 front panel screws nor the bottom panel screws.</p>
 <h2>Power</h2>
-<i>This is a work in progress.</i>
+The original battery power design was that the batteries stay permanently connected
+and external 12VDC, when applied, trickle charges the NiCd's. I have two reasons to
+change that design:
+<ol>
+<li>Trickle charging will raise the battery voltage above 6VDC, but that number is
+the absolute maximum input voltage specified for the LTC3525 part that makes
+regulated 5VDC from the NiCds.
+<li>Continuous charging of NiCd's is not recommended by their manufacturers. They
+say to bring them to full charge and then disconnect them.
+</ol>
+For these reasons the design published here adds an internal DPDT switch that
+selects the power source between external 12VDC or the battery pack. The battery
+cells must be removed to be charged in an external charger. So going to 
+battery power requires a lot more steps than the original design.
+<ul><li>Remove the batteries and charge them.
+<li>Reinstall the batteries and switch the DPDT switch to battery power.
+<li>Run on battery power now
+<li>Open the box and switch the DPDT switch to 12V external to go back
+to external power.
+</ul>
+<p>There is one
+major caveat: the new switch <b>allows both</b> the USB 5V and the battery 5V
+to be simulateously applied. Therefore, do <b>not</b> connect the USB cable and
+switch to battery power simultaneously. The smoke will likely be released from
+the power supply parts, rendering them useless. For normal users who will 
+only program their Arduino once, it should not be too big a burden to remember
+that the one and only time they connect the USB to program it, remove the
+battieres!</p>
  <h2>Calibration</h2>
  <p>The code supports four settings in EEPROM. These (roughly) correspond to 
  potentiometers on the original analog board. The EEPROM settings are:

@@ -88,10 +88,7 @@ namespace calibrate {
 	 * To set power calibrations (A), start with the front switch in PEAK&HOLD
 	 * To set ALO settings (B), start with the front switch in AVERAGE.
 	 *
-	 * FIXME FIXME FIXME
-	 * On the back panel, simultaneously switch BOTH the ALO and POWER switches
-	 * three times within one second. The meter responds by setting the LOCK LED.
-	 * FIXME FIXME FIXME
+	 * On the back panel, momentarily press the added pushbutton in the ALO SENSE hole.
 	 *
 	 * ********* power calibration ***********
 	 *
@@ -143,10 +140,10 @@ namespace calibrate {
 }
 
 void setup() {
-	// Digital pins (except PWM output pins)
     pinMode(coupler7dot5VPinIn, INPUT_PULLUP);
     pinMode(ALOtripSwitchPinIn, INPUT_PULLUP);
     pinMode(PowerForwReflSwitchPinIn, INPUT_PULLUP);
+    pinMode(initiateCalibratePinIn, INPUT_PULLUP);
     pinMode(SenseLedPinOut, OUTPUT);
     pinMode(AloLockPinOut, OUTPUT);
     pinMode(SampleLedPinOut, OUTPUT);
@@ -204,7 +201,7 @@ namespace {
 	DisplayPower_t getAveragePwr();
 	void DisplayPwr(DisplayPower_t);
 
-	const unsigned NominalCouplerResistance = 3353u; // my own meter gives zero calibration correction with this
+	const unsigned NominalCouplerResistance = 4350u; // assumes 1:7.6 input divider
 	const uint32_t NominalCouplerResistanceMultiplier = 0x20000u;
 	const unsigned NominalCouplerResistanceRecip =
 			NominalCouplerResistanceMultiplier / NominalCouplerResistance;
@@ -221,14 +218,8 @@ namespace {
 	enum SetupMode_t MeterMode(METER_NORMAL);
 
 	// Alo/calibrate Setup Mode detect
-	const unsigned AloEntryDeadlineMsec = 1000;
 	const unsigned AloSetupModeTimesOut = 30000;
-	unsigned AloSwitchChangeCount;
-	unsigned PwrSwitchChangeCount;
-	unsigned long CaliSwitchChangeTime;
 	unsigned long EnteredAloSetupModeTime;
-	bool BackPanelAloSwitchSwrPrev;
-	bool BackPanelPwrSwitchFwdPrev;
 
 	AcquiredVolts_t fwdCalibration = 0x8000; // this fixed point 1.0 multiplier
 	AcquiredVolts_t revCalibration = 0x8000; // ditto
@@ -291,40 +282,15 @@ void loop()
   unsigned long now = millis();
 
   // CHECK ENTER CALIBRATE MODE
-  if (MeterMode == METER_NORMAL && digitalRead(PeakSwitchPinIn) != LOW)
+  if (MeterMode == METER_NORMAL &&
+		  digitalRead(PeakSwitchPinIn) != LOW &&
+		  digitalRead(initiateCalibratePinIn) == LOW)
   {
-	  if (BackPanelPwrSwitchFwd != BackPanelPwrSwitchFwdPrev)
-		  PwrSwitchChangeCount += 1;
-	  if (BackPanelAloSwitchSwrPrev != BackPanelAloSwitchSwr)
-		  AloSwitchChangeCount += 1;
-	  if (AloSwitchChangeCount + PwrSwitchChangeCount == 1)
-		  CaliSwitchChangeTime = now;
-	  if (now - CaliSwitchChangeTime < AloEntryDeadlineMsec)
-	  {
-		  if ((PwrSwitchChangeCount >= 3) && (AloSwitchChangeCount >= 3))
-		  {
-			  MeterMode = (digitalRead(AverageSwitchPinIn) == LOW) ?
-					  ALO_SETUP : CALIBRATE_SETUP;
-			  EnteredAloSetupModeTime = now;
-			  AloSwitchChangeCount = 0;
-			  PwrSwitchChangeCount = 0;
-		  }
-	  }
-	  else
-	  {
-		  AloSwitchChangeCount = 0;
-		  PwrSwitchChangeCount = 0;
-	  }
-
-	  BackPanelPwrSwitchFwdPrev = BackPanelPwrSwitchFwd;
-	  BackPanelAloSwitchSwrPrev = BackPanelAloSwitchSwr;
-  }
-
-  if ((digitalRead(coupler7dot5VPinIn) == LOW) ||
-		  (MeterMode != METER_NORMAL))
-  {
-	  coupler7dot5LastHeardMillis = now;
+  	  MeterMode = (digitalRead(AverageSwitchPinIn) == LOW) ?
+			  ALO_SETUP : CALIBRATE_SETUP;
 	  digitalWrite(PanelLampsPinOut,	HIGH);
+	  coupler7dot5LastHeardMillis = now;
+	  EnteredAloSetupModeTime = now;
   }
 
   // dispatch per MeterMode
@@ -345,6 +311,13 @@ void loop()
 			digitalWrite(AloLockPinOut, LOW);
 	  return;
   }
+
+  if (digitalRead(coupler7dot5VPinIn) == LOW)
+  {
+	  coupler7dot5LastHeardMillis = now;
+	  digitalWrite(PanelLampsPinOut,	HIGH);
+  }
+
 
   if (digitalRead(AloLockPinOut) == HIGH &&
 		  now - LockoutStartedAtMillis > LockoutLengthMsec)
