@@ -1,6 +1,6 @@
 # Battery Power Branch
 As of this writing, this branch in the repository is <b>not tested</b>.
-It appears that the function of the 4 Ni-Cd batteries in the original unit
+It appears that the function of the 4 cell Ni-Cd battery in the original unit
 can be (mostly) restored. This branch may eventually be updated to confirm
 construction and test details. For now, its a work in progress.
 
