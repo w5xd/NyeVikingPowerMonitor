@@ -104,8 +104,8 @@ converts in this design. I also replaced the front panel incandecent lamps with 
  and the other for reflected.) The 1:11 specified for the RFM-003 should be changed
  by a factor of  SQRT(5000 / 3000), which is 1.29 * 11, which is 14:1. That is,
  the 1M in series with L1/L2 should be increased to 1.3M, leaving the 100K resistor
- unchanged. This change in the voltage divider would reduce the 5000W voltage at the
- LM324 to 3.5V or so, and would reduce the overall system gain such that the meter
+ unchanged. This change in the voltage divider would reduce the 5000W voltage at pin 12
+ of the op-amp to 3.5V or so, and would reduce the overall system gain such that the meter
  readings should be close enough that the EEPROM calibration included below should
  be able to get the final accuracy to within 5% or so.
  
