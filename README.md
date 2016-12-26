@@ -97,10 +97,11 @@ battieres!</p>
  <h2>Hardware changes from the no-battery branch</h3>
  <ol>
  <li> A battery module is added. See the circuit diagram.
- <li>The 5VDC regulator on the UNO must be disabled (unsolder its In/Out pins)
- <li>A new switch is added to the back panel. Use the existing .25" hole that
+  <li>A new switch is added to the back panel. Use the existing .25" hole that
  allowed access to the old ALO pot. Use a momentary SPST NC switch. 
  Wire that new switch to pull D3 down.
+ <li>An internally accessible DPDT switch is added to prevent simultaneous
+ operation of the external 12VDC and internal battery back power supplies.
  <li>The ALO TRIP SWR/REV function that used to be on D3 is now wired to A0.
  <li>Substitute an OP495 OP-AMP for the LM324. It goes rail-to-rail and also
  draws little enough power supply current for battery operation.
