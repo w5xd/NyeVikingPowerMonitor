@@ -77,6 +77,15 @@ the power supply parts, rendering them useless. For normal users who will
 only program their Arduino once, it should not be too big a burden to remember
 that the one and only time they connect the USB to program it, remove the
 battieres!</p>
+<p>The battery is converted to 5VDC using an LTC3525 step-up converted. This 
+device is limited to 6VDC input, but really is designed to take lower-than-5VDC
+at its input. The original pack of four AA NiCd cells would nominally be at
+4.8V. Alkaline AA cells cannot be used in a battery of four, but three of
+them would work fine in this circuit. The LTC3525 will drain them all the
+way down to below 1V.</p>
+<p>For battery operation, use of the original LM324 op-amp is no longer 
+appropriate. Substitute an LMC6044 CMOS op-amp to get its quiescent 
+current drain down below 1mA.</p>
  <h2>Calibration</h2>
  <p>The code supports four settings in EEPROM. These (roughly) correspond to 
  potentiometers on the original analog board. The EEPROM settings are:
