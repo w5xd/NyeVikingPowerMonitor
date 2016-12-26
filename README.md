@@ -1,7 +1,8 @@
 # Battery Power Branch
-As of this writing, this branch in the archive is NOT TESTED.
+As of this writing, this branch in the repository is <b>not tested</b>.
 It appears that the function of the 4 Ni-Cd batteries in the original unit
-can be (mostly) restored. This branch may eventually be updated to show how to accomplish that.
+can be (mostly) restored. This branch may eventually be updated to confirm
+construction and test details. For now, its a work in progress.
 
 # Nye Viking Power Monitor
 Brain transplant for Nye Viking Power Monitor RFM-003
@@ -121,12 +122,12 @@ current drain down below 1mA.</p>
  <li>An internally accessible DPDT switch is added to prevent simultaneous
  operation of the external 12VDC and internal battery back power supplies.
  <li>The ALO TRIP SWR/REV function that used to be on D3 is now wired to A0.
- <li>Substitute an LMC6044 CMOS op-amp for the LM324. It goes rail-to-rail and also
- draws little enough power supply current for battery operation.
+ <li>Substitute an LMC6044 CMOS op-amp for the LM324. Its output swings rail-to-rail and 
+ it requires much reduced power supply current.
  <li>The input network becomes 1:7.6@500Hz for both forward and reflected. 
  This has a little less noise, and a little better resolution--taking advantage
  of the wider voltage swing of the LMC6044.
- <li>Of course, if you modify your hardware per this branch, you must also
+ <li>Of course, if you modify your hardware per this battery-power branch, you must also
  upload the program as compiled from this branch.
  </ol>
  
