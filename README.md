@@ -37,7 +37,8 @@ and HIGH) mounted such that they fit through the original RFM front panel holes.
 series resistors for the LEDs.</p>
 <p>I removed the original board by snipping each wire at its end opposite the circuit board. That is
 the old board ends up with lots of flying single-ended wires attached. (EXCEPTION: the Ni-Cd battery 
-pack wires I snipped at the circuit board.) I did not scavange any parts from
+pack wires, and the L1/L2 wires from the coupler I snipped at the circuit board.) 
+I did not scavange any parts from
 it and instead bought new LEDs, a relay, etc. The original board, I suppose, could still be repaired and
 resinstalled. The new board assembly fits in the position of the old board. I used 22 gauge solid 
 hookup wire to connect all the front panel and back panel meters, potentiometer, switches, etc. </p>
