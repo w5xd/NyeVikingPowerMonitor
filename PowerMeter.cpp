@@ -1,6 +1,8 @@
 // Do not remove the include below
 #include "Arduino.h"
 #include <avr/pgmspace.h>
+#include <avr/sleep.h>
+#include <avr/interrupt.h>
 #include <avr/power.h>
 #include <EEPROM.h>
 
@@ -161,6 +163,7 @@ void setup() {
     movingAverage::clear();
 
     calibrate::SetCalibrationConstantsFromEEPROM();
+    digitalWrite(PanelLampsPinOut,	HIGH); // turn on front panel lights on boot
 
 #if defined(DEBUG_SERIAL)
     Serial.begin(9600);
@@ -177,10 +180,14 @@ namespace Alo {
 	void doAloSetup();
 }
 
+namespace sleep {
+	void SleepNow();
+}
+
 namespace {
 	void sample();
 	uint8_t DisplaySwr();
-	void FrontPanelLamps();
+	bool FrontPanelLamps();
 	enum SetupMode_t {METER_NORMAL, ALO_SETUP, CALIBRATE_SETUP};
 	enum EEPROM_ASSIGNMENTS {EEPROM_SWR_LOCK, EEPROM_PWR_LOCK, EEPROM_FWD_CALIBRATION, EEPROM_REFL_CALIBRATION};
 
@@ -353,7 +360,6 @@ void loop()
 	  }
 #endif
 	  SwrUpdateTime = now;
-	  FrontPanelLamps();
 	  uint8_t swr = DisplaySwr();
 	  DisplayPower_t pwr;
 	  if (digitalRead(PeakSwitchPinIn) == LOW)
@@ -367,6 +373,8 @@ void loop()
 		  Alo::CheckAloSwr(swr);
 	  else
 		  Alo::CheckAloPwr();
+	  if (!FrontPanelLamps())
+		  sleep::SleepNow();
   }
 
   unsigned long nowusec = micros();
@@ -966,14 +974,17 @@ uint8_t DisplaySwr()
 	return (uint8_t)v;
 }
 
-void FrontPanelLamps()
+bool FrontPanelLamps()
 {
 	if (digitalRead(PanelLampsPinOut) == HIGH)
 	{
 		unsigned long timeOn = millis() - coupler7dot5LastHeardMillis;
 		if ( timeOn > FrontPanelLampsOnMsec)
 			digitalWrite(PanelLampsPinOut,	LOW);
+		return true;
 	}
+	else
+		return false;
 }
 
 DisplayPower_t SquareToWatts(DisplayPower_t s)
@@ -1590,3 +1601,30 @@ void doCalibrateSetup()
 
 }
 }
+
+namespace sleep {
+	void Coupler7dot5Interrupt()
+	{
+		detachInterrupt(digitalPinToInterrupt(coupler7dot5VPinIn));
+	}
+
+	void AloRevInterrupt()
+	{
+		detachInterrupt(digitalPinToInterrupt(ALOtripSwitchPinIn));
+	}
+
+	void SleepNow()
+	{
+		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+		cli();
+		attachInterrupt(digitalPinToInterrupt(coupler7dot5VPinIn), Coupler7dot5Interrupt, LOW);
+		attachInterrupt(digitalPinToInterrupt(ALOtripSwitchPinIn), AloRevInterrupt, LOW);
+		sleep_enable();
+		sleep_bod_disable();
+		sei();
+		sleep_cpu();
+		sleep_disable();
+		sei();
+	}
+}
+
