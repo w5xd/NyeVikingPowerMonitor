@@ -1,7 +1,7 @@
 # Battery Power Branch
 As of this writing, this branch in the archive is NOT TESTED.
 It appears that the function of the 4 Ni-Cd batteries in the original unit
-can be restored. This branch may eventually be updated to show how to accomplish that.
+can be (mostly) restored. This branch may eventually be updated to show how to accomplish that.
 
 # Nye Viking Power Monitor
 Brain transplant for Nye Viking Power Monitor RFM-003
@@ -13,7 +13,8 @@ instead bought an Arduino UNO single-board computer and its mating Proto Shield 
 See http://arduino.cc. I built a replacement for the Power Monitor's original circuit board. 
 This repo documents the hardware and software used.
 
-Don't know about the Nye Viking Power Monitor? Here is a demonstration: http://www.youtube.com/watch?v=muCM9BKhpKA
+Don't know about the Nye Viking Power Monitor? Here is a demonstration: 
+<br/>http://www.youtube.com/watch?v=muCM9BKhpKA
 
 <h2>Files</h2>
 NyeVikingBrain1.png is the circuit diagram of the new interface.
@@ -77,15 +78,16 @@ the power supply parts, rendering them useless. For normal users who will
 only program their Arduino once, it should not be too big a burden to remember
 that the one and only time they connect the USB to program it, remove the
 battieres!</p>
-<p>The battery is converted to 5VDC using an LTC3525 step-up converted. This 
+<p>The battery is converted to 5VDC using an LTC3525 step-up converter. This 
 device is limited to 6VDC input, but is designed to take lower-than-5VDC
 at its input. The original pack of four AA NiCd cells would nominally be at
-4.8V. Alkaline AA cells cannot be used here in a battery of four, but three of
+4.8V. Alkaline AA cells <i>cannot</i> be used here in a battery of four, but three of
 them in series (or even in parallel!) would work fine in this circuit. 
 The LTC3525 will drain them all the
 way down to below 1V. Here is a commercially available board that has
 the LTC3525 along with the other (tiny) parts needed to make
-a 5VDC step-up: <a href='http://moderndevice.com/product/jeelabs-aa-power-board/'>JeeLabs AA Power Board</a>.
+a 5VDC step-up: 
+<br><a href='http://moderndevice.com/product/jeelabs-aa-power-board/'>JeeLabs AA Power Board</a>.
 It has space for only a single AA battery, and this power meter will run on that
 single AA cell for a while. Or wire in the original 4 by AA NiCd cells.</p>
 <p>For battery operation, use of the original LM324 op-amp is no longer 
