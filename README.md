@@ -79,11 +79,13 @@ converts in this design. I also replaced the front panel incandecent lamps with 
  allowed access to the old ALO pot. Use a momentary SPST NC switch. 
  Wire that new switch to pull D3 down.
  <li>The ALO TRIP SWR/REV function that used to be on D3 is now wired to A0.
- <li>Substitute an OP495 OP-AMP for the LM324. It goes rail-to-rail and alos
+ <li>Substitute an OP495 OP-AMP for the LM324. It goes rail-to-rail and also
  draws little enough power supply current for battery operation.
  <li>The input network becomes 1:7.6@500Hz for both forward and reflected. 
  This has a little less noise, and a little better resolution--taking advantage
- of the wider voltage swing of the OP495
+ of the wider voltage swing of the OP495.
+ <li>Of course, if you modify your hardware per this branch, you must also
+ upload the program as compiled from this branch.
  </ol>
  
 <h2>RFM-005 support? </h2>
@@ -112,16 +114,17 @@ converts in this design. I also replaced the front panel incandecent lamps with 
  regardless of which meter full scale you have. That is, 26V is 1500W (as I measured)
  regardless which meter you happen to have. That would mean that support of the
  RFM-005 needs only an overall gain factor change. While the NominalCouplerResistance
- in the code could be increased to accomplish that gain change in software, the 3.5V limit
- of the LM324 would prevent the reading of powers above about 3000W.
+ in the code could be increased to accomplish that gain change in software, a 5000W
+ signal will overflow the ADC for the forward power such that the 3000W limit
+ of the RFM-003 would also apply to the RFM-005.
  
  A better solution would be to leave the code alone, and instead change the
- 1M/100K voltage dividers in the input circuit. (There are two--one for forward power
- and the other for reflected.) The 1:11 specified for the RFM-003 should be changed
- by a factor of  SQRT(5000 / 3000), which is 1.29 * 11, which is 14:1. That is,
- the 1M in series with L1/L2 should be increased to 1.3M, leaving the 100K resistor
+ 1M/150K voltage dividers in the input circuit. (There are two--one for forward power
+ and the other for reflected.) The 1:7.6 ration specified for the RFM-003 should be changed
+ by a factor of  SQRT(5000 / 3000), which is 1.29 * 7.6, which is (about) 10:1. That is,
+ the 1M in series with L1/L2 should be increased to 1.3M, leaving the 150K resistor
  unchanged. This change in the voltage divider would reduce the 5000W voltage at the
- LM324 to 3.5V or so, and would reduce the overall system gain such that the meter
+ OP496 to 4.8V or so, and would reduce the overall system gain such that the meter
  readings should be close enough that the EEPROM calibration included below should
  be able to get the final accuracy to within 5% or so.
  
