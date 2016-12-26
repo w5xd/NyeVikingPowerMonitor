@@ -295,6 +295,8 @@ void loop()
 			  MeterMode = (digitalRead(AverageSwitchPinIn) == LOW) ?
 					  ALO_SETUP : CALIBRATE_SETUP;
 			  EnteredAloSetupModeTime = now;
+		 	  coupler7dot5LastHeardMillis = now; // turn on front panel lamps as if power detected
+		 	  digitalWrite(PanelLampsPinOut,	HIGH);
 			  AloSwitchChangeCount = 0;
 			  PwrSwitchChangeCount = 0;
 		  }
@@ -309,14 +311,7 @@ void loop()
 	  BackPanelAloSwitchSwrPrev = BackPanelAloSwitchSwr;
   }
 
-  if ((digitalRead(coupler7dot5VPinIn) == LOW) ||
-		  (MeterMode != METER_NORMAL))
-  {
-	  coupler7dot5LastHeardMillis = now;
-	  digitalWrite(PanelLampsPinOut,	HIGH);
-  }
-
-  // dispatch per MeterMode
+   // dispatch per MeterMode
   if (MeterMode == ALO_SETUP)
   {
 	  Alo::doAloSetup();
@@ -334,6 +329,12 @@ void loop()
 			digitalWrite(AloLockPinOut, LOW);
 	  return;
   }
+
+  if (digitalRead(coupler7dot5VPinIn) == LOW)
+   {
+ 	  coupler7dot5LastHeardMillis = now;
+ 	  digitalWrite(PanelLampsPinOut,	HIGH);
+   }
 
   if (digitalRead(AloLockPinOut) == HIGH &&
 		  now - LockoutStartedAtMillis > LockoutLengthMsec)
