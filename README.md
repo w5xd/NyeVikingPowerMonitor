@@ -31,6 +31,8 @@ The first two are of commercial manufacture:
 2 Arduino PROTO Shield board.<br/>
 3 Generic prototyping circuit board.<br/>
 <br/>
+<p>While I developed and tested with the UNO, the Arduino Leonardo appears to have the same 
+specifications and is a few dollars cheaper.</p>
 <p>Board (3) is drilled with mounting hole pattern to match the original RFM-003 board. (In my case,
 I only covered the front two mounting posts.) It has the 6 LEDs (SENSE, LOCK, SAMPLE, HOLD, LOW, 
 and HIGH) mounted such that they fit through the original RFM front panel holes. This board also has the 220 ohm 
