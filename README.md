@@ -165,8 +165,8 @@ current drain down below 1mA.</p>
  and the other for reflected.) The 1:7.6 ration specified for the RFM-003 should be changed
  by a factor of  SQRT(5000 / 3000), which is 1.29 * 7.6, which is (about) 10:1. That is,
  the 1M in series with L1/L2 should be increased to 1.3M, leaving the 150K resistor
- unchanged. This change in the voltage divider would reduce the 5000W voltage at the
- OP496 to 4.8V or so, and would reduce the overall system gain such that the meter
+ unchanged. This change in the voltage divider would reduce the 5000W voltage at pin 12
+ of the op-amp to 4.8V or so, and would reduce the overall system gain such that the meter
  readings should be close enough that the EEPROM calibration included below should
  be able to get the final accuracy to within 5% or so.
  
