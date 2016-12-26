@@ -1,3 +1,8 @@
+# Battery Power Branch
+As of this writing, this branch in the archive is NOT TESTED.
+It appears that the function of the 4 Ni-Cd batteries in the original unit
+can be restored. This branch may eventually be updated to show how to accomplish that.
+
 # Nye Viking Power Monitor
 Brain transplant for Nye Viking Power Monitor RFM-003
 
@@ -65,6 +70,21 @@ converts in this design. I also replaced the front panel incandecent lamps with 
  While the code (nearly) duplicates the original behavior of the analog board, there is
  one additional feature. When it detects power levels below 1/10 of full scale, it 
  multiplies the value by 10 and flashes the LOW LED.
+ 
+ <h2>Hardware changes from the no-battery branch</h3>
+ <ol>
+ <li> A battery module is added. See the circuit diagram.
+ <li>The 5VDC regulator on the UNO must be disabled (unsolder its In/Out pins)
+ <li>A new switch is added to the back panel. Use the existing .25" hole that
+ allowed access to the old ALO pot. Use a momentary SPST NC switch. 
+ Wire that new switch to pull D3 down.
+ <li>The ALO TRIP SWR/REV function that used to be on D3 is now wired to A0.
+ <li>Substitute an OP495 OP-AMP for the LM324. It goes rail-to-rail and alos
+ draws little enough power supply current for battery operation.
+ <li>The input network becomes 1:7.6@500Hz for both forward and reflected. 
+ This has a little less noise, and a little better resolution--taking advantage
+ of the wider voltage swing of the OP495
+ </ol>
  
 <h2>RFM-005 support? </h2>
  The difference between the two meters, according to the schematic in their (common) manual,

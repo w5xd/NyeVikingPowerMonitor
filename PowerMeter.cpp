@@ -26,7 +26,8 @@ typedef uint32_t DisplayPower_t; // This is 128 times Watts (i.e. value 128 is 1
 
 // pin assignments
 const int coupler7dot5VPinIn =  2;
-const int ALOtripSwitchPinIn = 3;
+const int initiateCalibratePinIn = 3;
+const int ALOtripSwitchPinIn = A0;
 const int PowerForwReflSwitchPinIn = 4;
 const int SwrMeterPinOut = 5;
 const int RfMeterPinOut = 6;
@@ -87,8 +88,10 @@ namespace calibrate {
 	 * To set power calibrations (A), start with the front switch in PEAK&HOLD
 	 * To set ALO settings (B), start with the front switch in AVERAGE.
 	 *
+	 * FIXME FIXME FIXME
 	 * On the back panel, simultaneously switch BOTH the ALO and POWER switches
 	 * three times within one second. The meter responds by setting the LOCK LED.
+	 * FIXME FIXME FIXME
 	 *
 	 * ********* power calibration ***********
 	 *
@@ -1608,9 +1611,9 @@ namespace sleep {
 		detachInterrupt(digitalPinToInterrupt(coupler7dot5VPinIn));
 	}
 
-	void AloRevInterrupt()
+	void CaliInterrupt()
 	{
-		detachInterrupt(digitalPinToInterrupt(ALOtripSwitchPinIn));
+		detachInterrupt(digitalPinToInterrupt(initiateCalibratePinIn));
 	}
 
 	void SleepNow()
@@ -1618,7 +1621,7 @@ namespace sleep {
 		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 		cli();
 		attachInterrupt(digitalPinToInterrupt(coupler7dot5VPinIn), Coupler7dot5Interrupt, LOW);
-		attachInterrupt(digitalPinToInterrupt(ALOtripSwitchPinIn), AloRevInterrupt, LOW);
+		attachInterrupt(digitalPinToInterrupt(initiateCalibratePinIn), CaliInterrupt, LOW);
 		sleep_enable();
 		sleep_bod_disable();
 		sei();
