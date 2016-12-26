@@ -1,7 +1,6 @@
 // Do not remove the include below
 #include "Arduino.h"
 #include <avr/pgmspace.h>
-#include <avr/power.h>
 #include <EEPROM.h>
 
 //#define DEBUG_SERIAL
