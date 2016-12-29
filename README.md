@@ -1,7 +1,8 @@
 # Battery Power Branch
 As of this writing, this branch in the repository is <b>not tested</b>.
 It appears that the function of the 4 cell Ni-Cd battery in the original unit
-can be (mostly) restored. This branch may eventually be updated to confirm
+can be (mostly) restored. But the UNO is probably not going to be the right
+CPU board to use for battery power. This branch may eventually be updated to confirm
 construction and test details. For now, its a work in progress.
 
 # Nye Viking Power Monitor
@@ -94,9 +95,29 @@ a 5VDC step-up:
 <br><a href='http://moderndevice.com/product/jeelabs-aa-power-board/'>JeeLabs AA Power Board</a>.
 It has space for only a single AA battery, and this power meter will run on that
 single AA cell for a while. Or wire in the original 4 by AA NiCd cells.</p>
-<p>For battery operation, use of the original LM324 op-amp is no longer 
-appropriate. Substitute an LMC6044 CMOS op-amp to get its quiescent 
+<p>For battery operation, a substitution can improve
+current draw from the original LM324 op-amp. Substitute an LMC6044 CMOS op-amp to get its quiescent 
 current drain down below 1mA.</p>
+<p>Measuring current drain with the UNO makes me believe that long term battery
+operation with it is probably not viable. Activation of the power shut down code in
+PowerMeter.cpp, drops current drain for the assembly, with the original LM324 
+in place, only from about 45mA down to about 33mA. Divide the 33mA into the 700mA-hr capacity
+of my NiCd's and I only get one day at idle. Actual use to measure power or
+SWR will shorten that. </p>
+<p>Where is the 33mA going? There is almost
+certainly a posting on an arduino forum somewhere with the answer. I
+haven't run across it, though. And I am not willing to go
+after my UNO with a soldering iron to confirm any of this. The likely candidates are
+U1, U2, U3, U4 and U5. The datasheets for U1, U2 and U5 seem to put their
+power supply current draws down below 1mA each. The LM324 on my proto
+board is below 1mA. U3 is the chip that PowerMeter.cpp puts into power down mode.
+That leaves U4, which is another Atmel CPU just like the one we put in 
+power down mode. Having not done anything to power it down, it likely is drawing
+power per its datasheet specification that at 5VDC and 16MHz its drawing 14mA. If that
+is what it is doing, then it is half the problem. For my own tastes, in the 
+absence of an external on/off switch, I would want at least a month of
+idling available for the battery. That means another order of magnitude
+of consumption must be found and removed.</p>
  <h2>Calibration</h2>
  <p>The code supports four settings in EEPROM. These (roughly) correspond to 
  potentiometers on the original analog board. The EEPROM settings are:
