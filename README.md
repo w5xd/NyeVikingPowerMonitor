@@ -55,9 +55,13 @@ together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to
 the four screws from the left hand side, and the outer-most four screws from the back panel. Do NOT remove the
 front panel screws nor the bottom panel screws.</p>
 <h2>Power</h2>
+<p>The builder may want to know that, while the 12VDC connector at the back
+of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin) and
+outer diameter, (5.5mm) of the Arduino, the diameter of the inner pins do NOT match.</p>
+<p>
 The original battery power design was that the batteries stay permanently connected
 and external 12VDC, when applied, trickle charges the NiCd's. I have two reasons to
-change that design:
+change that design:</p>
 <ol>
 <li>Trickle charging will raise the battery voltage above 6VDC, but that number is
 the absolute maximum input voltage specified for the LTC3525 part that makes
@@ -96,8 +100,10 @@ a 5VDC step-up:
 It has space for only a single AA battery, and this power meter will run on that
 single AA cell for a while. Or wire in the original 4 by AA NiCd cells.</p>
 <p>For battery operation, a substitution can improve
-current draw from the original LM324 op-amp. Substitute an LMC6044 CMOS op-amp to get its quiescent 
-current drain down below 1mA.</p>
+current draw from the original LM324 op-amp. Substitute an LMC6044 CMOS op-amp, and I
+measure a drop in overall current consumption down by about 1mA from before:
+from 52 mA down to 51mA when measured in the 12VDC line to the external DC input
+and while the software is not in power down mode.</p>
 <p>Measuring current drain with the UNO makes me believe that long term battery
 operation with it is probably not viable. Activation of the power shut down code in
 PowerMeter.cpp, drops current drain for the assembly, with the original LM324 
