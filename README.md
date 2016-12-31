@@ -49,7 +49,7 @@ front panel screws nor the bottom panel screws.</p>
 original incandescent 1813 lamps. The 4.7K value works fine with LED replacement lamps that fit the
 same sockets.</p>
 <h2>Power</h2>
-<p>The builder may want to know that, while the 12VDC connector at the back
+<p>A prospective builder may want to know that, while the 12VDC connector at the back
 of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin) and
 outer diameter, (5.5mm) of the Arduino, the diameter of the inner pins do NOT match.</p>
 I disconnected the old Ni-Cd battery back and require external 12VDC in the new design. A subsequent project
