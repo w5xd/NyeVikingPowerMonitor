@@ -32,8 +32,6 @@ The first two are of commercial manufacture:
 2 Arduino PROTO Shield board.<br/>
 3 Generic prototyping circuit board.<br/>
 <br/>
-<p>While I developed and tested with the UNO, the Arduino Leonardo appears to have the same 
-specifications and is a few dollars cheaper.</p>
 <p>Board (3) is drilled with mounting hole pattern to match the original RFM-003 board. (In my case,
 I only covered the front two mounting posts.) It has the 6 LEDs (SENSE, LOCK, SAMPLE, HOLD, LOW, 
 and HIGH) mounted such that they fit through the original RFM front panel holes. This board also has the 220 ohm 
@@ -55,7 +53,7 @@ together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to
 the four screws from the left hand side, and the outer-most four screws from the back panel. Do NOT remove the
 front panel screws nor the bottom panel screws.</p>
 <h2>Power</h2>
-<p>The builder may want to know that, while the 12VDC connector at the back
+<p>A prospective builder may want to know that, while the 12VDC connector at the back
 of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin) and
 outer diameter, (5.5mm) of the Arduino, the diameter of the inner pins do NOT match.</p>
 <p>
@@ -64,66 +62,66 @@ and external 12VDC, when applied, trickle charges the NiCd's. I have two reasons
 change that design:</p>
 <ol>
 <li>Trickle charging will raise the battery voltage above 6VDC, but that number is
-the absolute maximum input voltage specified for the LTC3525 part that makes
+the absolute maximum input voltage specified for the LTC3525 part I chose to make
 regulated 5VDC from the NiCds.
 <li>Continuous charging of NiCd's is not recommended by their manufacturers. They
 say to bring them to full charge and then disconnect them.
 </ol>
 For these reasons the design published here adds an internal DPDT switch that
 selects the power source between external 12VDC or the battery pack. The battery
-cells must be removed to be charged in an external charger. So going to 
-battery power requires a lot more steps than the original design.
+cells must be removed to be charged in an external charger. Going to 
+battery power, then, requires a lot more steps than the original design.
 <ul><li>Remove the batteries and charge them.
 <li>Reinstall the batteries and switch the DPDT switch to battery power.
-<li>Run on battery power now
+<li>Run on battery power
 <li>Open the box and switch the DPDT switch to 12V external to go back
 to external power.
 </ul>
 <p>There is one
-major caveat: the new switch <b>allows both</b> the USB 5V and the battery 5V
-to be simulateously applied. Therefore, do <b>not</b> connect the USB cable and
+major caveat: the new switch <b>does not prevent both</b> the USB 5V and the battery 5V
+from being simulateously applied. Therefore, do <b>not</b> connect the USB cable and
 switch to battery power simultaneously. The smoke will likely be released from
-the power supply parts, rendering them useless. For normal users who will 
-only program their Arduino once, it should not be too big a burden to remember
+the power supply parts, rendering them useless. If you just build from this plan, you will 
+only program your Arduino once, it should not be too big a burden to remember
 that the one and only time they connect the USB to program it, remove the
 battieres!</p>
 <p>The battery is converted to 5VDC using an LTC3525 step-up converter. This 
-device is limited to 6VDC input, but is designed to take lower-than-5VDC
-at its input. The original pack of four AA NiCd cells would nominally be at
+device is limited to 6VDC input, while taking lower-than-5VDC
+at its input. The original pack of four AA NiCd cells would nominally be at a
+safe
 4.8V. Alkaline AA cells <i>cannot</i> be used here in a battery of four, but three of
-them in series (or even in parallel!) would work fine in this circuit. 
+them in series (or even in parallel!) would work fine with the LTC3525. 
 The LTC3525 will drain them all the
 way down to below 1V. Here is a commercially available board that has
 the LTC3525 along with the other (tiny) parts needed to make
 a 5VDC step-up: 
 <br><a href='http://moderndevice.com/product/jeelabs-aa-power-board/'>JeeLabs AA Power Board</a>.
-It has space for only a single AA battery, and this power meter will run on that
+It has space for a single AA battery, and this power meter will run on that
 single AA cell for a while. Or wire in the original 4 by AA NiCd cells.</p>
 <p>For battery operation, a substitution can improve
 current draw from the original LM324 op-amp. Substitute an LMC6044 CMOS op-amp, and I
 measure a drop in overall current consumption down by about 1mA from before:
 from 52 mA down to 51mA when measured in the 12VDC line to the external DC input
-and while the software is not in power down mode.</p>
+and while the software is not in power down mode. The LMC6044 also features
+rail-to-rail swing on its output, which opens the possibility for
+circuit changes to increase the resolution on the forward and reflected
+power digitizing.</p>
 <p>Measuring current drain with the UNO makes me believe that long term battery
 operation with it is probably not viable. Activation of the power shut down code in
-PowerMeter.cpp, drops current drain for the assembly, with the original LM324 
-in place, only from about 45mA down to about 33mA. Divide the 33mA into the 700mA-hr capacity
+this git branch of
+PowerMeter.cpp drops current drain for the assembly (measured with the original LM324 
+in place) only from about 45mA down to about 33mA. Divide that 33mA idle
+current into the 700mA-hr capacity
 of my NiCd's and I only get one day at idle. Actual use to measure power or
 SWR will shorten that. </p>
 <p>Where is the 33mA going? There is almost
 certainly a posting on an arduino forum somewhere with the answer. I
 haven't run across it, though. And I am not willing to go
-after my UNO with a soldering iron to confirm any of this. The likely candidates are
-U1, U2, U3, U4 and U5. The datasheets for U1, U2 and U5 seem to put their
-power supply current draws down below 1mA each. The LM324 on my proto
-board is below 1mA. U3 is the chip that PowerMeter.cpp puts into power down mode.
-That leaves U4, which is another Atmel CPU just like the one we put in 
-power down mode. Having not done anything to power it down, it likely is drawing
-power per its datasheet specification that at 5VDC and 16MHz its drawing 14mA. If that
-is what it is doing, then it is half the problem. For my own tastes, in the 
+after my UNO with a soldering iron to confirm any of this. For my own tastes, in the 
 absence of an external on/off switch, I would want at least a month of
 idling available for the battery. That means another order of magnitude
-of consumption must be found and removed.</p>
+of consumption must be found and removed. Any further experiments to
+reduce idling current will need to be done on a different Arduino board.</p>
  <h2>Calibration</h2>
  <p>The code supports four settings in EEPROM. These (roughly) correspond to 
  potentiometers on the original analog board. The EEPROM settings are:
@@ -156,11 +154,14 @@ of consumption must be found and removed.</p>
  it requires much reduced power supply current.
  <li>The input network becomes 1:7.6@500Hz for both forward and reflected. 
  This has a little less noise, and a little better resolution--taking advantage
- of the wider voltage swing of the LMC6044.
+ of the rail-to-rail output voltage swing of the LMC6044.
+ <li>The ALO lockout relay with a 3VDC coil is an unnecessary battery drain
+ compared to an equivalent part with a 5VDC coil.
+ The only reason mine is 3V is because Fry's did not have a 5V part in stock,
+ and because I don't really care much about battery operation.
  <li>Of course, if you modify your hardware per this battery-power branch, you must also
  upload the program as compiled from this branch.
- </ol>
- 
+ </ol> 
 <h2>RFM-005 support? </h2>
  The difference between the two meters, according to the schematic in their (common) manual,
  is that the former has a full scale power meter reading of 300 vs 500 in the latter.
