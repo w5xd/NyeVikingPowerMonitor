@@ -126,8 +126,8 @@ reduce idling current will need to be done on a different Arduino board.</p>
  potentiometers on the original analog board. The EEPROM settings are:
  <br/>ALO SWR lock-out threshold
  <br/>ALO PWR lock-out threshold
- <br/>Foward voltage calibration correction (+/-10%) range
- <br/>Reflected voltage calibration correction (+/-10%) range
+ <br/>Foward voltage calibration correction (+/-5%) range
+ <br/>Reflected voltage calibration correction (+/-5%) range
  </p><p>
  Setting the EEPROM values is accomplished using a magic switch switch sequence 
  followed by turning the front panel HOLD pot. See the code for full instructions.
