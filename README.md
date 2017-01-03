@@ -17,7 +17,9 @@ NyeVikingBrain1.png is the circuit diagram of the new interface.
 <br/>PowerMeter.cpp is the source code.
 
 <h2>Construction</h2>
-The original instrument has a single circuit board. This project consists of three circuit boards
+The original instrument has a single circuit board. 
+<img alt='AfterTransplant.jpg' src='BeforeTransplant.jpg'/>
+This project consists of three circuit boards
 held together by a couple of 4-40 machine screws. 
 The first two are of commercial manufacture:
 <ol> <li>1 Arduino UNO single-board computer.
