@@ -98,7 +98,7 @@ draw 100mA or so each.</li>
 <li>The 4.7K resistor from D8 to the base of the 2n3053 should be 470 ohms if you're going to retain the
 original incandescent 1813 lamps. The 4.7K value works fine with LED replacement lamps that fit the
 same sockets.</li>
-<ul>
+</ul>
 
 <h2>Power</h2>
 <p>A prospective builder may want to know that, while the 12VDC connector at the back
