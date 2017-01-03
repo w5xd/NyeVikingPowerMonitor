@@ -44,13 +44,62 @@ This pair connects to each
 other with several headers. I ran a pair of 4-40 screws through all three boards and fastened them 
 together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to the back panel.
 </p>
-<p>Disassembly hint.</p><p>The box splits into a clam shell by removing the four screws from the right hand side,
+<p>Disassembly hint.</p>
+<p>The box splits into a clam shell by removing the four screws from the right hand side,
 the four screws from the left hand side, and the outer-most four screws from the back panel. Do NOT remove the
 front panel screws nor the bottom panel screws.</p>
-<p>Errata:
-<br/>The 4.7K resistor from D8 to the base of the 2n3053 should be 470 ohms if you're going to retain the
+<h2>Circuit</h2>
+<p>
+Three NPN transistors and an LM324 quad opamp (the
+same opamp part as was used in the original board) are used to accomplish the necessary level shifting and impedance
+matching to make the Arduino interface with the original RFM meter components.
+The ADC inputs on the ATmega328P are documented at 10K ohm impedance. The opamp (with one unit unused)
+buffers the three analog input signals:</p>
+<ol>
+<li>Forward power. The coupler (which is not modified in this design) has a source impedance on the order of 
+its R9, which is 4.7K. The original circuit filters it with R14/C7 at 1M and .001uF which has a pole at about 160Hz.
+This circuit uses a somewhat higher frequency input filter, 750Hz, than the original,
+which likely means this circuit will
+be sensitive to somewhat shorter peaks in its PEAK mode.  
+<li>Reflected power. Digitized using the same design as forward power.
+<li>Hold pot setting. The original pot, left unchanged, is 1M ohm. A 390K series resistor is added
+to keep the pot wiper below the 3.7V limit of the LM324.
+</ol>
+This is the circuit used:
+<img alt='NyeVikingBrain1.png' src='NyeVikingBrain1.png'/>
+<p>
+Almost all the components are mounted on the PROTO Shield available from http://arduino.cc. As marked,
+some of the resistors are "flying" from their associated front or back panel
+components. The ALO relay is simply double-stick taped to the back panel. A 5VDC coil
+would draw less current but Fry's only had a 3VDC coil available when I was in the store,
+and there is a 3.3V regulator on the UNO not doing anything else.</p>
+<p>The original coupler supplies not only rectified Forward and Reflected voltages
+like any directional coupler would do, but also a 
+signal labeled "7.5V" in the original schematic. It turns on the front panel lights, both
+in the original design and here.</p>
+<p>
+The program digitizes at 650Hz.
+This number, and the input filter cutoff, are not magic. They are, in part, due to the values of resistors and capacitors
+that were available in my junk box.
+</p>
+<p>The 9.4K series resistors for the two meters were hand chosen 
+to make the analog pulse width moduled output (PWM) of 249 read full scale mark. Note that 255 is the maximum PWM
+value available on the Arduino CPU, so the software can command the meter a few ticks beyond the marked full scale.
+</p>
+<p>Errata:</p>
+<ul>
+<li>An LMC6044 CMOS opamp can (and should) be substituted for the LM324. It has
+the identical pin out, and it draws less idle
+current in case you ever want to convert to battery power.</li>
+<li>The 2n3053 in its metal TO-39 case is overkill, especially for pulling
+the LED substitutions for the front panel 1813 lamps. A 2N3904 is
+plenty big enough for the LED versions. The original lamps
+draw 100mA or so each.</li>
+<li>The 4.7K resistor from D8 to the base of the 2n3053 should be 470 ohms if you're going to retain the
 original incandescent 1813 lamps. The 4.7K value works fine with LED replacement lamps that fit the
-same sockets.</p>
+same sockets.</li>
+<ul>
+
 <h2>Power</h2>
 <p>A prospective builder may want to know that, while the 12VDC connector at the back
 of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin) and
