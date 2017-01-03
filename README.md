@@ -9,14 +9,14 @@ construction and test details. For now, its a work in progress.
 Brain transplant for Nye Viking Power Monitor RFM-003
 
 My old RFM-003 quit working. The single circuit board in it is an analog computer that converts 
-the two voltages from a directional coupler (forward and reflected) to an SWR meter reading and 
-an RF Power meter reading. After switching out the obvious parts, I gave up trying to fix it and
+the two voltages from a directional coupler (forward and reflected) to an SWR reading and 
+an RF Power reading. After switching out the obvious parts, I gave up trying to fix it and
 instead bought an Arduino UNO single-board computer and its mating Proto Shield circuit board.
 See http://arduino.cc. I built a replacement for the Power Monitor's original circuit board. 
-This repo documents the hardware and software used.
+This git repo documents the hardware and software used.
 
-Don't know about the Nye Viking Power Monitor? Here is a demonstration: 
-<br/>http://www.youtube.com/watch?v=muCM9BKhpKA
+Don't know about the Nye Viking Power Monitor? Here is a demonstration
+videoed by N8RWS:<br/> http://www.youtube.com/watch?v=muCM9BKhpKA
 
 <h2>Files</h2>
 NyeVikingBrain1.png is the circuit diagram of the new interface.
@@ -25,19 +25,18 @@ NyeVikingBrain1.png is the circuit diagram of the new interface.
 
 <h2>Construction</h2>
 The original instrument has a single circuit board. This project consists of three circuit boards
-bolted together. The final assembly is still much smaller than the original. 
+held together by a couple of 4-40 machine screws. 
 The first two are of commercial manufacture:
-
-1 Arduino UNO single-board computer<br/>
-2 Arduino PROTO Shield board.<br/>
-3 Generic prototyping circuit board.<br/>
-<br/>
-<p>Board (3) is drilled with mounting hole pattern to match the original RFM-003 board. (In my case,
+<ol> <li>1 Arduino UNO single-board computer.
+<li>Arduino PROTO Shield board.
+<li>Generic prototyping circuit board.</ol>
+The final assembly is still much smaller than the original. 
+<p>The generic prototyping board (3) is drilled with mounting hole pattern to match the original RFM-003 board. (In my case,
 I only covered the front two mounting posts.) It has the 6 LEDs (SENSE, LOCK, SAMPLE, HOLD, LOW, 
 and HIGH) mounted such that they fit through the original RFM front panel holes. This board also has the 220 ohm 
 series resistors for the LEDs.</p>
-<p>I removed the original board by snipping each wire at its end opposite the circuit board. That is
-the old board ends up with lots of flying single-ended wires attached. (EXCEPTION: the Ni-Cd battery 
+<p>I removed the original board by snipping each wire at its end opposite the circuit board. 
+The old board ends up with lots of flying single-ended wires attached. (EXCEPTIONS: the Ni-Cd battery 
 pack wires, and the L1/L2 wires from the coupler I snipped at the circuit board.) 
 I did not scavange any parts from
 it and instead bought new LEDs, a relay, etc. The original board, I suppose, could still be repaired and
@@ -55,7 +54,7 @@ front panel screws nor the bottom panel screws.</p>
 <h2>Power</h2>
 <p>A prospective builder may want to know that, while the 12VDC connector at the back
 of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin) and
-outer diameter, (5.5mm) of the Arduino, the diameter of the inner pins do NOT match.</p>
+outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match.</p>
 <p>
 The original battery power design was that the batteries stay permanently connected
 and external 12VDC, when applied, trickle charges the NiCd's. I have two reasons to

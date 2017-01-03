@@ -1,4 +1,9 @@
-// Do not remove the include below
+/* Copyright (c) 2017 by Wayne E. Wright
+** W5XD
+** Round Rock, Texas, USA
+**
+** For terms of use, see LICENSE
+*/
 #include "Arduino.h"
 #include <avr/pgmspace.h>
 #include <avr/sleep.h>
@@ -166,6 +171,7 @@ void setup() {
     digitalWrite(PanelLampsPinOut,	HIGH); // turn on front panel lights on boot
 
 #if defined(DEBUG_SERIAL)
+    // The serial port is only used for debugging, otherwise unused in this sketch.
     Serial.begin(9600);
 #endif
 }
@@ -192,10 +198,8 @@ namespace {
 	enum EEPROM_ASSIGNMENTS {EEPROM_SWR_LOCK, EEPROM_PWR_LOCK, EEPROM_FWD_CALIBRATION, EEPROM_REFL_CALIBRATION};
 
 	// Voltages are in acquisition units.
-	// Max is 50 * ADC max, which is 2**10.
-	// (Actually, on the 5V reference, the lm324 limits the
-	// data to about 3.7V, so our max is not 2**10 = 1024, but about 710 or so
-	//
+	// Max is 50 * ADC max, which is (about) 2**6 times 2**10, so it fits in 16 bits
+    //
 	DisplayPower_t getPeakPwr();
 	DisplayPower_t getPeakHoldPwr();
 	DisplayPower_t getAveragePwr();
@@ -281,7 +285,7 @@ void loop()
 
   unsigned long now = millis();
 
-  // CHECK ENTER CALIBRATE MODE
+  // CHECK FOR ENTER CALIBRATE MODE
   if (MeterMode == METER_NORMAL &&
 		  digitalRead(PeakSwitchPinIn) != LOW &&
 		  digitalRead(initiateCalibratePinIn) == LOW)
@@ -377,7 +381,7 @@ namespace movingAverage {
 	// The ADC is 10 bits, so multiplying by 50 still keeps us within 16 bit unsigned
 
 	// NOTE. The Arduino compiler development environment did NOT generate any errors
-	// when these arrays were only a "little" too big to fit in 2KB SRAM.
+	// when these arrays were only a little too big to fit in 2KB SRAM.
 	// That just makes the Arduino crash mysteriously when you run this sketch...
 
 	AcquiredVolts_t fwdHistory[NUM_TO_AVERAGE]; // units are ADC converter units
@@ -406,7 +410,7 @@ namespace movingAverage {
 					i = NUM_TO_AVERAGE - 1;
 			}
 			// optimize the divide by count to nearby power of two
-			// Only the ratio of f and r will be used later
+			// Only the ratio of f and r will be used to compute SWR
 			for (;;)
 			{
 				count >>= 1;
@@ -733,7 +737,7 @@ namespace SwrMeter {
 			9309, // 72.7273
 			10240, // 80
 			11378, // 88.8889
-			12800, // 100 <-- last entry to use--full scale on meter
+			12800, // 100 <-- last entry to use--series resistor selected for full scale on meter
 			14629, // 114.286
 			17067, // 133.333
 			20480, // 160
@@ -1304,7 +1308,7 @@ namespace PwrMeter {
 			37402, // 292.203
 			37760, // 295
 			38120, // 297.81
-			38481, // 300.633
+			38481, // 300.633  Series resistor is selected for meter full scale @ 249
 			38844, // 303.47
 			39209, // 306.32
 			39575, // 309.183
@@ -1501,7 +1505,7 @@ int16_t EpromByteToCaliOffset(uint8_t v)
 		int32_t c = v;
 		c -= (PwrMeter::HIGHEST_VALID_CALIBRATION + PwrMeter::LOWEST_VALID_CALIBRATION) / 2;
 		// c ranges about +/- 50 here
-		return c * 80;
+		return c * 80; // or about +/- 4000, which is roughly +/- 5% adjustment range
 	}
 	return 0;
 }
