@@ -58,7 +58,7 @@ could restore battery power but likely would require different processor board
 because the UNO has a couple of 10mA power consumers that are not needed for
 this sketch, but cannot be turned off without physical modification. 
 Note that the accuracy of the 5V supply is assumed for the ADC
-converts in this design. 
+converter in this design. 
 I replaced the front panel incandecent lamps with LED equivalents.
 
  <h2>Calibration</h2>
