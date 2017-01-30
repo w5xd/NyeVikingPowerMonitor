@@ -1,6 +1,6 @@
 # Battery Power Branch
 The function of the 4 cell Ni-Cd battery in the original unit
-can be (mostly) restored. The Arduino PRO must be used instead of the UNO described in the master branch. Even with its power LED left intact, the PRO draws only about 1.6mA when the sleep code in this branch engages. Removing the power LED would presumably reduce
+can be (mostly) restored. The Arduino PRO must be used instead of the UNO described in the <a href='http://github.com/w5xd/NyeVikingPowerMonitor/tree/master'>master branch</a>. Even with its power LED left intact, the PRO draws only about 1.6mA when the sleep code in this branch engages. Removing the power LED would presumably reduce
 the idle even more. With 700mA-hour NiCd cells, the predicted battery lifetime with that LED continuously on is
 about 2 weeks. Powering up the meter, of course, reduces that. The biggest difference from the stock Nye Viking battery behavior is the addition of an internal switch to go between battery power and the wall wart.
 
