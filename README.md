@@ -1,9 +1,8 @@
 # Battery Power Branch
-As of this writing, this branch in the repository is <b>not tested</b>.
-It appears that the function of the 4 cell Ni-Cd battery in the original unit
-can be (mostly) restored. But the UNO is probably not going to be the right
-CPU board to use for battery power. This branch may eventually be updated to confirm
-construction and test details. For now, its a work in progress.
+The function of the 4 cell Ni-Cd battery in the original unit
+can be (mostly) restored. The Arduino PRO must be used instead of the UNO described in the master branch. Even with its power LED left intact, the PRO draws only about 1.6mA when the sleep code in this branch engages. Removing the power LED would presumably reduce
+the idle even more. With 700mA-hour NiCd cells, the predicted battery lifetime with that LED continuously on is
+about 2 weeks. Powering up the meter, of course, reduces that. The biggest difference from the stock Nye Viking battery behavior is the addition of an internal switch to go between battery power and the wall wart.
 
 # Nye Viking Power Monitor
 Brain transplant for Nye Viking Power Monitor RFM-003
@@ -11,7 +10,7 @@ Brain transplant for Nye Viking Power Monitor RFM-003
 My old RFM-003 quit working. The single circuit board in it is an analog computer that converts 
 the two voltages from a directional coupler (forward and reflected) to an SWR reading and 
 an RF Power reading. After switching out the obvious parts, I gave up trying to fix it and
-instead bought an Arduino UNO single-board computer and its mating Proto Shield circuit board.
+instead bought an Arduino single-board computer and its mating Proto Shield circuit board.
 See http://arduino.cc. I built a replacement for the Power Monitor's original circuit board. 
 This git repo documents the hardware and software used.
 
@@ -19,7 +18,7 @@ Don't know about the Nye Viking Power Monitor? Here is a demonstration
 videoed by N8RWS:<br/> http://www.youtube.com/watch?v=muCM9BKhpKA
 
 <h2>Files</h2>
-NyeVikingBrain1.png is the circuit diagram of the new interface.
+NyeVikingBrain1.png is the circuit diagram of the replacement.
 <br/>NyeVikingBrain2.png is the layout of the circuit onto the Proto Shield prototyping circuit board.
 <br/>PowerMeter.cpp is the source code.
 
@@ -27,7 +26,7 @@ NyeVikingBrain1.png is the circuit diagram of the new interface.
 The original instrument has a single circuit board. This project consists of three circuit boards
 held together by a couple of 4-40 machine screws. 
 The first two are of commercial manufacture:
-<ol> <li>1 Arduino UNO single-board computer.
+<ol> <li>Arduino PRO single-board computer.
 <li>Arduino PROTO Shield board.
 <li>Generic prototyping circuit board.</ol>
 The final assembly is still much smaller than the original. 
@@ -43,8 +42,10 @@ it and instead bought new LEDs, a relay, etc. The original board, I suppose, cou
 resinstalled. The new board assembly fits in the position of the old board. I used 22 gauge solid 
 hookup wire to connect all the front panel and back panel meters, potentiometer, switches, etc. </p>
 <p>
-The PROTO shield has all the interfacing parts except the new relay. The UNO is used unmodified. 
-This pair connects to each
+The PROTO shield has all the interfacing parts except the new relay. The PRO is unmodified, except
+that it comes with no headers which must be added in order to
+plug in the PROTO Shield.
+This PRO/PROTO-SHIELD pair connects to each
 other with several headers. I ran a pair of 4-40 screws through all three boards and fastened them 
 together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to the back panel.
 </p>
@@ -57,24 +58,19 @@ of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner 
 outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match.</p>
 <p>
 The original battery power design was that the batteries stay permanently connected
-and external 12VDC, when applied, trickle charges the NiCd's. I have two reasons to
-change that design:</p>
-<ol>
-<li>Trickle charging will raise the battery voltage above 6VDC, but that number is
+and external 12VDC, when applied, trickle charges the NiCd's. But
+Trickle charging raises the battery voltage above 6VDC. That number is
 the absolute maximum input voltage specified for the LTC3525 part I chose to make
 regulated 5VDC from the NiCds.
-<li>Continuous charging of NiCd's is not recommended by their manufacturers. They
-say to bring them to full charge and then disconnect them.
-</ol>
-For these reasons the design published here adds an internal DPDT switch that
-selects the power source between external 12VDC or the battery pack. The battery
-cells must be removed to be charged in an external charger. Going to 
-battery power, then, requires a lot more steps than the original design.
-<ul><li>Remove the batteries and charge them.
-<li>Reinstall the batteries and switch the DPDT switch to battery power.
+Therefore the design published here adds an internal DPDT switch that
+selects the power source between external 12VDC or the battery pack. 
+The circuit shows a 220ohm trickle charging resistor. Going to 
+battery power requires:
+<ul><li>Open the power meter case
+<li>switch the DPDT switch to battery power.
 <li>Run on battery power
 <li>Open the box and switch the DPDT switch to 12V external to go back
-to external power.
+to external power, and trickle charge the NiCd battery.
 </ul>
 <p>There is one
 major caveat: the new switch <b>does not prevent both</b> the USB 5V and the battery 5V
@@ -83,44 +79,31 @@ switch to battery power simultaneously. The smoke will likely be released from
 the power supply parts, rendering them useless. If you just build from this plan, you will 
 only program your Arduino once, it should not be too big a burden to remember
 that the one and only time they connect the USB to program it, remove the
-battieres!</p>
+battery and <b>also</b> disconnect the external 12VDC!</p>
 <p>The battery is converted to 5VDC using an LTC3525 step-up converter. This 
 device is limited to 6VDC input, while taking lower-than-5VDC
-at its input. The original pack of four AA NiCd cells would nominally be at a
-safe
-4.8V. Alkaline AA cells <i>cannot</i> be used here in a battery of four, but three of
-them in series (or even in parallel!) would work fine with the LTC3525. 
-The LTC3525 will drain them all the
-way down to below 1V. Here is a commercially available board that has
+at its input. The original pack of four AA NiCd cells will nominally be at a
+safe 4.8V. Alkaline AA cells <i>cannot</i> be used here in a battery of four, but three of
+them in series (or even in parallel!) would work fine with the LTC3525. Remove the
+trickle charge resistor for non-rechargeable cells. 
+The LTC3525 will drain whatever battery you give it all the
+way down to below 1V input while still delivering 5V output. 
+Here is a commercially available board that has
 the LTC3525 along with the other (tiny) parts needed to make
 a 5VDC step-up: 
 <br><a href='http://moderndevice.com/product/jeelabs-aa-power-board/'>JeeLabs AA Power Board</a>.
 It has space for a single AA battery, and this power meter will run on that
-single AA cell for a while. Or wire in the original 4 by AA NiCd cells.</p>
-<p>For battery operation, a substitution can improve
-current draw from the original LM324 op-amp. Substitute an LMC6044 CMOS op-amp, and I
-measure a drop in overall current consumption down by about 1mA from before:
-from 52 mA down to 51mA when measured in the 12VDC line to the external DC input
-and while the software is not in power down mode. The LMC6044 also features
-rail-to-rail swing on its output, which opens the possibility for
-circuit changes to increase the resolution on the forward and reflected
-power digitizing.</p>
-<p>Measuring current drain with the UNO makes me believe that long term battery
-operation with it is probably not viable. Activation of the power shut down code in
-this git branch of
-PowerMeter.cpp drops current drain for the assembly (measured with the original LM324 
-in place) only from about 45mA down to about 33mA. Divide that 33mA idle
-current into the 700mA-hr capacity
-of my NiCd's and I only get one day at idle. Actual use to measure power or
-SWR will shorten that. </p>
-<p>Where is the 33mA going? There is almost
-certainly a posting on an arduino forum somewhere with the answer. I
-haven't run across it, though. And I am not willing to go
-after my UNO with a soldering iron to confirm any of this. For my own tastes, in the 
-absence of an external on/off switch, I would want at least a month of
-idling available for the battery. That means another order of magnitude
-of consumption must be found and removed. Any further experiments to
-reduce idling current will need to be done on a different Arduino board.</p>
+single AA cell for a while. Or wire in the original 4 by AA NiCd cells and
+include the 220ohm trickler charge resistor shown in this circuit.</p>
+<p>The op-amp specified is a LMC6044 CMOS part instead of the LM324.
+ The LMC6044  features
+rail-to-rail swing on its output, which is why this branch specifies 150K resistors
+in the ADC voltage divider, and the firmware has a corresponding change in the coupler
+resistance constant.</p>
+<p>The stock NyeViking wall wart has an output too high to run the Arduino PRO. The 7805 
+regulator circuit is used to reduce it to 12V. Use a 7812 if you have one. My junk box
+only had the 7805.</p>
+<p>This is the circuit used:<img alt='NyeVikingBrain1.png' src='NyeVikingBrain1.png'/></p>
  <h2>Calibration</h2>
  <p>The code supports four settings in EEPROM. These (roughly) correspond to 
  potentiometers on the original analog board. The EEPROM settings are:
@@ -129,7 +112,7 @@ reduce idling current will need to be done on a different Arduino board.</p>
  <br/>Foward voltage calibration correction (+/-5%) range
  <br/>Reflected voltage calibration correction (+/-5%) range
  </p><p>
- Setting the EEPROM values is accomplished using a magic switch switch sequence 
+ Setting the EEPROM values is accomplished using the back panel pushbutton switch
  followed by turning the front panel HOLD pot. See the code for full instructions.
  </p>
  
