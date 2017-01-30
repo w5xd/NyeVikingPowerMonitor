@@ -1,8 +1,8 @@
 # Battery Power Branch
 The function of the 4 cell Ni-Cd battery in the original unit
-can be (mostly) restored. The Arduino PRO must be used instead of the UNO described in the <a href='http://github.com/w5xd/NyeVikingPowerMonitor/tree/master'>master branch</a>. Even with its power LED left intact, the PRO draws only about 1.6mA when the sleep code in this branch engages. Removing the power LED would presumably reduce
-the idle even more. With 700mA-hour NiCd cells, the predicted battery lifetime with that LED continuously on is
-about 2 weeks. Powering up the meter, of course, reduces that. The biggest difference from the stock Nye Viking battery behavior is the addition of an internal switch to go between battery power and the wall wart.
+can be restored. The Arduino PRO must be used instead of the UNO described in the <a href='http://github.com/w5xd/NyeVikingPowerMonitor/tree/master'>master branch</a>. Even with its power LED left intact, the PRO draws only about 1.6mA when the sleep code in this branch engages. Removing the power LED would presumably reduce
+the idle even more. With 700mA-hour NiCd cells, the predicted battery lifetime even with that LED continuously on is
+about 2 weeks. Using the meter, of course, reduces that. 
 
 # Nye Viking Power Monitor
 Brain transplant for Nye Viking Power Monitor RFM-003
@@ -58,27 +58,21 @@ of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner 
 outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match.</p>
 <p>
 The original battery power design was that the batteries stay permanently connected
-and external 12VDC, when applied, trickle charges the NiCd's. But
-Trickle charging raises the battery voltage above 6VDC. That number is
+and external 12VDC, when applied, trickle charges the NiCd's. Trickle
+charging raises the battery voltage above 6VDC. That number is
 the absolute maximum input voltage specified for the LTC3525 part I chose to make
 regulated 5VDC from the NiCds.
-Therefore the design published here adds an internal DPDT switch that
-selects the power source between external 12VDC or the battery pack. 
-The circuit shows a 220ohm trickle charging resistor. Going to 
-battery power requires:
-<ul><li>Open the power meter case
-<li>switch the DPDT switch to battery power.
-<li>Run on battery power
-<li>Open the box and switch the DPDT switch to 12V external to go back
-to external power, and trickle charge the NiCd battery.
-</ul>
-<p>There is one
-major caveat: the new switch <b>does not prevent both</b> the USB 5V and the battery 5V
-from being simulateously applied. Therefore, do <b>not</b> connect the USB cable and
-switch to battery power simultaneously. The smoke will likely be released from
+Therefore the design published here adds an internal DPDT relay that
+routes the power wires between external 12VDC or the battery pack. 
+The circuit shows a 220ohm trickle charging resistor, which can be omitted 
+if you choose to remove the cells and recharge them externally. 
+<p>There is one hazard: the relay <b>does not prevent both</b> the programming header
+5V and the other 5V
+from being simulateously applied. Therefore, to connect the programming header,
+remove at least one cell <b>and</b> disconnect the external 12VDC. Otherwise, the smoke will likely be released from
 the power supply parts, rendering them useless. If you just build from this plan, you will 
 only program your Arduino once, it should not be too big a burden to remember
-that the one and only time they connect the USB to program it, remove the
+that the one and only time they connect the header to program it, remove the
 battery and <b>also</b> disconnect the external 12VDC!</p>
 <p>The battery is converted to 5VDC using an LTC3525 step-up converter. This 
 device is limited to 6VDC input, while taking lower-than-5VDC
@@ -115,8 +109,7 @@ only had the 7805.</p>
  Setting the EEPROM values is accomplished using the back panel pushbutton switch
  followed by turning the front panel HOLD pot. See the code for full instructions.
  </p>
- 
- <h2>Added low-low power feature</h2>
+  <h2>Added low-low power feature</h2>
  While the code (nearly) duplicates the original behavior of the analog board, there is
  one additional feature. When it detects power levels below 1/10 of full scale, it 
  multiplies the value by 10 and flashes the LOW LED.
@@ -129,8 +122,8 @@ only had the 7805.</p>
   <li>A new switch is added to the back panel. Use the existing .25" hole that
  allowed access to the old ALO pot. Use a momentary SPST NC switch. 
  Wire that new switch to pull D3 down.
- <li>An internally accessible DPDT switch is added to prevent simultaneous
- operation of the external 12VDC and internal battery back power supplies.
+ <li>A DPDT relay is added to engage the trickler charcter or
+ internal battery back power supply.
  <li>The ALO TRIP SWR/REV function that used to be on D3 is now wired to A0.
  <li>Substitute an LMC6044 CMOS op-amp for the LM324. Its output swings rail-to-rail and 
  it requires much reduced power supply current.
