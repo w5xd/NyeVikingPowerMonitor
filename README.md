@@ -101,7 +101,7 @@ rail-to-rail swing on its output, which is why this branch specifies 150K resist
 in the ADC voltage divider, and the firmware has a corresponding change in the coupler
 resistance constant.</p>
 <p>The stock NyeViking wall wart has an output too high to run the Arduino PRO. The 7805 
-regulator circuit is used to reduce it to 12V. Use a 7812 if you have one. My junk box
+regulator circuit is used to reduce it to 8V. Use a 7808 if you have one. My junk box
 only had the 7805.</p>
 <p>This is the circuit used:<img alt='NyeVikingBrain1.png' src='NyeVikingBrain1.png'/></p>
  <h2>Calibration</h2>
