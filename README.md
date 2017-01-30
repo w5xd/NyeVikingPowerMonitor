@@ -106,10 +106,9 @@ of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner 
 outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match.</p>
 <p>For the Arduino UNO board, the Nye Viking stock wall wart output of about 17VDC is acceptable. However, for the Arduino PRO, the voltage must be dropped below 16V. The 7805 circuit with a pair of resistors drops it to 8VDC. A 7808 would
 do the job with fewer parts but I didn't have one in my junk box.</p>
-I disconnected the old Ni-Cd battery back and require external 12VDC in the new design. A subsequent project
-could restore battery power but likely would require different processor board
-because the UNO has a couple of 10mA power consumers that are not needed for
-this sketch, but cannot be turned off without physical modification. 
+I disconnected the old Ni-Cd battery back and require external 12VDC in the new design. 
+A <a href='http://github.com/w5xd/NyeVikingPowerMonitor/tree/battery-power'>subsequent project</a>
+restores battery power but requires a different Arduino board.. 
 Note that the accuracy of the 5V supply is assumed for the ADC
 converter in this design. 
 I replaced the front panel incandecent lamps with LED equivalents.
