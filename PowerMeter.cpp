@@ -205,7 +205,7 @@ namespace {
 	DisplayPower_t getAveragePwr();
 	void DisplayPwr(DisplayPower_t);
 
-	const unsigned NominalCouplerResistance = 4350u; // assumes 1:7.6 input divider
+	const unsigned NominalCouplerResistance = 6902u; // assumes 1:7.6 input divider
 	const uint32_t NominalCouplerResistanceMultiplier = 0x20000u;
 	const unsigned NominalCouplerResistanceRecip =
 			NominalCouplerResistanceMultiplier / NominalCouplerResistance;
