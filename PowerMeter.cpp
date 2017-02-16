@@ -1597,12 +1597,14 @@ namespace sleep {
 	{
 		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 		cli();
+		power_all_disable();
 		attachInterrupt(digitalPinToInterrupt(coupler7dot5VPinIn), Coupler7dot5Interrupt, LOW);
 		attachInterrupt(digitalPinToInterrupt(initiateCalibratePinIn), CaliInterrupt, LOW);
 		sleep_enable();
 		sleep_bod_disable();
 		sei();
 		sleep_cpu();
+		power_all_enable();
 		sleep_disable();
 		sei();
 	}
