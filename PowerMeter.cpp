@@ -1595,9 +1595,11 @@ namespace sleep {
 
 	void SleepNow()
 	{
+		analogReference(EXTERNAL);	// these TWO lines save about 30 uA
+		analogRead(HoldTimePotAnalogPinIn); // ditto
 		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 		cli();
-		power_all_disable();
+		power_all_disable(); // this appears to be redundant. no power reduction results
 		attachInterrupt(digitalPinToInterrupt(coupler7dot5VPinIn), Coupler7dot5Interrupt, LOW);
 		attachInterrupt(digitalPinToInterrupt(initiateCalibratePinIn), CaliInterrupt, LOW);
 		sleep_enable();
@@ -1607,6 +1609,7 @@ namespace sleep {
 		power_all_enable();
 		sleep_disable();
 		sei();
+		setAnalogReferenceInternal();
 	}
 }
 
