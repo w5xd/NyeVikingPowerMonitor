@@ -4,7 +4,6 @@
 **
 ** For terms of use, see LICENSE
 */
-#include "Arduino.h"
 #include <avr/pgmspace.h>
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
