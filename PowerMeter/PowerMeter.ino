@@ -4,8 +4,10 @@
 **
 ** For terms of use, see LICENSE
 */
-#include "Arduino.h"
 #include <avr/pgmspace.h>
+#include <avr/sleep.h>
+#include <avr/interrupt.h>
+#include <avr/power.h>
 #include <EEPROM.h>
 
 //#define DEBUG_SERIAL
@@ -28,7 +30,8 @@ typedef uint32_t DisplayPower_t; // This is 128 times Watts (i.e. value 128 is 1
 
 // pin assignments
 const int coupler7dot5VPinIn =  2;
-const int ALOtripSwitchPinIn = 3;
+const int initiateCalibratePinIn = 3;
+const int ALOtripSwitchPinIn = A0;
 const int PowerForwReflSwitchPinIn = 4;
 const int SwrMeterPinOut = 5;
 const int RfMeterPinOut = 6;
@@ -89,8 +92,7 @@ namespace calibrate {
 	 * To set power calibrations (A), start with the front switch in PEAK&HOLD
 	 * To set ALO settings (B), start with the front switch in AVERAGE.
 	 *
-	 * On the back panel, simultaneously switch BOTH the ALO and POWER switches
-	 * three times within one second. The meter responds by setting the LOCK LED.
+	 * On the back panel, momentarily press the added pushbutton in the ALO SENSE hole.
 	 *
 	 * ********* power calibration ***********
 	 *
@@ -142,10 +144,10 @@ namespace calibrate {
 }
 
 void setup() {
-	// Digital pins (except PWM output pins)
     pinMode(coupler7dot5VPinIn, INPUT_PULLUP);
     pinMode(ALOtripSwitchPinIn, INPUT_PULLUP);
     pinMode(PowerForwReflSwitchPinIn, INPUT_PULLUP);
+    pinMode(initiateCalibratePinIn, INPUT_PULLUP);
     pinMode(SenseLedPinOut, OUTPUT);
     pinMode(AloLockPinOut, OUTPUT);
     pinMode(SampleLedPinOut, OUTPUT);
@@ -165,6 +167,7 @@ void setup() {
     movingAverage::clear();
 
     calibrate::SetCalibrationConstantsFromEEPROM();
+    digitalWrite(PanelLampsPinOut,	HIGH); // turn on front panel lights on boot
 
 #if defined(DEBUG_SERIAL)
     // The serial port is only used for debugging, otherwise unused in this sketch.
@@ -182,24 +185,26 @@ namespace Alo {
 	void doAloSetup();
 }
 
+namespace sleep {
+	void SleepNow();
+}
+
 namespace {
 	void sample();
 	uint8_t DisplaySwr();
-	void FrontPanelLamps();
+	bool FrontPanelLamps();
 	enum SetupMode_t {METER_NORMAL, ALO_SETUP, CALIBRATE_SETUP};
 	enum EEPROM_ASSIGNMENTS {EEPROM_SWR_LOCK, EEPROM_PWR_LOCK, EEPROM_FWD_CALIBRATION, EEPROM_REFL_CALIBRATION};
 
 	// Voltages are in acquisition units.
 	// Max is 50 * ADC max, which is (about) 2**6 times 2**10, so it fits in 16 bits
-	// (Actually, on the 5V reference with the lm324 opamp, 3.7V is the maximum,
-    // so ADC max is not 2**10 = 1024, but about 710 or so)
-	//
+    //
 	DisplayPower_t getPeakPwr();
 	DisplayPower_t getPeakHoldPwr();
 	DisplayPower_t getAveragePwr();
 	void DisplayPwr(DisplayPower_t);
 
-	const unsigned NominalCouplerResistance = 3353u; 
+	const unsigned NominalCouplerResistance = 6902u; // assumes 1:7.6 input divider
 	const uint32_t NominalCouplerResistanceMultiplier = 0x20000u;
 	const unsigned NominalCouplerResistanceRecip =
 			NominalCouplerResistanceMultiplier / NominalCouplerResistance;
@@ -216,14 +221,8 @@ namespace {
 	enum SetupMode_t MeterMode(METER_NORMAL);
 
 	// Alo/calibrate Setup Mode detect
-	const unsigned AloEntryDeadlineMsec = 1000;
 	const unsigned AloSetupModeTimesOut = 30000;
-	unsigned AloSwitchChangeCount;
-	unsigned PwrSwitchChangeCount;
-	unsigned long CaliSwitchChangeTime;
 	unsigned long EnteredAloSetupModeTime;
-	bool BackPanelAloSwitchSwrPrev;
-	bool BackPanelPwrSwitchFwdPrev;
 
 	AcquiredVolts_t fwdCalibration = 0x8000; // this fixed point 1.0 multiplier
 	AcquiredVolts_t revCalibration = 0x8000; // ditto
@@ -286,38 +285,18 @@ void loop()
   unsigned long now = millis();
 
   // CHECK FOR ENTER CALIBRATE MODE
-  if (MeterMode == METER_NORMAL && digitalRead(PeakSwitchPinIn) != LOW)
+  if (MeterMode == METER_NORMAL &&
+		  digitalRead(PeakSwitchPinIn) != LOW &&
+		  digitalRead(initiateCalibratePinIn) == LOW)
   {
-	  if (BackPanelPwrSwitchFwd != BackPanelPwrSwitchFwdPrev)
-		  PwrSwitchChangeCount += 1;
-	  if (BackPanelAloSwitchSwrPrev != BackPanelAloSwitchSwr)
-		  AloSwitchChangeCount += 1;
-	  if (AloSwitchChangeCount + PwrSwitchChangeCount == 1)
-		  CaliSwitchChangeTime = now;
-	  if (now - CaliSwitchChangeTime < AloEntryDeadlineMsec)
-	  {
-		  if ((PwrSwitchChangeCount >= 3) && (AloSwitchChangeCount >= 3))
-		  {
-			  MeterMode = (digitalRead(AverageSwitchPinIn) == LOW) ?
-					  ALO_SETUP : CALIBRATE_SETUP;
-			  EnteredAloSetupModeTime = now;
-		 	  coupler7dot5LastHeardMillis = now; // turn on front panel lamps as if power detected
-		 	  digitalWrite(PanelLampsPinOut,	HIGH);
-			  AloSwitchChangeCount = 0;
-			  PwrSwitchChangeCount = 0;
-		  }
-	  }
-	  else
-	  {
-		  AloSwitchChangeCount = 0;
-		  PwrSwitchChangeCount = 0;
-	  }
-
-	  BackPanelPwrSwitchFwdPrev = BackPanelPwrSwitchFwd;
-	  BackPanelAloSwitchSwrPrev = BackPanelAloSwitchSwr;
+  	  MeterMode = (digitalRead(AverageSwitchPinIn) == LOW) ?
+			  ALO_SETUP : CALIBRATE_SETUP;
+	  digitalWrite(PanelLampsPinOut,	HIGH);
+	  coupler7dot5LastHeardMillis = now;
+	  EnteredAloSetupModeTime = now;
   }
 
-   // dispatch per MeterMode
+  // dispatch per MeterMode
   if (MeterMode == ALO_SETUP)
   {
 	  Alo::doAloSetup();
@@ -337,10 +316,11 @@ void loop()
   }
 
   if (digitalRead(coupler7dot5VPinIn) == LOW)
-   {
- 	  coupler7dot5LastHeardMillis = now;
- 	  digitalWrite(PanelLampsPinOut,	HIGH);
-   }
+  {
+	  coupler7dot5LastHeardMillis = now;
+	  digitalWrite(PanelLampsPinOut,	HIGH);
+  }
+
 
   if (digitalRead(AloLockPinOut) == HIGH &&
 		  now - LockoutStartedAtMillis > LockoutLengthMsec)
@@ -359,7 +339,6 @@ void loop()
 	  }
 #endif
 	  SwrUpdateTime = now;
-	  FrontPanelLamps();
 	  uint8_t swr = DisplaySwr();
 	  DisplayPower_t pwr;
 	  if (digitalRead(PeakSwitchPinIn) == LOW)
@@ -373,6 +352,8 @@ void loop()
 		  Alo::CheckAloSwr(swr);
 	  else
 		  Alo::CheckAloPwr();
+	  if (!FrontPanelLamps())
+		  sleep::SleepNow();
   }
 
   unsigned long nowusec = micros();
@@ -972,14 +953,17 @@ uint8_t DisplaySwr()
 	return (uint8_t)v;
 }
 
-void FrontPanelLamps()
+bool FrontPanelLamps()
 {
 	if (digitalRead(PanelLampsPinOut) == HIGH)
 	{
 		unsigned long timeOn = millis() - coupler7dot5LastHeardMillis;
 		if ( timeOn > FrontPanelLampsOnMsec)
 			digitalWrite(PanelLampsPinOut,	LOW);
+		return true;
 	}
+	else
+		return false;
 }
 
 DisplayPower_t SquareToWatts(DisplayPower_t s)
@@ -1596,3 +1580,35 @@ void doCalibrateSetup()
 
 }
 }
+
+namespace sleep {
+	void Coupler7dot5Interrupt()
+	{
+		detachInterrupt(digitalPinToInterrupt(coupler7dot5VPinIn));
+	}
+
+	void CaliInterrupt()
+	{
+		detachInterrupt(digitalPinToInterrupt(initiateCalibratePinIn));
+	}
+
+	void SleepNow()
+	{
+		analogReference(EXTERNAL);	// these TWO lines save about 30 uA
+		analogRead(HoldTimePotAnalogPinIn); // ditto
+		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+		cli();
+		power_all_disable(); // this appears to be redundant. no power reduction results
+		attachInterrupt(digitalPinToInterrupt(coupler7dot5VPinIn), Coupler7dot5Interrupt, LOW);
+		attachInterrupt(digitalPinToInterrupt(initiateCalibratePinIn), CaliInterrupt, LOW);
+		sleep_enable();
+		sleep_bod_disable();
+		sei();
+		sleep_cpu();
+		power_all_enable();
+		sleep_disable();
+		sei();
+		setAnalogReferenceInternal();
+	}
+}
+
