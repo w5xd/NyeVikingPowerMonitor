@@ -1,6 +1,6 @@
 # Battery Power Branch
 The function of the 4 cell Ni-Cd battery in the original unit
-can be restored. The Arduino PRO must be used instead of the UNO described in <a href='http://github.com/w5xd/NyeVikingPowerMonitor/tree/VERSION001'>VERSION001</a>. Even with its power LED left intact, the PRO draws only about 1.3mA when the sleep code in this branch engages. Removing the power LED reduces this to 750uA. With 700mA-hour NiCd cells, the predicted battery lifetime even with that LED continuously on is about 2 weeks. Using the meter, of course, reduces that. In one test involving no actually RF measurement, but pressing the back panel ALO button once per day to see if it would respond, it failed to respond on day 14. This was with the power LED removed. 
+can be restored. The Arduino PRO must be used instead of the UNO described in <a href='http://github.com/w5xd/NyeVikingPowerMonitor/tree/VERSION001'>VERSION001</a>. Even with its power LED left intact, the PRO draws only about 1.3mA when the sleep code in this version engages. Removing the power LED reduces this to 750uA. With 700mA-hour NiCd cells, the predicted battery lifetime even with that LED continuously on is about 2 weeks. Using the meter, of course, reduces that. In one test involving no actually RF measurement, but pressing the back panel ALO button once per day to see if it would respond, it failed to respond on day 14. This was with the power LED removed. 
 
 # Nye Viking Power Monitor
 Brain transplant for Nye Viking Power Monitor RFM-003
@@ -18,10 +18,12 @@ videoed by N8RWS:<br/> http://www.youtube.com/watch?v=muCM9BKhpKA
 <h2>Files</h2>
 NyeVikingBrain1.png is the circuit diagram of the replacement.
 <br/>NyeVikingBrain2.png is the layout of the circuit onto the Proto Shield prototyping circuit board.
-<br/>PowerMeter.cpp is the source code.
+<br/>PowerMeter is the Arduino sketch.
 
 <h2>Construction</h2>
-The original instrument has a single circuit board. This project consists of three smaller circuit boards
+The original instrument has a single circuit board. 
+<p align='center'><img alt='AfterTransplant.jpg' src='BeforeTransplant.jpg'/></p>
+This project consists of three smaller circuit boards
 held together by a couple of 4-40 machine screws. 
 The first two are of commercial manufacture:
 <ol> <li>Arduino PRO single-board computer.
@@ -54,7 +56,6 @@ front panel screws nor the bottom panel screws.</p>
 <p>A prospective builder may want to know that, while the 12VDC connector at the back
 of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin) and
 outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match.</p>
-<<<<<<< HEAD
 <p>
 The original battery power design was that the batteries stay permanently connected
 and external 12VDC, when applied, trickle charges the NiCd's. Trickle
@@ -90,24 +91,13 @@ single AA cell for a while. Or wire in the original 4 by AA NiCd cells and
 include the 220ohm trickler charge resistor shown in this circuit.</p>
 <p>The op-amp specified is a LMC6044 CMOS part instead of the LM324.
  The LMC6044  features
-rail-to-rail swing on its output, which is why this branch specifies 150K resistors
+rail-to-rail swing on its output, which is why this tag specifies 150K resistors
 in the ADC voltage divider, and the firmware has a corresponding change in the coupler
 resistance constant.</p>
 <p>The stock NyeViking wall wart has an output too high to run the Arduino PRO. The 7805 
 regulator circuit is used to reduce it to 8V. Use a 7808 if you have one. My junk box
 only had the 7805.</p>
 <p>This is the circuit used:<img alt='NyeVikingBrain1.png' src='NyeVikingBrain1.png'/></p>
-=======
-<p>For the Arduino UNO board, the Nye Viking stock wall wart output of about 17VDC is acceptable. However, for the Arduino PRO, the voltage must be dropped below 16V. The 7805 circuit with a pair of resistors drops it to 8VDC. A 7808 would
-do the job with fewer parts but I didn't have one in my junk box.</p>
-I disconnected the old Ni-Cd battery back and require external 12VDC in the new design. 
-A <a href='http://github.com/w5xd/NyeVikingPowerMonitor/tree/battery-power'>subsequent project</a>
-restores battery power but requires a different Arduino board.. 
-Note that the accuracy of the 5V supply is assumed for the ADC
-converter in this design. 
-I replaced the front panel incandecent lamps with LED equivalents.
-
->>>>>>> 5fd5873dfd257b6ee1a18d415a4648f445edb0ae
  <h2>Calibration</h2>
  <p>The code supports four settings in EEPROM. These (roughly) correspond to 
  potentiometers on the original analog board. The EEPROM settings are:
@@ -144,9 +134,11 @@ I replaced the front panel incandecent lamps with LED equivalents.
  compared to an equivalent part with a 5VDC coil.
  The only reason mine is 3V is because Fry's did not have a 5V part in stock,
  and because I don't really care much about battery operation.
- <li>Of course, if you modify your hardware per this battery-power branch, you must also
- upload the program as compiled from this branch.
+ <li>Of course, if you modify your hardware per this battery power design (VERSION002 or higher), you must also
+ upload the program as compiled from the same.
  </ol> 
+After the transplant:
+<p align='center'><img alt='AfterTransplant.jpg' src='AfterTransplant.jpg'/></p>
 <h2>RFM-005 support? </h2>
  The difference between the two meters, according to the schematic in their (common) manual,
  is that the former has a full scale power meter reading of 300 vs 500 in the latter.
