@@ -10,7 +10,6 @@
 #include <avr/power.h>
 #include <EEPROM.h>
 
-//#define DEBUG_SERIAL
 
 static_assert(sizeof(uint16_t)==2,"uint16_t");
 static_assert(sizeof(int16_t)==2, "int16_t");
@@ -169,15 +168,10 @@ void setup() {
     calibrate::SetCalibrationConstantsFromEEPROM();
     digitalWrite(PanelLampsPinOut,	HIGH); // turn on front panel lights on boot
 
-#if defined(DEBUG_SERIAL)
-    // The serial port is only used for debugging, otherwise unused in this sketch.
     Serial.begin(9600);
-#endif
+    Serial.println("W5XD PowerMeter 1.0");
 }
 
-#if defined(DEBUG_SERIAL)
-static bool printDebug; // flag that gets set once when a character comes in on the Serial
-#endif
 
 namespace Alo {
 	void CheckAloPwr();
@@ -276,7 +270,10 @@ void loop()
 {
   // throttle to one loop every TimerLoopIntervalMicroSec
   previousMicrosec = micros();
-
+  while (Serial.available() > 0)
+  {
+    auto inChar = Serial.read();
+  }
   sample(); // read FWD/REFL ADCs
 
   BackPanelPwrSwitchFwd = digitalRead(PowerForwReflSwitchPinIn) == HIGH;
@@ -331,13 +328,6 @@ void loop()
   // Update the displays less frequently than loop() can excute
   if (now - SwrUpdateTime >= MeterUpdateIntervalMsec)
   {
-#if defined(DEBUG_SERIAL)
-	  if (Serial.available() > 0)
-	  {
-		  Serial.read();
-		  printDebug = true;
-	  }
-#endif
 	  SwrUpdateTime = now;
 	  uint8_t swr = DisplaySwr();
 	  DisplayPower_t pwr;
@@ -361,9 +351,6 @@ void loop()
   diff -= TimerLoopIntervalMicroSec;
   if ((diff < 0) && (diff >= -TimerLoopIntervalMicroSec))
 	  delayMicroseconds((unsigned int)-diff);
-#if defined(DEBUG_SERIAL)
-  printDebug = false;
-#endif
 }
 
 namespace movingAverage {
