@@ -1679,7 +1679,10 @@ namespace Comm {
                         DisplayPower_t forward = VoltsToWatts(f);
                         DisplayPower_t reflected = VoltsToWatts(r);
                         Serial.print(" Pf:"); Serial.print(forward); 
-                        Serial.print(" Pr:"); Serial.println(reflected);
+                        Serial.print(" Pr:"); Serial.print(reflected);
+                        if (digitalRead(AloLockPinOut) == HIGH)
+                            Serial.print(" L");
+                        Serial.println();
                 }
 		printedZero = (f == 0) && (r == 0);
         }
