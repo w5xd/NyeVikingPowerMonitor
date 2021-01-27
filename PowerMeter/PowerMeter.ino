@@ -270,13 +270,16 @@ namespace {
 
 namespace Comm {
         int OutputToSerial;
+        unsigned long OutputStartedMsec;
         void CommUpdateForwardAndReverse();
+        const unsigned long OUTPUT_TIMEOUT_MSEC = 10000;
 }
 
 void loop()
 {
         // throttle to one loop every TimerLoopIntervalMicroSec
         previousMicrosec = micros();
+        unsigned long now = millis();
         while (Serial.available() > 0)
         {
                 static unsigned char numInBuf = 0;
@@ -287,7 +290,10 @@ void loop()
                 {
                         buf[numInBuf] = 0;
                         if (strcmp(buf, "P ON") == 0)
+                        {
                                 Comm::OutputToSerial = 1;
+                        	Comm::OutputStartedMsec = now; 
+                        }
                         else if (strcmp(buf, "P OFF") == 0)
                                 Comm::OutputToSerial = 0;
                         numInBuf = 0;            
@@ -301,8 +307,6 @@ void loop()
 
         BackPanelPwrSwitchFwd = digitalRead(PowerForwReflSwitchPinIn) == HIGH;
         BackPanelAloSwitchSwr = digitalRead(ALOtripSwitchPinIn) == HIGH;
-
-        unsigned long now = millis();
 
         // CHECK FOR ENTER CALIBRATE MODE
         if (MeterMode == METER_NORMAL &&
@@ -347,6 +351,9 @@ void loop()
         {
                 digitalWrite(AloLockPinOut, LOW);
         }
+
+	if (now - Comm::OutputStartedMsec > Comm::OUTPUT_TIMEOUT_MSEC)
+        	Comm::OutputToSerial = 0;
 
         if (now - CommUpdateTime >= CommUpdateIntervalMsec)
         {
