@@ -30,14 +30,15 @@ namespace NyeVikingMonitor
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.comboBoxSerial = new System.Windows.Forms.ComboBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.labelW = new System.Windows.Forms.Label();
             this.labelSwrMax = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.radioButtonAverage = new System.Windows.Forms.RadioButton();
             this.radioButtonPeak = new System.Windows.Forms.RadioButton();
+            this.radioButtonAverage = new System.Windows.Forms.RadioButton();
             this.labelPr = new NyeVikingMonitor.BarLabel();
             this.labelPf = new NyeVikingMonitor.BarLabel();
             this.labelSWR = new NyeVikingMonitor.BarLabel();
@@ -93,6 +94,17 @@ namespace NyeVikingMonitor
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             // 
+            // radioButtonPeak
+            // 
+            this.radioButtonPeak.AutoSize = true;
+            this.radioButtonPeak.Location = new System.Drawing.Point(101, 14);
+            this.radioButtonPeak.Name = "radioButtonPeak";
+            this.radioButtonPeak.Size = new System.Drawing.Size(50, 17);
+            this.radioButtonPeak.TabIndex = 1;
+            this.radioButtonPeak.Text = "Peak";
+            this.radioButtonPeak.UseVisualStyleBackColor = true;
+            this.radioButtonPeak.CheckedChanged += new System.EventHandler(this.radioButtonAverage_CheckedChanged);
+            // 
             // radioButtonAverage
             // 
             this.radioButtonAverage.AutoSize = true;
@@ -105,17 +117,6 @@ namespace NyeVikingMonitor
             this.radioButtonAverage.Text = "Average";
             this.radioButtonAverage.UseVisualStyleBackColor = true;
             this.radioButtonAverage.CheckedChanged += new System.EventHandler(this.radioButtonAverage_CheckedChanged);
-            // 
-            // radioButtonPeak
-            // 
-            this.radioButtonPeak.AutoSize = true;
-            this.radioButtonPeak.Location = new System.Drawing.Point(101, 14);
-            this.radioButtonPeak.Name = "radioButtonPeak";
-            this.radioButtonPeak.Size = new System.Drawing.Size(50, 17);
-            this.radioButtonPeak.TabIndex = 1;
-            this.radioButtonPeak.Text = "Peak";
-            this.radioButtonPeak.UseVisualStyleBackColor = true;
-            this.radioButtonPeak.CheckedChanged += new System.EventHandler(this.radioButtonAverage_CheckedChanged);
             // 
             // labelPr
             // 
@@ -165,6 +166,7 @@ namespace NyeVikingMonitor
             this.Controls.Add(this.labelSWR);
             this.Controls.Add(this.comboBoxSerial);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Main";
             this.Text = "Power Monitor";
