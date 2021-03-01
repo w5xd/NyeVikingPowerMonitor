@@ -186,7 +186,6 @@ namespace NyeVikingMonitor
                 l.Text = String.Format("{0:0}", v);
             l.Value = v;
         }
-
         private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             var sp = (SerialPort)sender;

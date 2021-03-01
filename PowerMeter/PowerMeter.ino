@@ -418,10 +418,10 @@ namespace movingAverage {
         uint64_t fwdTotal;
         uint64_t revTotal;
 
-        class AvgSinceLastCheck1
+        class AvgSinceLastCheck
         {
         public:
-            AvgSinceLastCheck1() : lastIndex(0) {}
+            AvgSinceLastCheck() : lastIndex(0) {}
 
             // expect to be called at meter update frequency: 8Hz
             void getCalibratedSums(uint32_t& f, uint32_t& r)
@@ -450,39 +450,6 @@ namespace movingAverage {
                 }
                 f = calibrateScaleFwd(f);
                 r = calibrateScaleRev(r);
-                lastIndex = curIndex;
-            }
-
-        private:
-            int lastIndex;
-        };
-
-        class AvgSinceLastCheck2
-        {
-        public:
-            AvgSinceLastCheck2() : lastIndex(0) {}
-
-            // expect to be called at meter update frequency: 8Hz
-            void getCalibratedVolts(AcquiredVolts_t& forward, AcquiredVolts_t& reflected)
-            {
-                forward = reflected = 0;
-                uint32_t f = 0; uint32_t r = 0;
-                // backwards from newest sample
-                // stop at sample we used last time called
-                unsigned count = 0;
-                for (int i = curIndex; i != lastIndex; )
-                {
-                    f += fwdHistory[i];
-                    r += revHistory[i];
-                    count += 1;
-                    if (--i < 0)
-                        i = NUM_TO_AVERAGE - 1;
-                }
-                if (count > 0)
-                {
-                    forward = calibrateFwd(f / count);
-                    reflected = calibrateRev(r / count);
-                }
                 lastIndex = curIndex;
             }
 
@@ -981,39 +948,36 @@ namespace {
 
         uint8_t DisplaySwr()
         {
-                static movingAverage::AvgSinceLastCheck1 average;
-                unsigned long displayValue = 1;
-                uint32_t f;
-                uint32_t r;
-                average.getCalibratedSums(f,r);
-                if (f)
-                {
-                        if (r < f)
-                        {
-                                // SWR = (f + r) / (f - r) -- all in volts (not power!)
-                                uint32_t fplusr = f;
-                                fplusr += r;
-                                fplusr <<= SWR_SCALE_PWR; // convert to display units
-                                uint32_t fminusr = f;
-                                fminusr -= r;
-                                if (fminusr != 0)
-                                {
-                                        displayValue = fplusr / fminusr;
-                                        if (displayValue > INFINITE_SWR << SWR_SCALE_PWR)
-                                                displayValue = INFINITE_SWR << SWR_SCALE_PWR;
-                                }
-                                else
-                                        displayValue = INFINITE_SWR << SWR_SCALE_PWR;
-                        }
-                        else
-                                displayValue = INFINITE_SWR << SWR_SCALE_PWR;
-                }
-                uint16_t swrCoded = (uint16_t)displayValue;
-                uint16_t v = MeterInvert<SwrMeter::PWR_ENTRIES>::TableLookup(swrCoded, SwrMeter::PwmToSwr);
-                v = MeterInvert<SwrMeter::PWR_ENTRIES>::map(v);
-                static MeterFilter meterFilter; // don't jerk the meter around too quickly
-                analogWrite(SwrMeterPinOut, meterFilter.apply(v));
-                return (uint8_t)v;
+            static movingAverage::AvgSinceLastCheck average;
+            unsigned long displayValue = 1;
+            uint32_t f;
+            uint32_t r;
+            average.getCalibratedSums(f, r);
+            if (f)
+            {
+                if (r < f)
+                {   // SWR = (f + r) / (f - r) -- all in volts (not power!)
+                    uint32_t fplusr = f;
+                    fplusr += r;
+                    fplusr <<= SWR_SCALE_PWR; // convert to display units
+                    uint32_t fminusr = f;
+                    fminusr -= r;
+                    if (fminusr != 0)
+                    {
+                        displayValue = fplusr / fminusr;
+                        if (displayValue > INFINITE_SWR << SWR_SCALE_PWR)
+                            displayValue = INFINITE_SWR << SWR_SCALE_PWR;
+                    } else
+                        displayValue = INFINITE_SWR << SWR_SCALE_PWR;
+                } else
+                    displayValue = INFINITE_SWR << SWR_SCALE_PWR;
+            }
+            uint16_t swrCoded = (uint16_t)displayValue;
+            uint16_t v = MeterInvert<SwrMeter::PWR_ENTRIES>::TableLookup(swrCoded, SwrMeter::PwmToSwr);
+            v = MeterInvert<SwrMeter::PWR_ENTRIES>::map(v);
+            static MeterFilter meterFilter; // don't jerk the meter around too quickly
+            analogWrite(SwrMeterPinOut, meterFilter.apply(v));
+            return (uint8_t)v;
         }
 
         bool FrontPanelLamps()
@@ -1677,34 +1641,39 @@ namespace sleep {
 namespace Comm {
         void CommUpdateForwardAndReverse()
         {
-                static movingAverage::AvgSinceLastCheck2 average;
-                static bool printedZero = false;
-                AcquiredVolts_t f;
-                AcquiredVolts_t r;
-                if (Comm::OutputToSerial == Comm::AVG_OUTPUT_TO_SERIAL)
-                    average.getCalibratedVolts(f, r);
-                else if (Comm::OutputToSerial == Comm::PEAK_OUTPUT_TO_SERIAL)
-                {
-                    movingAverage::getPeaks(f, r);
-                    f = calibrateFwd(f);
-                    r = calibrateRev(r);
-                }
-                else return;
-                if ((f > 0) || (r > 0) || !printedZero)
-                {
-                        Serial.print("Vf:"); Serial.print(f); 
-                        Serial.print(" Vr:"); Serial.print(r);
+            static bool printedZero = false;
+            static movingAverage::AvgSinceLastCheck average;
+            uint32_t fV;
+            uint32_t rV;
+            average.getCalibratedSums(fV, rV);
+            DisplayPower_t fd(0);
+            DisplayPower_t rd(0);
+            if (Comm::OutputToSerial == Comm::PEAK_OUTPUT_TO_SERIAL)
+            {
+                AcquiredVolts_t f; AcquiredVolts_t r;
+                movingAverage::getPeaks(f, r);
+                fd = VoltsToWatts(calibrateFwd(f));
+                rd = VoltsToWatts(calibrateRev(r));
+            }
+            else if (Comm::OutputToSerial == Comm::AVG_OUTPUT_TO_SERIAL)
+            {
+                fd = SquareToWatts(calibrateFwdPower(movingAverage::fwdPwr()));
+                rd = SquareToWatts(calibrateRevPower(movingAverage::revPwr()));
+            }
+            if ((fd > 0) || (rd > 0) || !printedZero)
+            {
+                // Voltages are always averaged
+                Serial.print("Vf:"); Serial.print(fV); 
+                Serial.print(" Vr:"); Serial.print(rV);
 
-                        //DisplayPower_t is calibrated in units of 1/128 Watt
-                        DisplayPower_t forward = VoltsToWatts(f);
-                        DisplayPower_t reflected = VoltsToWatts(r);
-                        Serial.print(" Pf:"); Serial.print(forward); 
-                        Serial.print(" Pr:"); Serial.print(reflected);
-                        if (digitalRead(AloLockPinOut) == HIGH)
-                            Serial.print(" L");
-                        Serial.println();
-                }
-		printedZero = (f == 0) && (r == 0);
+                //DisplayPower_t is calibrated in units of 1/128 Watt
+                Serial.print(" Pf:"); Serial.print(fd); 
+                Serial.print(" Pr:"); Serial.print(rd);
+                if (digitalRead(AloLockPinOut) == HIGH)
+                    Serial.print(" L");
+                Serial.println();
+            }
+		    printedZero = (fd == 0) && (rd == 0);
         }
 }
 
