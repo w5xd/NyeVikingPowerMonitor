@@ -269,7 +269,8 @@ namespace {
 }
 
 namespace Comm {
-        int OutputToSerial;
+    enum OutputToSerial_t { NO_OUTPUT_TO_SERIAL, AVG_OUTPUT_TO_SERIAL, PEAK_OUTPUT_TO_SERIAL };
+        OutputToSerial_t OutputToSerial;
         unsigned long OutputStartedMsec;
         void CommUpdateForwardAndReverse();
         const unsigned long OUTPUT_TIMEOUT_MSEC = 10000;
@@ -291,11 +292,16 @@ void loop()
                         buf[numInBuf] = 0;
                         if (strcmp(buf, "P ON") == 0)
                         {
-                                Comm::OutputToSerial = 1;
+                            Comm::OutputToSerial = Comm::AVG_OUTPUT_TO_SERIAL;
                         	Comm::OutputStartedMsec = now; 
                         }
                         else if (strcmp(buf, "P OFF") == 0)
-                                Comm::OutputToSerial = 0;
+                                Comm::OutputToSerial = Comm::NO_OUTPUT_TO_SERIAL;
+                        else if (strcmp(buf, "P PEAK") == 0)
+                        {
+                                Comm::OutputToSerial = Comm::PEAK_OUTPUT_TO_SERIAL;
+                                Comm::OutputStartedMsec = now; 
+                        }
                         numInBuf = 0;            
                 }
                 else numInBuf += 1;
@@ -353,12 +359,12 @@ void loop()
         }
 
 	if (now - Comm::OutputStartedMsec > Comm::OUTPUT_TIMEOUT_MSEC)
-        	Comm::OutputToSerial = 0;
+        	Comm::OutputToSerial = Comm::NO_OUTPUT_TO_SERIAL;
 
         if (now - CommUpdateTime >= CommUpdateIntervalMsec)
         {
                 CommUpdateTime = now;
-                if (Comm::OutputToSerial > 0)
+                if (Comm::OutputToSerial != Comm::NO_OUTPUT_TO_SERIAL)
                         Comm::CommUpdateForwardAndReverse();
         }
 
@@ -414,74 +420,74 @@ namespace movingAverage {
 
         class AvgSinceLastCheck1
         {
-                public:
-                        AvgSinceLastCheck1() : lastIndex(0){}
+        public:
+            AvgSinceLastCheck1() : lastIndex(0) {}
 
-                        // expect to be called at meter update frequency: 8Hz
-                        void getCalibratedSums(uint32_t &f, uint32_t &r)
-                        {
-                                f = 0; r = 0;
-                                // backwards from newest sample
-                                // stop at sample we used last time called
-                                unsigned count = 0;
-                                for (int i = curIndex; i != lastIndex;  )
-                                {
-                                        f += fwdHistory[i];
-                                        r += revHistory[i];
-                                        count += 1;
-                                        if (--i < 0)
-                                                i = NUM_TO_AVERAGE - 1;
-                                }
-                                // optimize the divide by count to nearby power of two
-                                // Only the ratio of f and r will be used to compute SWR
-                                for (;;)
-                                {
-                                        count >>= 1;
-                                        if (count == 0)
-                                                break;
-                                        f >>= 1;
-                                        r >>= 1;
-                                }
-                                f = calibrateScaleFwd(f);
-                                r = calibrateScaleRev(r);
-                                lastIndex = curIndex;
-                        }
+            // expect to be called at meter update frequency: 8Hz
+            void getCalibratedSums(uint32_t& f, uint32_t& r)
+            {
+                f = 0; r = 0;
+                // backwards from newest sample
+                // stop at sample we used last time called
+                unsigned count = 0;
+                for (int i = curIndex; i != lastIndex; )
+                {
+                    f += fwdHistory[i];
+                    r += revHistory[i];
+                    count += 1;
+                    if (--i < 0)
+                        i = NUM_TO_AVERAGE - 1;
+                }
+                // optimize the divide by count to nearby power of two
+                // Only the ratio of f and r will be used to compute SWR
+                for (;;)
+                {
+                    count >>= 1;
+                    if (count == 0)
+                        break;
+                    f >>= 1;
+                    r >>= 1;
+                }
+                f = calibrateScaleFwd(f);
+                r = calibrateScaleRev(r);
+                lastIndex = curIndex;
+            }
 
-                private:
-                        int lastIndex;
+        private:
+            int lastIndex;
         };
 
         class AvgSinceLastCheck2
         {
-                public:
-                        AvgSinceLastCheck2() : lastIndex(0){}
+        public:
+            AvgSinceLastCheck2() : lastIndex(0) {}
 
-                        // expect to be called at meter update frequency: 8Hz
-                        void getCalibratedVolts(AcquiredVolts_t &forward, AcquiredVolts_t &reflected)
-                        {
-                                forward = reflected = 0;
-                                uint32_t f = 0; uint32_t r = 0;
-                                // backwards from newest sample
-                                // stop at sample we used last time called
-                                unsigned count = 0;
-                                for (int i = curIndex; i != lastIndex;  )
-                                {
-                                        f += fwdHistory[i];
-                                        r += revHistory[i];
-                                        count += 1;
-                                        if (--i < 0)
-                                                i = NUM_TO_AVERAGE - 1;
-                                }
-                                if (count > 0)
-                                {
-                                 forward = calibrateFwd(f/count);
-                                 reflected = calibrateRev(r/count);
-                                }
-                                lastIndex = curIndex;
-                        }
+            // expect to be called at meter update frequency: 8Hz
+            void getCalibratedVolts(AcquiredVolts_t& forward, AcquiredVolts_t& reflected)
+            {
+                forward = reflected = 0;
+                uint32_t f = 0; uint32_t r = 0;
+                // backwards from newest sample
+                // stop at sample we used last time called
+                unsigned count = 0;
+                for (int i = curIndex; i != lastIndex; )
+                {
+                    f += fwdHistory[i];
+                    r += revHistory[i];
+                    count += 1;
+                    if (--i < 0)
+                        i = NUM_TO_AVERAGE - 1;
+                }
+                if (count > 0)
+                {
+                    forward = calibrateFwd(f / count);
+                    reflected = calibrateRev(r / count);
+                }
+                lastIndex = curIndex;
+            }
 
-                private:
-                        int lastIndex;
+        private:
+            int lastIndex;
         };
 
         void clear()
@@ -1443,7 +1449,6 @@ namespace {
 }
 
 namespace Alo {
-
         void Lockout(DisplayPower_t p)
         {
                 static const uint32_t LockoutThreshold =    25672; // 200W
@@ -1676,7 +1681,15 @@ namespace Comm {
                 static bool printedZero = false;
                 AcquiredVolts_t f;
                 AcquiredVolts_t r;
-                average.getCalibratedVolts(f,r);
+                if (Comm::OutputToSerial == Comm::AVG_OUTPUT_TO_SERIAL)
+                    average.getCalibratedVolts(f, r);
+                else if (Comm::OutputToSerial == Comm::PEAK_OUTPUT_TO_SERIAL)
+                {
+                    movingAverage::getPeaks(f, r);
+                    f = calibrateFwd(f);
+                    r = calibrateRev(r);
+                }
+                else return;
                 if ((f > 0) || (r > 0) || !printedZero)
                 {
                         Serial.print("Vf:"); Serial.print(f); 

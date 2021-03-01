@@ -82,7 +82,7 @@ namespace NyeVikingMonitor
                 HaveReceivedAnything = false;
                 timer1.Interval = TIMER_INIT_MSEC;
                 timer1.Enabled = true;
-                serialPort1.WriteLine("P ON");
+                serialPort1.WriteLine(radioButtonAverage.Checked ? "P ON" : "P PEAK");
             }
             return ret;
         }
@@ -102,10 +102,7 @@ namespace NyeVikingMonitor
         const int NYE_VIKING_TIMER_MSEC = 5000;
         const int TIMER_INIT_MSEC = 500;
         bool HaveReceivedAnything;
-        int Vf;
-        int Vr;
-        int Pf;
-        int Pr;
+        int Vf; int Vr; int Pf; int Pr;
         string serialBuffer;
         private void SerialReceived(string s)
         {
@@ -183,12 +180,10 @@ namespace NyeVikingMonitor
         }
         private void ToLabel(BarLabel l, float v)
         {
-            if (v < 10)
+            if (v < 100)
                 l.Text = String.Format("{0:0.0}", v);
-            else if (v < 100)
-                l.Text = String.Format("{0:00.0}", v);
             else
-                l.Text = String.Format("{0:0000}", v);
+                l.Text = String.Format("{0:0}", v);
             l.Value = v;
         }
 
@@ -201,7 +196,7 @@ namespace NyeVikingMonitor
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (serialPort1.IsOpen)
-                serialPort1.WriteLine("P ON");
+                serialPort1.WriteLine(radioButtonAverage.Checked ? "P ON" : "P PEAK");
         }
 
         private void Main_FormClosed(object sender, FormClosedEventArgs e)
@@ -210,6 +205,11 @@ namespace NyeVikingMonitor
             if (serialPort1.IsOpen)
                 serialPort1.Dispose();
             Properties.Settings.Default.Save();
+        }
+
+        private void radioButtonAverage_CheckedChanged(object sender, EventArgs e)
+        {
+            timer1_Tick(null, null);
         }
     }
 }
