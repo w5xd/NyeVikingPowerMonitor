@@ -2,3 +2,5 @@ Release
 .settings
 .cproject
 .project
+*~
+*.swp
