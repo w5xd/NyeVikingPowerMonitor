@@ -1,7 +1,3 @@
-# Battery Power Branch
-The function of the 4 cell Ni-Cd battery in the original unit
-can be restored. The Arduino PRO must be used instead of the UNO described in <a href='http://github.com/w5xd/NyeVikingPowerMonitor/tree/VERSION001'>VERSION001</a>. Even with its power LED left intact, the PRO draws only about 1.3mA when the sleep code in this version engages. Removing the power LED reduces this to 750uA. With 700mA-hour NiCd cells, the predicted battery lifetime even with that LED continuously on is about 2 weeks. Using the meter, of course, reduces that. In one test involving no actually RF measurement, but pressing the back panel ALO button once per day to see if it would respond, it failed to respond on day 14. This was with the power LED removed. 
-
 # Nye Viking Power Monitor
 Brain transplant for Nye Viking Power Monitor RFM-003
 
@@ -14,6 +10,14 @@ This git repo documents the hardware and software used.
 
 Don't know about the Nye Viking Power Monitor? Here is a demonstration
 videoed by N8RWS:<br/> http://www.youtube.com/watch?v=muCM9BKhpKA
+
+# Battery Power
+The function of the 4 cell Ni-Cd battery in the original unit
+can be restored. The Arduino PRO must be used instead of 
+the UNO described in <a 
+href='http://github.com/w5xd/NyeVikingPowerMonitor/tree/VERSION001'>the older release at VERSION001</a>. Even with its power LED left intact, the PRO draws only about 1.3mA when the sleep code in this version engages. Removing the power LED reduces this to 750uA. With 700mA-hour NiCd cells, the predicted battery lifetime even with that LED continuously on is about 2 weeks. Using the meter, of course, reduces that. In one test involving no actually RF measurement, but pressing the back panel ALO button once per day to see if it would respond, it failed to respond on day 14. This was with the power LED removed. 
+
+
 
 <h2>Files</h2>
 NyeVikingBrain1.png is the circuit diagram of the replacement.
