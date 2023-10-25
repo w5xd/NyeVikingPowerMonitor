@@ -58,8 +58,8 @@ the four screws from the left hand side, and the outer-most four screws from the
 front panel screws nor the bottom panel screws.</p>
 <h2>Power</h2>
 <p>A prospective builder may want to know that, while the 12VDC connector at the back
-of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin) and
-outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match.</p>
+of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin, 2.5mmm) and
+outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match. The Arduino power plugs have a 2.1mm inner pin.</p>
 <p>
 The original battery power design was that the batteries stay permanently connected
 and external 12VDC, when applied, trickle charges the NiCd's. Trickle
