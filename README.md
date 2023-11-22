@@ -1,195 +1,292 @@
 # Nye Viking Power Monitor
 Brain transplant for Nye Viking Power Monitor RFM-003
 
-My old RFM-003 quit working. The single circuit board in it is an analog computer that converts 
-the two voltages from a directional coupler (forward and reflected) to an SWR reading and 
-an RF Power reading. After switching out the obvious parts, I gave up trying to fix it and
-instead bought an Arduino single-board computer and its mating Proto Shield circuit board.
-See http://arduino.cc. I built a replacement for the Power Monitor's original circuit board. 
-This git repo documents the hardware and software used.
+My old RFM-003 quit working. I had purchased it new in 1988 and it has been my go-to device
+ever since. It was produced by Nye Viking 
+in Bellevue, Washington  through the 1980's and 1990's. Its original 
+design is an analog computer that converts the two voltages (forward and reflected) from a directional coupler to present an SWR reading and 
+an RF Power reading on analog meters. 
 
-Don't know about the Nye Viking Power Monitor? Here is a demonstration
-videoed by N8RWS:<br/> http://www.youtube.com/watch?v=muCM9BKhpKA
+After switching out the obvious parts, I gave up trying to fix mine and
+instead started prototyping with an Arduino single-board computer and its mating Proto Shield circuit board.
+This git repo documents the hardware and software needed to replace the OEM analog computer with what I finally came up with: an
+Arduino-based custom printed circuit board (PCB).  
 
-# Battery Power
-The function of the 4 cell Ni-Cd battery in the original unit
-can be restored. The Arduino PRO must be used instead of 
-the UNO described in <a 
-href='http://github.com/w5xd/NyeVikingPowerMonitor/tree/VERSION001'>the older release at VERSION001</a>. Even with its power LED left intact, the PRO draws only about 1.3mA when the sleep code in this version engages. Removing the power LED reduces this to 750uA. With 700mA-hour NiCd cells, the predicted battery lifetime even with that LED continuously on is about 2 weeks. Using the meter, of course, reduces that. In one test involving no actually RF measurement, but pressing the back panel ALO button once per day to see if it would respond, it failed to respond on day 14. This was with the power LED removed. 
+Old Nye Viking power meters also become available from time to time "for parts only."
+This project presents a four layer PCB design that has the same functions as the OEM PCB, supports the
+same switches and connectors on the OEM device's front and back panels, and can be retrofitted into an OEM RFM-003 console
+to restore all of its original functionality.
 
+Don't know about the Nye Viking Power Monitor? Here is a demonstration videoed by N8RWS:<br/> http://www.youtube.com/watch?v=muCM9BKhpKA
 
+When I did the retrofit of my own two Nye Viking consoles, I took the liberty of making three
+exernally visible changes: I substituted 
+RGB diodes on the front panel, drilled a small back panel hole for a USB port, and placed a small
+momentary contact SPST switch in the back panel ALO sense adjustment hole. If you forego those three
+substitutions, you can make it difficult to distinguish the OEM console from the retrofit&mdash;even in operation.  (Spoiler:
+feed the retrofit less than 20W and it will blink the LOW power front panel LED while simultaneously
+displaying the power meter readout multiplied by 10, which the OEM won't do.) 
 
-<h2>Files</h2>
-NyeVikingBrain1.png is the circuit diagram of the replacement.
-<br/>NyeVikingBrain2.png is the layout of the circuit onto the Proto Shield prototyping circuit board.
-<br/>PowerMeter is the Arduino sketch.
+# Revision History
+The original instrument has a single circuit board. Here is a photo with its cover removed.
+<p align='center'><img alt='AfterTransplant.jpg' src='BeforeTransplant.jpg'/></p>
+<p> This repo documents 
+a replacement project done in 2023 that is based on on a custom printed circuit board documented
+in the PCB folder. If you want the full history, the git tag 
+<a href='https://github.com/w5xd/NyeVikingPowerMonitor/tree/Final-Haywire-Prototype'>Final-Haywire-Prototype</a> 
+documents my first steps in this project back to 2016. </p>
 
 <h2>Construction</h2>
-The original instrument has a single circuit board. 
-<p align='center'><img alt='AfterTransplant.jpg' src='BeforeTransplant.jpg'/></p>
-This project consists of three smaller circuit boards
-held together by a couple of 4-40 machine screws. 
-The first two are of commercial manufacture:
-<ol> <li>Arduino PRO single-board computer.
-<li>Arduino PROTO Shield board.
-<li>Generic prototyping circuit board.</ol>
-The final assembly is still much smaller than the original. 
-<p>The generic prototyping board (3) is to be drilled with mounting hole pattern to match the original RFM-003 board. (In my case,
-I only covered the front two mounting posts.) It has the 6 LEDs (SENSE, LOCK, SAMPLE, HOLD, LOW, 
-and HIGH) mounted such that they fit through the original RFM front panel holes. This board also has the 220 ohm 
-series resistors for the LEDs.</p>
-<p>I removed the original board by snipping each wire at its end opposite the circuit board. 
-The old board ends up with lots of flying single-ended wires attached. (EXCEPTIONS: the Ni-Cd battery 
-pack wires, and the L1/L2 wires from the coupler I snipped at the circuit board.) 
-I did not scavange any parts from
-it and instead bought new LEDs, a relay, etc. The original board, I suppose, could still be repaired and
-resinstalled. The new board assembly fits in the position of the old board. I used 22 gauge solid 
-hookup wire to connect all the front panel and back panel meters, potentiometer, switches, etc. </p>
-<p>
-The PROTO shield has all the interfacing parts except the new relay. The PRO is unmodified, except
-that it comes with no headers which must be added in order to
-plug in the PROTO Shield.
-This PRO/PROTO-SHIELD pair connects to each
-other with several headers. I ran a pair of 4-40 screws through all three boards and fastened them 
-together with nylon 4-40 nuts. I mounted the new relay with double-stick tape to the back panel.
-</p>
-<p>Disassembly hint.</p><p>The box splits into a clam shell by removing the four screws from the right hand side,
-the four screws from the left hand side, and the outer-most four screws from the back panel. Do NOT remove the
+The custom PCB is 2 inches by 4 inches. Its circuit diagram is <a href='PCB/schematics.pdf'>PCB/schematics.pdf</a>. It is 
+published here in the format supported by expresspcb.com. Parts lists
+for duplicating this retrofit are published here. Two additional projects are documented:
+<ul>
+<li>documentation for building a directional coupler for the range 1.8MHz to 29MHz and power in the range
+of 5W to 3000W. There is a two layer PCB to make it especially easy to construct. The coupler here is not 
+a workalike for the OEM coupler. This difference requires some different resistor values on the PCB,
+and some compile-time definition changes in the sketch.
+<li>documentation for building a workalike of the original RFM-003 console using the same four layer PCB
+as works for the retrofit. There are two different console enclosure designs. One is purely 3D printed plastic,
+the other is a 3D printed plastic fascade on a commerically available aluminum enclosure.
+</ul>
+
+<p>Disassembly hint. The original box splits along its clam shell by first removing the top two screws from the right hand side,
+the top two screws from the left hand side to remove the top. Then the outer-most four screws from the back panel.
+To fold the front panel away, remove the bottom two screws <i>on the two side panels only</i>.
+ Do <b>not</b> remove any
 front panel screws nor the bottom panel screws.</p>
-<h2>Power</h2>
-<p>A prospective builder may want to know that, while the 12VDC connector at the back
+<p>I removed the original board by snipping each wire at its end at the circuit board. Some of the remaining wires
+will reach to their assigned position on the new PCB, but some will not. The custom PCB
+fits onto a 3D printed bracket that has holes to match the origin four #6 screws that held the OEM
+PCB in place, and that has size by 5mm LED holes to match the front panel LEDs. The bracket holds the
+custom PCB at an angle.</p>
+<p align='center'><img alt='OEM view' src='CAD/OEM/PartsView01.jpg'/></p>
+<p>A prospective builder will want to know that, while the 12VDC connector at the back
 of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin, 2.5mmm) and
-outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match. The Arduino power plugs have a 2.1mm inner pin.</p>
+outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match. The Arduino power plugs have
+a 2.1mm inner pin.</p>
+
+<a href='PCB/ConsolePcbMap.pdf'>Map of the console PCB</a>
+
+<h2>Added low-low power feature</h2>
+<p>While the code (nearly) duplicates the original behavior of the analog board, there is
+ one additional low power readout feature. When it detects power levels below 1/10 of full scale in the LOW RANGE, it 
+ multiplies the value by 10 and flashes the LOW LED.
+</p>
+<h2>SWR and RF Power</h2>
+The DC voltages from the coupler are input on a 4 pin jack. The pins are ground, foward signal, 
+reflected signal, and battery charge. This retrofit has no connection on the battery charge
+voltage on that fourth pin, but specifies a connector matching the OEM part.
+ The forward and reflected signal voltages are processed into
+ SWR and RF power readings that are presented on analog meters. The overall signal processing is
+equivalent in this retrofit to the OEM design. 
+The sketch supports a compile time option to construct lookup tables for analog meter movements, either 
+<ol type='a'>
+<li>the OEM meters with their original scales. This is for a retrofit.
+<li>1 mA movement meters with the mA scale replaced using the printout from the MeterFaces application here.
+Without OEM meters, constructing a workalike console requires modifying commercially available meter movements.
+</ol>
+
+<h2>Switches and Potentiometer</h2>
+This retrofit takes all the same human inputs as the original:
+<ul>
+<li>Front panel potentiometer for Hold Time
+<li>Front panel three-position switch for metering mode: Peak, Peak & Hold, Average
+<li>Back panel ALO selection between SWR and Reverse Power
+<li>Back panel Power selection between Forward and Reflected to drive the front panel Power meter
+<li>Back panel ALO RCA jacks that break continuity on detecting a lock out condition.
+</ul>
+<p>The retrofit adds a momentary action pushbutton switch to the back panel that is not in the OEM design. Pressing the switch places the meter 
+in calibrate mode so that
+you can adjust, within a restricted range, the meter's power sensitivity. This feature is in lieu of the
+calibration pots on the OEM PCB. A commerically available
+push button SPST switch fits in the OEM case in the original hole labeled ALO Adjust. That is, you
+don't need to drill any new holes for a retrofit
+</p>
+
+<h2>Forward and Reflected signals</h2>
 <p>
-The original battery power design was that the batteries stay permanently connected
-and external 12VDC, when applied, trickle charges the NiCd's. Trickle
-charging raises the battery voltage above 6VDC. That number is
-the absolute maximum input voltage specified for the LTC3525 part I chose to make
-regulated 5VDC from the NiCds.
-Therefore the design published here adds an internal DPDT relay that
-routes the power wires between external 12VDC or the battery pack. 
-The circuit shows a 220ohm trickle charging resistor, which can be omitted 
-if you choose to remove the cells and recharge them externally. 
-<p>There is one hazard: the relay <b>does not prevent both</b> the programming header
-5V and the other 5V
-from being simulateously applied. Therefore, to connect the programming header,
-remove at least one cell <b>and</b> disconnect the external 12VDC. Otherwise, the smoke will likely be released from
-the power supply parts, rendering them useless. If you just build from this plan, you will 
-only program your Arduino once, it should not be too big a burden to remember
-that the one and only time they connect the header to program it, remove the
-battery and <b>also</b> disconnect the external 12VDC!</p>
-<p>The battery is converted to 5VDC using an LTC3525 step-up converter. This 
-device is limited to 6VDC input, while taking lower-than-5VDC
-at its input. The original pack of four AA NiCd cells will nominally be at a
-safe 4.8V. Alkaline AA cells <i>cannot</i> be used here in a battery of four, but three of
-them in series (or even in parallel!) would work fine with the LTC3525. Remove the
-trickle charge resistor for non-rechargeable cells. 
-The LTC3525 will drain whatever battery you give it all the
-way down to below 1V input while still delivering 5V output. 
-Here is a commercially available board that has
-the LTC3525 along with the other (tiny) parts needed to make
-a 5VDC step-up: 
-<br><a href='http://moderndevice.com/product/jeelabs-aa-power-board/'>JeeLabs AA Power Board</a>.
-It has space for a single AA battery, and this power meter will run on that
-single AA cell for a while. Or wire in the original 4 by AA NiCd cells and
-include the 220ohm trickler charge resistor shown in this circuit.</p>
-<p>The op-amp specified is a LMC6044 CMOS part instead of the LM324.
- The LMC6044  features
-rail-to-rail swing on its output, which is why this tag specifies 150K resistors
-in the ADC voltage divider, and the firmware has a corresponding change in the coupler
-resistance constant.</p>
-<p>The stock NyeViking wall wart has an output too high to run the Arduino PRO. The 7805 
-regulator circuit is used to reduce it to 8V. Use a 7808 if you have one. My junk box
-only had the 7805.</p>
-<p>This is the circuit used:<img alt='NyeVikingBrain1.png' src='NyeVikingBrain1.png'/></p>
+In this retrofit design, the Forward and Reflected readings from the coupler are treated identically 
+to each other in the circuits leading up to
+the analog to digital conversion. Each signal input is fed undivided into an ADC input on the Arduino through a 100K resistor.
+This signal path is used for best resolution at low RF power up until the digitized voltage exceeds
+the 5V maximum at the ADC. The 100K resistor
+limits current under high power signals which can range up to about 15V for this coupler, or 26V for the
+OEM coupler. The same signal is voltage divided into a second ADC input channel, with the divider set to be enough to bring
+the highest measureable power (3000W) down below the 5V maximum that can be digitized in this Arduino circuit. The program in the sketch
+tries the undivided voltage first, notes if it is maxed out (or close) and tries again with the divided input. This
+strategy gives good low power resolution while still accommodating 3000W without overflowing the ADC.
+</p>
+
+<h2>How the Console is Powered</h2>
+<p>The power design here has one, but only one, important similarity to the OEM design: it has seamless switchover between battery power and
+external DC input. The OEM design included four rechargable NiCad AA cells which served not only as the
+battery power source, but also as the voltage regulator to convert the 12VDC input to regulated ~5VDC on its PCB circuits.</p>
+
+This retrofit includes no recharging circuit. It accepts a range of input voltage from about 7VDC up to about 15V.
+Its battery power circuit, based on the LTC3525, works with pretty
+much any battery technology and voltage from about 1.0 VDC up to 5VDC. It can convert any battery voltage 
+as low as 1V up to 5VDC, but, to repeat, there is no charger in this
+design. On the other hand, it hardly needs a charger. Ninety seconds after last detecting RF power present, the 
+Arduino sketch puts the CPU into
+power down sleep mode, which consumes less than 100 micro Amps (uA). Even a very modest battery, a single AAA alkaline cell,
+will 
+last through over 1000 hours of standby. The IC maintains a steady 5VDC power supply for the monitor as the battery
+loses voltage until the battery can no longer maintain about 1V at the LTC3525, at which point the IC shuts down.
+There is no off switch, and similarly, it hardly needs one.
+
+The maximum number of AA or AAA cells in a battery for the LTC8525 part is <b>three</b>.
+This limit is necessary in order to stay below
+its 6VDC absolute maximum battery voltage input for the LTC8525. The OEM meter from Nye Viking
+housed 4 AA NiCads. Its battery holder can be used, but one of the cells <b>must be replaced</b> with a dummy AA battery to stay
+within the ratings. The NiCads can be used (if they still work after all these years! but, again, only <i>three</i> of them) and 
+they'll have to be recharged outside the
+meter.
+
+The power jack labeled 12VDC will work down to about 7VDC and up to about 15VDC.
+
+The seamless battery power switchover is implemented by Q5, Q6, and Q7. The first two are complimentary MOSFETs, P-channel
+and N-channel, respectively, in a push-pull arrangement with both gates driven from the back panel DC input jack voltage.
+Their drains control the
+DC-to-DC converter's shutdown input. When that back panel jack is not
+powered, the gates are at ground voltage, which turns on the P channel, Q5, (its source pin as at the battery 
+voltage, which, of course, must be present to run the device on battery power) while the N channel, Q6, is off. 
+This is the battery power state of the switch. Apply power to the back panel 
+jack (which will get Q6's gate above its threshold turn-on voltage) and it
+turns on the N-channel while turning the P-channel off. The drains of both Q5 & Q6 drive the SHDN input 
+of the DC-to-DC converter, 
+which turns it on in the former case of battery
+power, or off for external DC power. The 4.7K resistor limits the drain currents in the case 
+(which should never happen anyway) of both Q5 and Q6 turning on simultaneously.
+
+The LM7805 regulator's 5V output terminal would pull 30mA or more in battery power mode if connected directly, but
+ the Q7 "ideal diode" implementation
+connects the LM7805 output
+ only when DC power is present on the back panel. External
+DC input pulls Q7's gate more than its gate threshold above the 5V regulated power (i.e. about 7V input turns on Q7 for
+its gate threshold specified at about 2V.) The LTC3525 does not need a disconnect as its SHDN input accomplishes that
+function.
+
+Acheiving the less-than-100uA standby current is dependent on the details of how the FT232H serial breakout is
+set up, as detailed in the following section.
+
+<p>To populate a PCB without battery power support, the following part positions on the PCB may
+be left empty: LTC3525, L1, Q5, Q6, Q7, NPC603.
+With those parts omitted, there are two jumper positions labeled on the board that must be jumpered: jp1 (near the NPC603) and jp2
+(near Q7).
+</p>
+
+<h2>USB interface</h2>
+<p>
+This design has a USB interface using the FT232H that presents on a PC as a COM port. The sketch supports
+some simple Serial port commands that can be used to remotely monitor forward and reverse voltages. A USB
+ jack can be installed on the back of the OEM console (if you are willing to violate any "no holes" requirement
+ for your vintage part.) A USB-C port fits in a small hole drilled in the back panel's
+upper right corner, just above the 12VDC external power jack, should you choose to drill.
+</p>
+<p> For convenience, the sketch can be
+uploaded onto the Arduino using USB. The FT232H on the Adafruit breakout board has an EEPROM that can
+be configured using <a href='https://ftdichip.com/utilities/#ft_prog'>FTDI's FT_Prog.exe</a>. Use that application to set the FT232H C0 output to Drive_0, which enables the
+Arduino IDE to invoke a reset on the PCB using serial port DTR as is typical for Arduino FTDI headers.
+The programming screen looks like this:
+<p align = 'center'><img alt='FT_Prog' src='FT_prog.png'/></p>
+That setup makes it easy to upload sketches. Be aware, however, that the <code>C0 at Drive_0</code> setting draws about 200 uA 
+continuously as long as the FT232H is connected to a powered USB port.
+ If the PCB has USB power without back panel 12V DC, this will draw down the battery much more quickly.
+Use FT_Prog to set C0 to Tristate to reduce the drain, but that setting makes it more difficult to program the Arduino
+through the serial port.
+The C8 and C9 outputs driving TXLED and RXLED shown in the screen above are for convenience. They make it easy to see that the 
+Arduino program upload is proceeding as expected.</p>
+
+Another 200uA (or so) is consumed, regardless of the FT232H EEPROM settings if the DTR on the FT232H's serial port is
+not asserted. This 200 uA can also be eliminated any of these ways:
+<ol type='a'>
+<li>Unplug the FT232H from the circuit such that there is no USB at all.
+<li>Power the FT232H's USB only while 12VDC is presented on the back panel. (Conversely: 
+if there is no 12VDC on the back panel, but there is power to the USB, the DTR pullup circuit on the PCB will draw
+about 200uA that otherwise would not be consumed.)
+</ol>
+
+<h2>Front Panel LEDs</h2>
+<p>This design employs a pair of general purpose TLC59108 LED driver chips that together can drive up to 16 common anode diodes.
+Each RGB LED package is takes three separate outputs from a TLC59108.   
+To easily retrofit into the OEM case, use its same T1-3/4 diodes (5mm diameter.) But instead of the OEM's specific color 
+diode at each of the six positions, I chose six identical RGB diodes and programmed the sketch to synthesize the yellow and amber from
+the 3 colors available.
+The sketch includes compile time conditionals
+for supporting either six RGB or six RGY diodes. If you're willing to modify the sketch, you can use whatever color scheme you want.
+The amber SENSE LED and the yellow SAMPLE LED on the OEM device cannot be perfectly replicated using RGB. (Regardless
+of what you may have heard about being able to synthesize all visual colors from three. That is an approximation
+that sometimes works because of limitations in the way the human eye reports colors to the brain. There is 
+more color in the world than you can see on a computer screen, and you eye can see the difference between the
+OEM single wavelength LEDs and the RGB simulation in the retrofit.) 
+The sketch simulates an amber color using a combination of two parts red with one part green, and simulates yellow with
+equal parts red and green.
+Alternatively, you can scavange the six OEM LEDS
+when you retrofit, and you can make this PCB successfully drive them, but you'll need to modify the
+sketch accordingly. 
+</p>
+<p>The PCB has positions for six SMT LEDs aligned along the front board edge. At this writing, there
+are available either RGB or RGY diodes that fit the PCB's SMT pad layout. The PCB also has holes for soldering
+pigtails to off-PCB diodes, which is what is documented in the enclosures here. Ultimately I was not satisfied with
+the overall look and feel of any 3D printed console enclosure that that I came up with when restricting its design to
+use both the front edge PCB-mounted LEDs and the back edge PCB-mounted switches and connectors. I was happier with
+an enclosure that kept the back edge PCB but put LEDs on pigtail, which allows design freedom for placing the 
+console's front panel, which includes the two analog meters, the Hold Time pot, and the Peak/Average mode switch.
+</p>
+
+<h2>Couplers</h2>
+<p>I was able to acquire an RFM-003 in good cosmetic condition; all the front and back panel components were good. The OEM
+PCB is easily replaced with the Arduino unit described here. But this was my second RFM-003 and it came without a coupler. A
+built-it-yourself
+coupler is described in <a href="PCB/schematics.pdf">PCB/schematics.pdf</a>.  This coupler has a different DC sensistivity than
+the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's.</p>
+It is enclosed in a commerically available clam shell aluminum box.
+This coupler design is based on one published in the 2008 ARRL
+Handbook, but with a more inductive toroid transformer design (a stacked trio of T80-2 toroids instead of a single T68-2). The 40:1 turns
+ratio (which was the Handbook design and also used here) gives somewhat smaller DC voltages at its detectors than the OEM 
+Nye Viking design. Decreasing the turns ratio would
+increase the voltage readout, but that reduction also reduces the transformer's inductive reactance. The trio of T80-2's is already just
+barely inductive enough to be used at 1.8MHz (and I don't think the 2008 Handbook design really worked well at 1.8MHz.)
+The coupler as described displays the equivalent of about 7 ohms of inductive
+reactance in series with a pure 50 ohm load at 1.8MHz, and that shows up as about a 1.15:1 SWR looking into the coupler from 
+the transmitter at that frequency, even though the coupler reads out zero reflected power. The reactance of the coupler
+measured as insignificant on all the remaining HF amateur bands 3.5MHz through 29MHz. <a href='PCB/CouplerPcbMap.pdf'>Map of the coupler PCB</a>
+
+<p align='center'><img alt='OEM view' src='CAD/coupler/CouplerView01.jpg'/></p>
+
+<h2>Build a Console from Scratch?</h2>
+<p>If you don't have an existing OEM unit to retrofit, an entire workalike unit can be built using the design in this repository. 
+(But this section is a work in progress for now. I have built one that works and the STP files
+for 3D printing are here, but don't like the cosmetics.)
+You'll need both a coupler and a console.
+ The console has a 3D printed
+enclosure. The CAD directory has a design for a 3D printed enclosure that fits the PCB with on-board SMD LEDs along its front panel.
+Also in the CAD directory is a design that instead places the PCB inside a commercially available aluminum box, but with 
+the front panel LEDs on pigtails onto a separate 3D printed front panel fascade in front of the aluminum box, and that
+supports the <a href='https://baomain.com/products/baomain-dh-670-1-ma'>Baomain Ammeter DH-670 DC 0-1.0 mA meter</a>. And listed on
+<a href='https://www.amazon.com/dp/B01HPKO8CS'>Amazon</a>
+The meter faces can be replaced using those drawn by the MeterFaces program <a href='MeterFaces'>here</a>.
+<table style='width:100%'><tr><td style="width:50%"><img alt='swr' width='400' src='MeterFaces/Swr.jpg'/></td><td><img alt='power' width='400' src='MeterFaces/Power.jpg'/></td></tr></table>
  <h2>Calibration</h2>
  <p>The code supports four settings in EEPROM. These (roughly) correspond to 
  potentiometers on the original analog board. The EEPROM settings are:
  <br/>ALO SWR lock-out threshold
  <br/>ALO PWR lock-out threshold
- <br/>Foward voltage calibration correction (+/-5%) range
- <br/>Reflected voltage calibration correction (+/-5%) range
+ <br/>Foward voltage calibration correction (restricted to a +/-5%) range
+ <br/>Reflected voltage calibration correction (also restricted to a +/-5%) range
  </p><p>
  Setting the EEPROM values is accomplished using the back panel pushbutton switch
  followed by turning the front panel HOLD pot. See the code for full instructions.
  </p>
-  <h2>Added low-low power feature</h2>
- While the code (nearly) duplicates the original behavior of the analog board, there is
- one additional feature. When it detects power levels below 1/10 of full scale, it 
- multiplies the value by 10 and flashes the LOW LED.
  
- <h2>Hardware changes from VERSION001</h2>
- The differences in the circuit design for this battery enabled design,
- compared to the original, external power only design, are:
- <ol>
- <li> A battery module is added. 
-  <li>A new switch is added to the back panel. Use the existing .25" hole that
- allowed access to the old ALO pot. Use a momentary SPST NC switch. 
- Wire that new switch to pull D3 down.
- <li>A DPDT relay is added to engage the trickler charcter or
- internal battery back power supply.
- <li>The ALO TRIP SWR/REV function that used to be on D3 is now wired to A0.
- <li>Substitute an LMC6044 CMOS op-amp for the LM324. Its output swings rail-to-rail and 
- it requires much reduced power supply current.
- <li>The input network becomes 1:7.6@500Hz for both forward and reflected. 
- This has a little less noise, and a little better resolution--taking advantage
- of the rail-to-rail output voltage swing of the LMC6044.
- <li>The ALO lockout relay with a 3VDC coil is an unnecessary battery drain
- compared to an equivalent part with a 5VDC coil.
- The only reason mine is 3V is because Fry's did not have a 5V part in stock,
- and because I don't really care much about battery operation.
- <li>Of course, if you modify your hardware per this battery power design (VERSION002 or higher), you must also
- upload the program as compiled from the same.
- </ol> 
-After the transplant:
-<p align='center'><img alt='AfterTransplant.jpg' src='AfterTransplant.jpg'/></p>
-<h2>RFM-005 support? </h2>
- The difference between the two meters, according to the schematic in their (common) manual,
- is that the former has a full scale power meter reading of 300 vs 500 in the latter.
- 
- Without an RFM-005 to test with, the following is speculation.
- 
- Their circuit diagrams are published to be identical, therefore the only published
- distinction between it and the RFM-003 is the meter marking--no components are
- marked different on their circuit diagrams. There are several unlabeled potentiometers
- that presumably are adjusted differently between the two. P3 sets the overall scale
- factor for power readings. Use of this code with the RFM-005 assumes that P3
- was adjusted differently at the factory for the RFM-003 vs RFM-005.
- 
- There are also two different couplers, but the documentation indicates they are
- interchangeable. I tested only with the "K" model with 5000W limit  as opposed to
- the "C" model with its 500W limit (C-1.8-30K versus C-1.8-30C.) Again speculation,
- but the code below should work with either coupler without change. The full
- scale readings would simply be a factor of ten lower for the lower power coupler.
- 
- To use this Arduino circuit and code with the RFM-005, more speculation.
- 
- Since the couplers are documented as "interchangeable" I assume the voltages
- coupler connector are, for some power in watts, the same voltage in volts
- regardless of which meter full scale you have. That is, 26V is 1500W (as I measured)
- regardless which meter you happen to have. That would mean that support of the
- RFM-005 needs only an overall gain factor change. While the NominalCouplerResistance
- in the code could be increased to accomplish that gain change in software, a 5000W
- signal will overflow the ADC for the forward power such that the 3000W limit
- of the RFM-003 would also apply to the RFM-005.
- 
- A better solution would be to leave the code alone, and instead change the
- 1M/150K voltage dividers in the input circuit. (There are two--one for forward power
- and the other for reflected.) The 1:7.6 ration specified for the RFM-003 should be changed
- by a factor of  SQRT(5000 / 3000), which is 1.29 * 7.6, which is (about) 10:1. That is,
- the 1M in series with L1/L2 should be increased to 1.3M, leaving the 150K resistor
- unchanged. This change in the voltage divider would reduce the 5000W voltage at pin 12
- of the op-amp to 4.8V or so, and would reduce the overall system gain such that the meter
- readings should be close enough that the EEPROM calibration included below should
- be able to get the final accuracy to within 5% or so.
- 
- The values in the PwmToPwr array would, for the RFM-005, no longer correspond
- to the labeled values on the meter, but the overall system still "works." That is,
- a 300W signal from the 5000W coupler gives a full scale 300W reading on the RFM-003.
- With an RFM-005, and with the 1M resistor (above) changed to 1.3M, a 500W signal
- would be required to deflect the meter full scale, which happens to be labeled 500W.
- 
- The Forward/Reflected calibration step centers around the 100W meter reading on the RFM-003.
- On the RFM-005, it would center around
- <br/>(SQRT(100) * SQRT(500) / SQRT (300)) ** 2 = 167W
-  
+<h2>Parts Lists</h2>
+<ul>
+<li>These parts are needed on the PCB regardless of whether you are doing a retrofit or a complete console. <a href='https://www.digikey.com/short/wrb8bqwj'>https://www.digikey.com/short/wrb8bqwj</a>.
+<li>If you are doing a retrofit, you'll need the small push button that fits the ALO hole, and you likely want LED versions of the
+lamp backlights: <a href='http://www.digikey.com/short/5m7ddj84'>http://www.digikey.com/short/5m7ddj84</a>
+<li>To build a stand alone console, you need to populate all the connectors on the PCB and the 4 pin connector to the coupler.
+<a href='http://www.digikey.com/short/vff05b8z'>http://www.digikey.com/short/vff05b8z</a>. Two panel meters are required as mentioned above.
+<li>To build a coupler, you'll need these: <a href='http://www.digikey.com/short/9nb54202'>http://www.digikey.com/short/9nb54202</a>. And you'll need
+quantity three T80-2 (red) toroids, and a few inches of RG-213.
+</ul>
