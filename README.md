@@ -37,7 +37,10 @@ in the PCB folder. If you want the full history, the git tag
 documents my first steps in this project back to 2016. </p>
 
 <h2>Construction</h2>
-The custom PCB is 2 inches by 4 inches. Its circuit diagram is <a href='PCB/schematics.pdf'>PCB/schematics.pdf</a>. It is 
+The custom PCB is 2 inches by 4 inches. Its circuit diagram is <a href='PCB/schematics.pdf'>
+<img alt='page1' src='PCB/schematics-1.png'/>
+<img atl='page2' src='PCB/schematics-2.png'/><img alt='page3' src='PCB/schematics-3.png'/></a>The
+PCB construction source is 
 published here in the format supported by expresspcb.com. Parts lists
 for duplicating this retrofit are published here. Two additional projects are documented:
 <ul>
@@ -283,10 +286,32 @@ The meter faces can be replaced using those drawn by the MeterFaces program <a h
 <h2>Parts Lists</h2>
 <ul>
 <li>These parts are needed on the PCB regardless of whether you are doing a retrofit or a complete console. <a href='https://www.digikey.com/short/wrb8bqwj'>https://www.digikey.com/short/wrb8bqwj</a>.
+And the PCB in <code>PCB/Power console.rrb</code> which can be ordered from expresspcb.com using this rrb file.
 <li>If you are doing a retrofit, you'll need the small push button that fits the ALO hole, and you likely want LED versions of the
 lamp backlights: <a href='http://www.digikey.com/short/5m7ddj84'>http://www.digikey.com/short/5m7ddj84</a>
 <li>To build a stand alone console, you need to populate all the connectors on the PCB and the 4 pin connector to the coupler.
-<a href='http://www.digikey.com/short/vff05b8z'>http://www.digikey.com/short/vff05b8z</a>. Two panel meters are required as mentioned above.
+<a href='https://www.digikey.com/short/w12hfd9z'>https://www.digikey.com/short/w12hfd9z</a>. Two panel meters are required as mentioned above.
 <li>To build a coupler, you'll need these: <a href='http://www.digikey.com/short/9nb54202'>http://www.digikey.com/short/9nb54202</a>. And you'll need
-quantity three T80-2 (red) toroids, and a few inches of RG-213.
+quantity six <a href='https://www.amidoncorp.com/t80-2/'>T80-2 (red) toroids</a>, a few inches of RG-213, and the custom <code>PCB/Power Coupler.rrb</code>.
+
 </ul>
+
+<h2>Some Construction Notes</h2>
+The console PCB in particular sports some SMDs with lead spacing way too small for me to hand solder. I use an SMD oven. Such ovens can be
+purchased online, but I built one using a toaster oven and this <a href='https://whizoo.com/pages/buildguide'>kit</a>. 
+
+The SMD ICs put up with some abuse for me. I placed the 6 pin battery to 5V step up IC rotated 180 degrees from its proper position. 
+When the board wouldn't do battery power and I diagnosed my error, I was able to use hot air to remove it, rotate it, and I put the
+same one back in. (Each costs over $5 and I wanted to at least try.) It worked. I was also able to remove the 20 pin LED driver ICs
+from an early prototype board and mount them on an updated PCB successfully.
+
+You can use the Arduino IDE to program the sketch onto the Sparkfun Pro Mini board (be sure to get the 5V version of the Pro Mini!) 
+Its recommended you first program the LedTest sketch here and type its various commands after you get the LEDs connected, but
+before you install the PCB in the console. 
+
+Program the PowerMeter.ino sketch when you are happy the board is OK. Do <i>not</i> change that sketch's disable watchdog timer code
+unless you are willing to learn how to program the Arduino using the 6 pin ISP positions on the PCB. The default bootloader in
+the Pro Mini does not properly support watchdog timer reset. Have a look at
+boards-to-add.txt for hints on how to update the Arduino IDE install to support the WDT.
+
+

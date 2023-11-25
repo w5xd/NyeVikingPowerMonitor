@@ -25,4 +25,7 @@
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="boards-to-add.txt" />
+  </ItemGroup>
 </Project>
