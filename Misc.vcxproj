@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="CAD\Readme.md" />
     <None Include="LICENSE" />
     <None Include="MeterInversionCalculations.ods" />
     <None Include="README.md" />
