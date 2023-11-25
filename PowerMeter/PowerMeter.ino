@@ -347,7 +347,6 @@ namespace Comm {
 }
 
 void setup() {
-    wdt_disable();
     pinMode(couplerPowerDetectPinIn, INPUT);
     pinMode(PanelLampsPinOut, OUTPUT);
 
@@ -405,7 +404,7 @@ void setup() {
     Serial.print(F("Coupler resistance cal: "));
     Serial.println(NominalCouplerResistance);
 
-    wdt_enable(WDTO_8S);
+    wdt_enable(WDTO_1S);
 }
 
 void loop()
@@ -2335,7 +2334,7 @@ namespace sleep {
         Wire.begin();
         pullUpPins(true);
         ADCSRA |= (1 << ADEN); // ADC back on
-        wdt_enable(WDTO_8S);
+        wdt_enable(WDTO_1S);
     }
 }
 
