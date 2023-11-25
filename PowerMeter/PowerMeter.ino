@@ -69,7 +69,7 @@ typedef uint32_t DisplayPower_t; // In units of  1/128  Watt (e.g. value 128 is 
 ** The author used a programmer ("Arduino as ISP") to replace the bootloader with the
 ** optiboot loader. That requires changes to boards.txt in the Arduino IDE and, of course,
 ** access to an Arduino as ISP programmer. */
-#define SUPPORT_WDT
+//#define SUPPORT_WDT
 
 namespace {
     // pin assignments on the PCB
