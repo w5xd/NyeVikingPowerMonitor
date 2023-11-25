@@ -8,6 +8,7 @@
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 #include <avr/power.h>
+#include <avr/wdt.h>
 #include <EEPROM.h>
 
 #include "PowerMeterLEDs.h"
@@ -346,6 +347,7 @@ namespace Comm {
 }
 
 void setup() {
+    wdt_disable();
     pinMode(couplerPowerDetectPinIn, INPUT);
     pinMode(PanelLampsPinOut, OUTPUT);
 
@@ -402,10 +404,13 @@ void setup() {
 
     Serial.print(F("Coupler resistance cal: "));
     Serial.println(NominalCouplerResistance);
+
+    wdt_enable(WDTO_8S);
 }
 
 void loop()
 {
+    wdt_reset();
     previousMicrosec = micros();
     unsigned long now = millis();
     leds.loop(now);
@@ -2292,6 +2297,7 @@ namespace sleep {
 
     void SleepNow()
     {
+        wdt_disable();
         pullUpPins(false);
         digitalWrite(RfMeterPinOut, LOW);
         digitalWrite(SwrMeterPinOut, LOW);
@@ -2329,6 +2335,7 @@ namespace sleep {
         Wire.begin();
         pullUpPins(true);
         ADCSRA |= (1 << ADEN); // ADC back on
+        wdt_enable(WDTO_8S);
     }
 }
 
