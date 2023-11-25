@@ -288,7 +288,9 @@ The meter faces can be replaced using those drawn by the MeterFaces program <a h
 <li>These parts are needed on the PCB regardless of whether you are doing a retrofit or a complete console. <a href='https://www.digikey.com/short/wrb8bqwj'>https://www.digikey.com/short/wrb8bqwj</a>.
 And the PCB in <code>PCB/Power console.rrb</code> which can be ordered from expresspcb.com using this rrb file.
 <li>If you are doing a retrofit, you'll need the small push button that fits the ALO hole, and you likely want LED versions of the
-lamp backlights: <a href='http://www.digikey.com/short/5m7ddj84'>http://www.digikey.com/short/5m7ddj84</a>
+lamp backlights: <a href='http://www.digikey.com/short/5m7ddj84'>http://www.digikey.com/short/5m7ddj84</a>. You'll need
+to 3D print the bracket here <code>CAD/OEM/Retrofit-board.stp</code>, and the LED holder here <code>CAD/OEM/LED backstop.stp</code>.
+Two machines screws, #2 x 7/16" with nuts hold the two 3D parts together.
 <li>To build a stand alone console, you need to populate all the connectors on the PCB and the 4 pin connector to the coupler.
 <a href='https://www.digikey.com/short/w12hfd9z'>https://www.digikey.com/short/w12hfd9z</a>. Two panel meters are required as mentioned above.
 <li>To build a coupler, you'll need these: <a href='http://www.digikey.com/short/9nb54202'>http://www.digikey.com/short/9nb54202</a>. And you'll need
@@ -297,21 +299,37 @@ quantity six <a href='https://www.amidoncorp.com/t80-2/'>T80-2 (red) toroids</a>
 </ul>
 
 <h2>Some Construction Notes</h2>
-The console PCB in particular sports some SMDs with lead spacing way too small for me to hand solder. I use an SMD oven. Such ovens can be
+<p>The console PCB in particular sports some SMDs with lead spacing way too small for me to hand solder. I use an SMD oven. Such ovens can be
 purchased online, but I built one using a toaster oven and this <a href='https://whizoo.com/pages/buildguide'>kit</a>. 
-
-The SMD ICs put up with some abuse for me. I placed the 6 pin battery to 5V step up IC rotated 180 degrees from its proper position. 
-When the board wouldn't do battery power and I diagnosed my error, I was able to use hot air to remove it, rotate it, and I put the
+</p>
+<p>While it is possible to 3D print a solder paste mask from the gerber files you will get if you buy a PCB from expresspcb, I
+did the paste spreading by hand. For
+parts with leads this small, I have had better luck spreading the solder paste using a piece of bare wire, #20 or #22, as a tool.
+I squeeze out a small amount of solder paste on a piece of scrap paper and dab it onto all the pads on the PCB. It will take
+some practice to know how much paste is enough, but here is a rule: too much paste is far harder to repair later than too little.
+And it is surprising how little will work. It is not necessary for the space between the pads to be completely clear
+of paste, but don't leave any big blobs. I found that if I could get the paste to form a thing string
+from my wire tool, that one strand of that thing string laid down across the entire row of 10 pins from pins 1 through 10
+ of the LED driver baked just fine. </p>
+<p>
+The SMD ICs put up with some abuse for me. Your mileage may vary. I placed the 6 pin battery to 5V step up IC rotated 180 
+degrees from its proper position. 
+When the board wouldn't do battery power and I diagnosed my error, I was able to use a hot air SMD tool to remove it, rotate it, and I put the
 same one back in. (Each costs over $5 and I wanted to at least try.) It worked. I was also able to remove the 20 pin LED driver ICs
 from an early prototype board and mount them on an updated PCB successfully.
-
+</p>
+<p>
 You can use the Arduino IDE to program the sketch onto the Sparkfun Pro Mini board (be sure to get the 5V version of the Pro Mini!) 
 Its recommended you first program the LedTest sketch here and type its various commands after you get the LEDs connected, but
 before you install the PCB in the console. 
-
+</p>
+<p>
 Program the PowerMeter.ino sketch when you are happy the board is OK. Do <i>not</i> change that sketch's disable watchdog timer code
 unless you are willing to learn how to program the Arduino using the 6 pin ISP positions on the PCB. The default bootloader in
 the Pro Mini does not properly support watchdog timer reset. Have a look at
-boards-to-add.txt for hints on how to update the Arduino IDE install to support the WDT.
-
-
+boards-to-add.txt for hints on how to update the Arduino IDE install to support the WDT. Do you need the WDT? My prototyped
+version of this sketch on an Arduino PRO I left unmodified for 5 years without noticing I might want the watchdog. I
+saw one hang during the testing of this new custom PCB version (that runs virtually the same sketch on virtually the
+same hardware) and therefore decided to "throw in" WDT support. At that point I discovered it was not as simple as
+I wanted, but if you have an ISP programmer, its manageable.
+</p>
