@@ -121,11 +121,13 @@ strategy gives good low power resolution while still accommodating 3000W without
 </p>
 
 <h2>How the Console is Powered</h2>
-<p>The power design here has one, but only one, important similarity to the OEM design: it has seamless switchover between battery power and
-external DC input. The OEM design included four rechargable NiCad AA cells which served not only as the
+<p>The power design here has one, but only one, important similarity to the OEM design: it can  
+accept exteranl DC input at (about) 12VDC, or seamlessly switchover to battery power when external DC is not present. 
+The OEM design included four rechargable NiCad AA cells which served not only as the
 battery power source, but also as the voltage regulator to convert the 12VDC input to regulated ~5VDC on its PCB circuits.</p>
 
-This retrofit includes no recharging circuit. It accepts a range of input voltage from about 7VDC up to about 15V.
+This retrofit includes no recharging circuit, nor does it require any battery installed at all&mdash;they are optional.
+It accepts a range of input voltage from about 7VDC up to about 15V.
 Its battery power circuit, based on the LTC3525, works with pretty
 much any battery technology and voltage from about 1.0 VDC up to 5VDC. It can convert any battery voltage 
 as low as 1V up to 5VDC, but, to repeat, there is no charger in this
