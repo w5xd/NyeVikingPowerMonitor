@@ -127,7 +127,7 @@ The OEM design included four rechargable NiCad AA cells which served not only as
 battery power source, but also as the voltage regulator to convert the 12VDC input to regulated ~5VDC on its PCB circuits.</p>
 
 This retrofit includes no recharging circuit, nor does it require any battery installed at all&mdash;they are optional.
-It accepts a range of input voltage from about 7VDC up to about 15V.
+The external DC jack accepts a range of input voltage from about 7VDC up to about 15V.
 Its battery power circuit, based on the LTC3525, works with pretty
 much any battery technology and voltage from about 1.0 VDC up to 5VDC. It can convert any battery voltage 
 as low as 1V up to 5VDC, but, to repeat, there is no charger in this
@@ -243,13 +243,14 @@ console's front panel, which includes the two analog meters, the Hold Time pot, 
 <p>I was able to acquire an RFM-003 in good cosmetic condition; all the front and back panel components were good. The OEM
 PCB is easily replaced with the Arduino unit described here. But this was my second RFM-003 and it came without a coupler. A
 built-it-yourself
-coupler schematic is in <a href="PCB/schematics.pdf"><img alt='page1' src='PCB/schematics-1.png'/></a>.  
- This coupler has a different DC sensistivity than
-the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's.</p>
+coupler schematic is here: <a href="PCB/schematics.pdf"><img alt='page1' src='PCB/schematics-1.png'/></a>  
+ <p>This coupler's detection sensistivity does not match
+the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's, and 
+some different coefficients in the sketch's ino file.
 It is enclosed in a commerically available clam shell aluminum box.
 This coupler design is based on one published in the 2008 ARRL
 Handbook, but with a more inductive toroid transformer design (a stacked trio of T80-2 toroids instead of a single T68-2). The 40:1 turns
-ratio (which was the Handbook design and also used here) gives somewhat smaller DC voltages at its detectors than the OEM 
+ratio (which was the Handbook design, which this unit matches) gives somewhat smaller DC voltages at its detectors than the OEM 
 Nye Viking design. Decreasing the turns ratio would
 increase the voltage readout, but that reduction also reduces the transformer's inductive reactance. The trio of T80-2's is already just
 barely inductive enough to be used at 1.8MHz (and I don't think the 2008 Handbook design really worked well at 1.8MHz.)
@@ -264,9 +265,7 @@ measured as insignificant on all the remaining HF amateur bands 3.5MHz through 2
 <p>If you don't have an existing OEM unit to retrofit, an entire workalike unit can be built using the design in this repository. 
 (But this section is a work in progress for now. I have built one that works and the STP files
 for 3D printing are here, but don't like the cosmetics.)
-You'll need both a coupler and a console.
- The console has a 3D printed
-enclosure. The CAD directory has a design for a 3D printed enclosure that fits the PCB with on-board SMD LEDs along its front panel.
+You'll need both a coupler and a console. The CAD directory has a design for a 3D printed enclosure that fits the PCB with on-board SMD LEDs along its front panel.
 Also in the CAD directory is a design that instead places the PCB inside a commercially available aluminum box, but with 
 the front panel LEDs on pigtails onto a separate 3D printed front panel fascade in front of the aluminum box, and that
 supports the <a href='https://baomain.com/products/baomain-dh-670-1-ma'>Baomain Ammeter DH-670 DC 0-1.0 mA meter</a>. And listed on
@@ -311,7 +310,7 @@ I squeeze out a small amount of solder paste on a piece of scrap paper and dab i
 some practice to know how much paste is enough, but here is a rule: too much paste is far harder to repair later than too little.
 And it is surprising how little will work. It is not necessary for the space between the pads to be completely clear
 of paste, but don't leave any big blobs. I found that if I could get the paste to form a thing string
-from my wire tool, that one strand of that thing string laid down across the entire row of 10 pins from pins 1 through 10
+from my wire tool, that one strand of that thin string laid down across the entire row of 10 pins from pins 1 through 10
  of the LED driver baked just fine. </p>
 <p>
 The SMD ICs put up with some abuse for me. Your mileage may vary. I placed the 6 pin battery to 5V step up IC rotated 180 
