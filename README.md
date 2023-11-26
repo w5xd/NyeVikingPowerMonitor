@@ -38,7 +38,6 @@ documents my first steps in this project back to 2016. </p>
 
 <h2>Construction</h2>
 The custom PCB is 2 inches by 4 inches. Its circuit diagram is <a href='PCB/schematics.pdf'>
-<img alt='page1' src='PCB/schematics-1.png'/>
 <img atl='page2' src='PCB/schematics-2.png'/><img alt='page3' src='PCB/schematics-3.png'/></a>The
 PCB construction source is 
 published here in the format supported by expresspcb.com. Parts lists
@@ -242,7 +241,8 @@ console's front panel, which includes the two analog meters, the Hold Time pot, 
 <p>I was able to acquire an RFM-003 in good cosmetic condition; all the front and back panel components were good. The OEM
 PCB is easily replaced with the Arduino unit described here. But this was my second RFM-003 and it came without a coupler. A
 built-it-yourself
-coupler is described in <a href="PCB/schematics.pdf">PCB/schematics.pdf</a>.  This coupler has a different DC sensistivity than
+coupler schematic is in <a href="PCB/schematics.pdf"><img alt='page1' src='PCB/schematics-1.png'/></a>.  
+ This coupler has a different DC sensistivity than
 the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's.</p>
 It is enclosed in a commerically available clam shell aluminum box.
 This coupler design is based on one published in the 2008 ARRL
