@@ -334,3 +334,15 @@ saw one hang during the testing of this new custom PCB version (that runs virtua
 same hardware) and therefore decided to "throw in" WDT support. At that point I discovered it was not as simple as
 I wanted, but if you have an ISP programmer, its manageable.
 </p>
+<h2 id='RFM005'>What about the RFM-005?</h2>
+<p>I don't have one to test with, but it should work with some modest 
+modifications. Based on the comment in the OEM manual that all the Nye Viking
+"directional couplers are calibrated for complete interchangeability" I deduce
+that the resistor values as labeled on this PCB for the OEM coupler 
+will work for any Nye Viking coupler</p>
+<p>The RFM-005's front panel power meter, however, will require modifying
+at least the <code>PwmToPwr</code> lookup table in the sketch. If 
+the meter movement in the RFM-005 happens to be 0.5mA full scale
+like both the power meter and SWR meter movements in the RFM-003,
+then the OEM PCB values labeled here should work for both the
+RFM-003 and RFM-005.</p>
