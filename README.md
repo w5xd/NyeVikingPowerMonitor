@@ -239,7 +239,7 @@ an enclosure that kept the back edge PCB but put LEDs on pigtail, which allows d
 console's front panel, which includes the two analog meters, the Hold Time pot, and the Peak/Average mode switch.
 </p>
 
-<h2>Couplers</h2>
+<h2 id='Couplers'>Couplers</h2>
 <p>I was able to acquire an RFM-003 in good cosmetic condition; all the front and back panel components were good. The OEM
 PCB is easily replaced with the Arduino unit described here. But this was my second RFM-003 and it came without a coupler. A
 built-it-yourself
