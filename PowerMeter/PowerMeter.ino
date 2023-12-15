@@ -1516,6 +1516,8 @@ namespace {
 #ifdef OEM_METER_SCALES
         // this table was constructing by observing the meter position on the OEM meter
         // for the PWM values from 0 to 255
+        // These numbers were chosen based on the RFM-003. The RFM-005 will require
+        // a different table.
         const uint16_t PwmToPwr[NUM_PWM] PROGMEM =
         {
                 0, // 0
