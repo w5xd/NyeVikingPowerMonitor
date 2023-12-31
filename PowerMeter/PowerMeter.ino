@@ -48,7 +48,7 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 
 /* The above two compile directives switch between look up table entries. Those look up tables are part of
 ** the elimination of any need floating point at run time, and any need for trig or log functions.
-** This code has some 32 bit and 64 bit long integer arithmetic, including divides, but floating point
+** We do end up with some 32 bit and 64 bit long integer arithmetic, including divides, but floating point
 ** is avoided by using the two fixed point integer typedef's below, AcquiredVolts_t and DisplayPower_t. */
 
 // There is one more compile time option in PowerMeterLEDs.h
@@ -63,13 +63,12 @@ typedef uint32_t DisplayPower_t; // In units of  1/128  Watt (e.g. value 128 is 
 ** The WDT support is a backup for the case something goes horribly wrong in the sketch code below.
 ** It "resets" the arduino. But if the default boot loader is what is in FLASH on the Arduino
 ** Pro Mini (and it WILL BE unless you have used a programmer to change it) then the WDT makes
-** any problem worse. You will get control of the Power Meter again without removing all power.
+** any problem worse. You will not get control of the Power Meter again without removing all power.
 ** That includes removing the battery backup! You'll have to open the enclosure and pull one of the
-** AA cells. 
-** The author used a programmer ("Arduino as ISP") to replace the bootloader with the
+** AA cells. The author used a programmer ("Arduino as ISP") to replace the bootloader with the
 ** optiboot loader. That requires changes to boards.txt in the Arduino IDE and, of course,
 ** access to an Arduino as ISP programmer. */
-//#define SUPPORT_WDT
+//#define SUPPORT_WDT /* READ THE ABOVE PARAGRAPH*/
 
 namespace {
     // pin assignments on the PCB
