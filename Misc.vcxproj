@@ -140,12 +140,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="CAD\Readme.md" />
     <None Include="LICENSE" />
     <None Include="MeterInversionCalculations.ods" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="BeforeTransplant.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="boards-to-add.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

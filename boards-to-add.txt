@@ -1,0 +1,49 @@
+#To support the Atmega328 watchdog timer feature when using
+#the Sparkfun Pro Mini, the bootloader must be replaced.
+#This section added to boards.txt in my Arduino IDE install
+#was enough to all a "ATmega328P (5V, Optiboot)" option to
+#my Arduino IDE installation. I have noticed that the IDE
+#changes over time, so take this as a starting point.
+#At this time, the key differences from the standard installed
+#"Pro or Pro Mini" setting was the bootloader.file option,
+#and the upload.protocol and upload.speed settings.
+#
+#Note that you should set the Arduino IDE to this Pro Mini (Optiboot)
+#option for BOTH it "burn bootloader" action, and for all subsequent
+#sketch upload actions.
+##############################################################
+
+opro.name=Arduino Pro or Pro Mini (Optiboot)
+
+opro.upload_port.0.board=pro
+opro.upload.tool=avrdude
+opro.upload.tool.default=avrdude
+opro.upload.tool.network=arduino_ota
+opro.upload.protocol=arduino
+
+opro.bootloader.tool=avrdude
+opro.bootloader.tool.default=avrdude
+opro.bootloader.unlock_bits=0x3F
+opro.bootloader.lock_bits=0x0F
+
+opro.build.board=AVR_PRO
+opro.build.core=arduino
+opro.build.variant=eightanaloginputs
+## Arduino Pro or Pro Mini (5V, Optiboot) w/ ATmega328P
+## --------------------------------------------------
+opro.menu.cpu.16MHzatmega328o=ATmega328P (5V, Optiboot)
+
+opro.menu.cpu.16MHzatmega328o.upload.maximum_size=30720
+opro.menu.cpu.16MHzatmega328o.upload.maximum_data_size=2048
+
+## to work with optiboot
+opro.menu.cpu.16MHzatmega328o.upload.protocol=arduino
+opro.menu.cpu.16MHzatmega328o.upload.speed=115200
+
+opro.menu.cpu.16MHzatmega328o.bootloader.low_fuses=0xFF
+opro.menu.cpu.16MHzatmega328o.bootloader.high_fuses=0xDA
+opro.menu.cpu.16MHzatmega328o.bootloader.extended_fuses=0xFD
+opro.menu.cpu.16MHzatmega328o.bootloader.file=optiboot/optiboot_atmega328.hex
+
+opro.menu.cpu.16MHzatmega328o.build.mcu=atmega328p
+opro.menu.cpu.16MHzatmega328o.build.f_cpu=16000000L

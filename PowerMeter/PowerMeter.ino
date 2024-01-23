@@ -8,6 +8,7 @@
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 #include <avr/power.h>
+#include <avr/wdt.h>
 #include <EEPROM.h>
 
 #include "PowerMeterLEDs.h"
@@ -47,14 +48,27 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 
 /* The above two compile directives switch between look up table entries. Those look up tables are part of
 ** the elimination of any need floating point at run time, and any need for trig or log functions.
-** This code has some 32 bit and 64 bit long integer arithmetic, including divides, but floating point
-** is avoided by using the two fixed point integer typedef's below, AcquiredVolts_t and DisplayPower_t.
-*/
+** We do end up with some 32 bit and 64 bit long integer arithmetic, including divides, but floating point
+** is avoided by using the two fixed point integer typedef's below, AcquiredVolts_t and DisplayPower_t. */
 
 // There is one more compile time option in PowerMeterLEDs.h
 
 typedef uint16_t AcquiredVolts_t; // maxes at ADC max (1024) * VOLTS_LOW_MULTIPLIER 
 typedef uint32_t DisplayPower_t; // In units of  1/128  Watt (e.g. value 128 is 1 watt )
+
+/* do NOT enable the SUPPORT_WDT symbol when using the Pro Mini with its default boot loader.
+** If you do not know what "default boot loader" means, then also do NOT enable SUPPORT_WDT
+** The issue is that the standard boot loader does not support watchdog timer (WDT) reset.
+** What does this mean?
+** The WDT support is a backup for the case something goes horribly wrong in the sketch code below.
+** It "resets" the arduino. But if the default boot loader is what is in FLASH on the Arduino
+** Pro Mini (and it WILL BE unless you have used a programmer to change it) then the WDT makes
+** any problem worse. You will not get control of the Power Meter again without removing all power.
+** That includes removing the battery backup! You'll have to open the enclosure and pull one of the
+** AA cells. The author used a programmer ("Arduino as ISP") to replace the bootloader with the
+** optiboot loader. That requires changes to boards.txt in the Arduino IDE and, of course,
+** access to an Arduino as ISP programmer. */
+//#define SUPPORT_WDT /* READ THE ABOVE PARAGRAPH*/
 
 namespace {
     // pin assignments on the PCB
@@ -345,7 +359,13 @@ namespace Comm {
         const unsigned long OUTPUT_TIMEOUT_MSEC = 10000;
 }
 
+static void get_mcusr();
+
 void setup() {
+#ifdef SUPPORT_WDT
+    MCUSR = 0;
+    wdt_disable();
+#endif
     pinMode(couplerPowerDetectPinIn, INPUT);
     pinMode(PanelLampsPinOut, OUTPUT);
 
@@ -402,10 +422,17 @@ void setup() {
 
     Serial.print(F("Coupler resistance cal: "));
     Serial.println(NominalCouplerResistance);
+
+#ifdef SUPPORT_WDT
+    wdt_enable(WDTO_1S);
+#endif
 }
 
 void loop()
 {
+#ifdef SUPPORT_WDT
+    wdt_reset();
+#endif
     previousMicrosec = micros();
     unsigned long now = millis();
     leds.loop(now);
@@ -476,6 +503,10 @@ void loop()
                 EEPROM.write((int)EEPROM_FWD_CALIBRATION, 0xff);
                 EEPROM.write((int)EEPROM_REFL_CALIBRATION, 0xff);
             }
+#ifdef SUPPORT_WDT
+            else if (strcmp(buf, "WDTT") == 0)
+                while(true); // test watchdog timer
+#endif
             numInBuf = 0;
         }
         else numInBuf += 1;
@@ -1484,6 +1515,8 @@ namespace {
 #ifdef OEM_METER_SCALES
         // this table was constructing by observing the meter position on the OEM meter
         // for the PWM values from 0 to 255
+        // These numbers were chosen based on the RFM-003. The RFM-005 will require
+        // a different table.
         const uint16_t PwmToPwr[NUM_PWM] PROGMEM =
         {
                 0, // 0
@@ -2292,6 +2325,9 @@ namespace sleep {
 
     void SleepNow()
     {
+#ifdef SUPPORT_WDT
+        wdt_disable();
+#endif
         pullUpPins(false);
         digitalWrite(RfMeterPinOut, LOW);
         digitalWrite(SwrMeterPinOut, LOW);
@@ -2329,6 +2365,9 @@ namespace sleep {
         Wire.begin();
         pullUpPins(true);
         ADCSRA |= (1 << ADEN); // ADC back on
+#ifdef SUPPORT_WDT
+        wdt_enable(WDTO_1S);
+#endif
     }
 }
 

@@ -37,7 +37,9 @@ in the PCB folder. If you want the full history, the git tag
 documents my first steps in this project back to 2016. </p>
 
 <h2>Construction</h2>
-The custom PCB is 2 inches by 4 inches. Its circuit diagram is <a href='PCB/schematics.pdf'>PCB/schematics.pdf</a>. It is 
+The custom PCB is 2 inches by 4 inches. Its circuit diagram is <a href='PCB/schematics.pdf'>
+<img atl='page2' src='PCB/schematics-2.png'/><img alt='page3' src='PCB/schematics-3.png'/></a>The
+PCB construction source is 
 published here in the format supported by expresspcb.com. Parts lists
 for duplicating this retrofit are published here. Two additional projects are documented:
 <ul>
@@ -46,7 +48,7 @@ of 5W to 3000W. There is a two layer PCB to make it especially easy to construct
 a workalike for the OEM coupler. This difference requires some different resistor values on the PCB,
 and some compile-time definition changes in the sketch.
 <li>documentation for building a workalike of the original RFM-003 console using the same four layer PCB
-as works for the retrofit. There are two different console enclosure designs. One is purely 3D printed plastic,
+as for the retrofit. <i>These are a work-in-progress and not ready to simply duplicate.</i> There are two different console enclosure designs. One is purely 3D printed plastic,
 the other is a 3D printed plastic fascade on a commerically available aluminum enclosure.
 </ul>
 
@@ -119,11 +121,13 @@ strategy gives good low power resolution while still accommodating 3000W without
 </p>
 
 <h2>How the Console is Powered</h2>
-<p>The power design here has one, but only one, important similarity to the OEM design: it has seamless switchover between battery power and
-external DC input. The OEM design included four rechargable NiCad AA cells which served not only as the
+<p>The power design here has one, but only one, important similarity to the OEM design: it can  
+accept exteranl DC input at (about) 12VDC, or seamlessly switchover to battery power when external DC is not present. 
+The OEM design included four rechargable NiCad AA cells which served not only as the
 battery power source, but also as the voltage regulator to convert the 12VDC input to regulated ~5VDC on its PCB circuits.</p>
 
-This retrofit includes no recharging circuit. It accepts a range of input voltage from about 7VDC up to about 15V.
+This retrofit includes no recharging circuit, nor does it require any battery installed at all&mdash;they are optional.
+The external DC jack accepts a range of input voltage from about 7VDC up to about 15V.
 Its battery power circuit, based on the LTC3525, works with pretty
 much any battery technology and voltage from about 1.0 VDC up to 5VDC. It can convert any battery voltage 
 as low as 1V up to 5VDC, but, to repeat, there is no charger in this
@@ -214,7 +218,7 @@ To easily retrofit into the OEM case, use its same T1-3/4 diodes (5mm diameter.)
 diode at each of the six positions, I chose six identical RGB diodes and programmed the sketch to synthesize the yellow and amber from
 the 3 colors available.
 The sketch includes compile time conditionals
-for supporting either six RGB or six RGY diodes. If you're willing to modify the sketch, you can use whatever color scheme you want.
+for supporting either six of RGB or six of RGY diodes. If you're willing to modify the sketch, you can use whatever color scheme you want.
 The amber SENSE LED and the yellow SAMPLE LED on the OEM device cannot be perfectly replicated using RGB. (Regardless
 of what you may have heard about being able to synthesize all visual colors from three. That is an approximation
 that sometimes works because of limitations in the way the human eye reports colors to the brain. There is 
@@ -227,24 +231,29 @@ when you retrofit, and you can make this PCB successfully drive them, but you'll
 sketch accordingly. 
 </p>
 <p>The PCB has positions for six SMT LEDs aligned along the front board edge. At this writing, there
-are available either RGB or RGY diodes that fit the PCB's SMT pad layout. The PCB also has holes for soldering
+are available either RGB or RGY diodes that fit the PCB's SMT pad layout. However, the author has found it too
+difficult to make the SMT LEDs mechanically and electrically go through the solder oven and do not recommend
+using the SMT LEDs. The PCB also has holes for soldering
 pigtails to off-PCB diodes, which is what is documented in the enclosures here. Ultimately I was not satisfied with
-the overall look and feel of any 3D printed console enclosure that that I came up with when restricting its design to
-use both the front edge PCB-mounted LEDs and the back edge PCB-mounted switches and connectors. I was happier with
+the overall look and feel of any 3D printed console enclosure that that I came up with. When restricting the enclosure design to
+use both the front edge PCB-mounted LEDs and the back edge PCB-mounted switches and connectors, I could not find
+a very good shape.. I was happier with
 an enclosure that kept the back edge PCB but put LEDs on pigtail, which allows design freedom for placing the 
 console's front panel, which includes the two analog meters, the Hold Time pot, and the Peak/Average mode switch.
 </p>
 
-<h2>Couplers</h2>
+<h2 id='Couplers'>Couplers</h2>
 <p>I was able to acquire an RFM-003 in good cosmetic condition; all the front and back panel components were good. The OEM
 PCB is easily replaced with the Arduino unit described here. But this was my second RFM-003 and it came without a coupler. A
 built-it-yourself
-coupler is described in <a href="PCB/schematics.pdf">PCB/schematics.pdf</a>.  This coupler has a different DC sensistivity than
-the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's.</p>
+coupler schematic is here: <a href="PCB/schematics.pdf"><img alt='page1' src='PCB/schematics-1.png'/></a>  
+ <p>This coupler's detection sensistivity does not match
+the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's, and 
+some different coefficients in the sketch's ino file.
 It is enclosed in a commerically available clam shell aluminum box.
 This coupler design is based on one published in the 2008 ARRL
 Handbook, but with a more inductive toroid transformer design (a stacked trio of T80-2 toroids instead of a single T68-2). The 40:1 turns
-ratio (which was the Handbook design and also used here) gives somewhat smaller DC voltages at its detectors than the OEM 
+ratio (which was the Handbook design, which this unit matches) gives somewhat smaller DC voltages at its detectors than the OEM 
 Nye Viking design. Decreasing the turns ratio would
 increase the voltage readout, but that reduction also reduces the transformer's inductive reactance. The trio of T80-2's is already just
 barely inductive enough to be used at 1.8MHz (and I don't think the 2008 Handbook design really worked well at 1.8MHz.)
@@ -259,9 +268,7 @@ measured as insignificant on all the remaining HF amateur bands 3.5MHz through 2
 <p>If you don't have an existing OEM unit to retrofit, an entire workalike unit can be built using the design in this repository. 
 (But this section is a work in progress for now. I have built one that works and the STP files
 for 3D printing are here, but don't like the cosmetics.)
-You'll need both a coupler and a console.
- The console has a 3D printed
-enclosure. The CAD directory has a design for a 3D printed enclosure that fits the PCB with on-board SMD LEDs along its front panel.
+You'll need both a coupler and a console. The CAD directory has a design for a 3D printed enclosure that fits the PCB with on-board SMD LEDs along its front panel.
 Also in the CAD directory is a design that instead places the PCB inside a commercially available aluminum box, but with 
 the front panel LEDs on pigtails onto a separate 3D printed front panel fascade in front of the aluminum box, and that
 supports the <a href='https://baomain.com/products/baomain-dh-670-1-ma'>Baomain Ammeter DH-670 DC 0-1.0 mA meter</a>. And listed on
@@ -282,11 +289,68 @@ The meter faces can be replaced using those drawn by the MeterFaces program <a h
  
 <h2>Parts Lists</h2>
 <ul>
-<li>These parts are needed on the PCB regardless of whether you are doing a retrofit or a complete console. <a href='https://www.digikey.com/short/wrb8bqwj'>https://www.digikey.com/short/wrb8bqwj</a>.
+<li>These parts are needed on the PCB regardless of whether you are doing a retrofit or a complete console. 
+<a href='https://www.digikey.com/short/wrb8bqwj'>https://www.digikey.com/short/wrb8bqwj</a>.
+And the PCB in <code>PCB/Power console.rrb</code> which can be ordered from expresspcb.com using this rrb file.
 <li>If you are doing a retrofit, you'll need the small push button that fits the ALO hole, and you likely want LED versions of the
-lamp backlights: <a href='http://www.digikey.com/short/5m7ddj84'>http://www.digikey.com/short/5m7ddj84</a>
+lamp backlights: <a href='http://www.digikey.com/short/5m7ddj84'>http://www.digikey.com/short/5m7ddj84</a>. You'll need
+to 3D print the bracket here <code>CAD/OEM/Retrofit-board.stp</code>, and the LED holder here <code>CAD/OEM/LED backstop.stp</code>.
+Two machines screws, #2 x 7/16" with nuts hold the two 3D parts together.
+<li>Quantity 6 of the 5mm T 1-3/4 RGB LED <a href='https://www.digikey.com/en/products/detail/everlight-electronics-co-ltd/EALP05RDMRGBA0/11200826'>
+https://www.digikey.com/en/products/detail/everlight-electronics-co-ltd/EALP05RDMRGBA0/11200826</a>. These
+LEDs are needed if you either retrofit an OEM console and want to use RGB LEDs, or if you build a stand alone work-alike
+console.</li>
 <li>To build a stand alone console, you need to populate all the connectors on the PCB and the 4 pin connector to the coupler.
-<a href='http://www.digikey.com/short/vff05b8z'>http://www.digikey.com/short/vff05b8z</a>. Two panel meters are required as mentioned above.
+<a href='https://www.digikey.com/short/w12hfd9z'>https://www.digikey.com/short/w12hfd9z</a>. Two panel meters are required as mentioned above.
 <li>To build a coupler, you'll need these: <a href='http://www.digikey.com/short/9nb54202'>http://www.digikey.com/short/9nb54202</a>. And you'll need
-quantity three T80-2 (red) toroids, and a few inches of RG-213.
+quantity six <a href='https://www.amidoncorp.com/t80-2/'>T80-2 (red) toroids</a>, a few inches of RG-213, and the custom <code>PCB/Power Coupler.rrb</code>.
+
 </ul>
+
+<h2>Some Construction Notes</h2>
+<p>The console PCB in particular sports some SMDs with lead spacing way too small for me to hand solder. I use an SMD oven. Such ovens can be
+purchased online, but I built one using a toaster oven and this <a href='https://whizoo.com/pages/buildguide'>kit</a>. 
+</p>
+<p>While it is possible to 3D print a solder paste mask from the gerber files you will get if you buy a PCB from expresspcb, I
+did the paste spreading by hand. For
+parts with leads this small, I have had better luck spreading the solder paste using a piece of bare wire, #20 or #22, as a tool.
+I squeeze out a small amount of solder paste on a piece of scrap paper and dab it onto all the pads on the PCB. It will take
+some practice to know how much paste is enough, but here is a rule: too much paste is far harder to repair later than too little.
+And it is surprising how little will work. It is not necessary for the space between the pads to be completely clear
+of paste, but don't leave any big blobs. I found that if I could get the paste to form a thing string
+from my wire tool, that one strand of that thin string laid down across the entire row of 10 pins from pins 1 through 10
+ of the LED driver baked just fine. </p>
+<p>
+The SMD ICs put up with some abuse for me. Your mileage may vary. I placed the 6 pin battery to 5V step up IC rotated 180 
+degrees from its proper position. 
+When the board wouldn't do battery power and I diagnosed my error, I was able to use a hot air SMD tool to remove it, rotate it, and I put the
+same one back in. (Each costs over $5 and I wanted to at least try.) It worked. I was also able to remove the 20 pin LED driver ICs
+from an early prototype board and mount them on an updated PCB successfully.
+</p>
+<p>
+You can use the Arduino IDE to program the sketch onto the Sparkfun Pro Mini board (be sure to get the 5V version of the Pro Mini!) 
+Its recommended you first program the LedTest sketch here and type its various commands after you get the LEDs connected, but
+before you install the PCB in the console. 
+</p>
+<p>
+Program the PowerMeter.ino sketch when you are happy the board is OK. Do <i>not</i> change that sketch's disable watchdog timer code
+unless you are willing to learn how to program the Arduino using the 6 pin ISP positions on the PCB. The default bootloader in
+the Pro Mini does not properly support watchdog timer reset. Have a look at
+boards-to-add.txt for hints on how to update the Arduino IDE install to support the WDT. Do you need the WDT? My prototyped
+version of this sketch on an Arduino PRO I left unmodified for 5 years without noticing I might want the watchdog. I
+saw one hang during the testing of this new custom PCB version (that runs virtually the same sketch on virtually the
+same hardware) and therefore decided to "throw in" WDT support. At that point I discovered it was not as simple as
+I wanted, but if you have an ISP programmer, its manageable.
+</p>
+<h2 id='RFM005'>What about the RFM-005?</h2>
+<p>I don't have one to test with, but it should work with some modest 
+modifications. Based on the comment in the OEM manual that all the Nye Viking
+"directional couplers are calibrated for complete interchangeability" I deduce
+that the resistor values as labeled on this PCB for the OEM coupler 
+will work for any Nye Viking coupler</p>
+<p>The RFM-005's front panel power meter, however, will require modifying
+at least the <code>PwmToPwr</code> lookup table in the sketch. If 
+the meter movement in the RFM-005 happens to be 0.5mA full scale
+like both the power meter and SWR meter movements in the RFM-003,
+then the OEM PCB values labeled here should work for both the
+RFM-003 and RFM-005.</p>
