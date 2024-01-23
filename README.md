@@ -48,7 +48,7 @@ of 5W to 3000W. There is a two layer PCB to make it especially easy to construct
 a workalike for the OEM coupler. This difference requires some different resistor values on the PCB,
 and some compile-time definition changes in the sketch.
 <li>documentation for building a workalike of the original RFM-003 console using the same four layer PCB
-as works for the retrofit. There are two different console enclosure designs. One is purely 3D printed plastic,
+as for the retrofit. <i>These are a work-in-progress and not ready to simply duplicate.</i> There are two different console enclosure designs. One is purely 3D printed plastic,
 the other is a 3D printed plastic fascade on a commerically available aluminum enclosure.
 </ul>
 
@@ -218,7 +218,7 @@ To easily retrofit into the OEM case, use its same T1-3/4 diodes (5mm diameter.)
 diode at each of the six positions, I chose six identical RGB diodes and programmed the sketch to synthesize the yellow and amber from
 the 3 colors available.
 The sketch includes compile time conditionals
-for supporting either six RGB or six RGY diodes. If you're willing to modify the sketch, you can use whatever color scheme you want.
+for supporting either six of RGB or six of RGY diodes. If you're willing to modify the sketch, you can use whatever color scheme you want.
 The amber SENSE LED and the yellow SAMPLE LED on the OEM device cannot be perfectly replicated using RGB. (Regardless
 of what you may have heard about being able to synthesize all visual colors from three. That is an approximation
 that sometimes works because of limitations in the way the human eye reports colors to the brain. There is 
@@ -231,10 +231,13 @@ when you retrofit, and you can make this PCB successfully drive them, but you'll
 sketch accordingly. 
 </p>
 <p>The PCB has positions for six SMT LEDs aligned along the front board edge. At this writing, there
-are available either RGB or RGY diodes that fit the PCB's SMT pad layout. The PCB also has holes for soldering
+are available either RGB or RGY diodes that fit the PCB's SMT pad layout. However, the author has found it too
+difficult to make the SMT LEDs mechanically and electrically go through the solder oven and do not recommend
+using the SMT LEDs. The PCB also has holes for soldering
 pigtails to off-PCB diodes, which is what is documented in the enclosures here. Ultimately I was not satisfied with
-the overall look and feel of any 3D printed console enclosure that that I came up with when restricting its design to
-use both the front edge PCB-mounted LEDs and the back edge PCB-mounted switches and connectors. I was happier with
+the overall look and feel of any 3D printed console enclosure that that I came up with. When restricting the enclosure design to
+use both the front edge PCB-mounted LEDs and the back edge PCB-mounted switches and connectors, I could not find
+a very good shape.. I was happier with
 an enclosure that kept the back edge PCB but put LEDs on pigtail, which allows design freedom for placing the 
 console's front panel, which includes the two analog meters, the Hold Time pot, and the Peak/Average mode switch.
 </p>
@@ -286,12 +289,17 @@ The meter faces can be replaced using those drawn by the MeterFaces program <a h
  
 <h2>Parts Lists</h2>
 <ul>
-<li>These parts are needed on the PCB regardless of whether you are doing a retrofit or a complete console. <a href='https://www.digikey.com/short/wrb8bqwj'>https://www.digikey.com/short/wrb8bqwj</a>.
+<li>These parts are needed on the PCB regardless of whether you are doing a retrofit or a complete console. 
+<a href='https://www.digikey.com/short/wrb8bqwj'>https://www.digikey.com/short/wrb8bqwj</a>.
 And the PCB in <code>PCB/Power console.rrb</code> which can be ordered from expresspcb.com using this rrb file.
 <li>If you are doing a retrofit, you'll need the small push button that fits the ALO hole, and you likely want LED versions of the
 lamp backlights: <a href='http://www.digikey.com/short/5m7ddj84'>http://www.digikey.com/short/5m7ddj84</a>. You'll need
 to 3D print the bracket here <code>CAD/OEM/Retrofit-board.stp</code>, and the LED holder here <code>CAD/OEM/LED backstop.stp</code>.
 Two machines screws, #2 x 7/16" with nuts hold the two 3D parts together.
+<li>Quantity 6 of the 5mm T 1-3/4 RGB LED <a href='https://www.digikey.com/en/products/detail/everlight-electronics-co-ltd/EALP05RDMRGBA0/11200826'>
+https://www.digikey.com/en/products/detail/everlight-electronics-co-ltd/EALP05RDMRGBA0/11200826</a>. These
+LEDs are needed if you either retrofit an OEM console and want to use RGB LEDs, or if you build a stand alone work-alike
+console.</li>
 <li>To build a stand alone console, you need to populate all the connectors on the PCB and the 4 pin connector to the coupler.
 <a href='https://www.digikey.com/short/w12hfd9z'>https://www.digikey.com/short/w12hfd9z</a>. Two panel meters are required as mentioned above.
 <li>To build a coupler, you'll need these: <a href='http://www.digikey.com/short/9nb54202'>http://www.digikey.com/short/9nb54202</a>. And you'll need
