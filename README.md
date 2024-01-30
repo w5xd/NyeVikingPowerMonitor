@@ -54,7 +54,7 @@ connectors are compatible.)
 <p>The original box splits along its clam shell by first removing the top two screws from the right hand side,
 the top two screws from the left hand side to remove the top. Then the outer-most four screws from the back panel.
 To fold the front panel away, remove the bottom two screws <i>on the two side panels only</i>.
- Do <b>not</b> remove any
+ Do not remove any
 front panel screws nor the bottom panel screws.</p>
 <p>I removed the original board by snipping each wire at its end at the circuit board. Some of the remaining wires
 will reach to their assigned position on the new PCB, but some will not. The custom PCB
@@ -65,7 +65,7 @@ custom PCB at an angle.</p>
 <p>A prospective builder will want to know that, while the 12VDC connector at the back
 of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin, 2.5mmm) and
 outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match. The Arduino power plugs have
-a 2.1mm inner pin.</p>
+a 2.1mm inner pin. </p>
 
 <a href='PCB/ConsolePcbMap.pdf'>Map of the console PCB</a>
 
@@ -290,8 +290,8 @@ The meter faces can be replaced using those drawn by the MeterFaces program <a h
 <table style='width:100%'><tr><td style="width:50%">
 <img alt='swr' width='400' src='MeterFaces/Swr.jpg'/></td><td><img alt='power' width='400' src='MeterFaces/Power.jpg'/>
 </td></tr></table>
-I tried several different LED parts for the workalike and ended up with two variations of the 3D printed 
-enclosure that support two different physical LED parts. You may choose to build with either of these two LEDs:
+I tried several different LED parts for the workalike. Eventually, I gave up trying to successfully mount SMT
+LEDs on the PCB. Here is what the hole pattern on the PCB supports, but I recommend only the first:
 <ul>
 <li>RGB T1-3/4 LED lamps, which are 5mm diameter. These mount through holes in the front panel,
 and require individually routing 4 wires to each of the LEDs from the PCB edge.
@@ -308,12 +308,6 @@ which places the front panel away from the PCB edge. There is also a <code>conso
 currently only a design concept for
 an enclosure that places the PCB inside a commercically available aluminum box for shielding.
 </ul>
-I don't have any recommendation for which LED choice is better. Once built, their behaviors are identical,
-neither is the price of the parts different enough to force a choice.
-The off-PCB lamps require you to individually route and solder each of the four leads on the required six RGB
-lamps to their corresponding holes on the PCB. On the other hand, I found it difficult to get
-the SMT LEDs to solder properly in my oven.  They tended to stand up on end, or rotate out of position.
-I also tried hand-soldering the SMT parts, and eventually succeeded. Your milage may vary.
 
  <h2>Calibration</h2>
  <p>The sketch supports four settings in EEPROM. These (roughly) correspond to 
@@ -335,11 +329,14 @@ And the PCB in <code>PCB/Power console.rrb</code> which can be ordered from expr
 <li>If you are doing a retrofit, you'll need the small push button that fits the ALO hole, and you likely want LED versions of the
 lamp backlights: <a href='http://www.digikey.com/short/5m7ddj84'>http://www.digikey.com/short/5m7ddj84</a>. You'll need
 to 3D print the bracket here <code>CAD/OEM/Retrofit-board.stp</code>, and the LED holder here <code>CAD/OEM/LED backstop.stp</code>.
-Two machines screws, #2 x 7/16" with nuts hold the two 3D parts together.
+Two machines screws, #2 x 7/16" with nuts hold the LED holder to the bracket.
+<li>The mating DC power connector for the OEM console is the 
+<a href='https://www.digikey.com/en/products/detail/cui-devices/PP3-002B/992137'>CUI Device 3-002B</a>.</li>
 <li>Quantity 6 of the 5mm T 1-3/4 RGB LED 
 <a href='https://www.digikey.com/en/products/detail/everlight-electronics-co-ltd/EALP05RDMRGBA0/11200826'>
 https://www.digikey.com/en/products/detail/everlight-electronics-co-ltd/EALP05RDMRGBA0/11200826</a>. These
-LEDs are needed if you either retrofit an OEM console and want to use RGB LEDs, or if you build a stand alone work-alike
+LEDs are needed if you either retrofit an OEM console and want to use RGB LEDs, or if you build a 
+stand alone work-alike
 console.</li>
 <li>To build a stand alone console, you need to populate all the connectors on the PCB and the 
 4 pin connector to the coupler.
@@ -352,8 +349,10 @@ and the custom <code>PCB/Power Coupler.rrb</code>.
 </ul>
 
 <h2>Construction Notes</h2>
-<p>The console PCB in particular sports SMDs with lead spacing way too small for me to hand solder. I use an SMD oven. Such ovens can be
-purchased online, but I built one using a toaster oven and this <a href='https://whizoo.com/pages/buildguide'>kit</a>. 
+<p>The console PCB in particular sports SMT devices with lead spacing way too small for me to 
+hand solder. I use an SMD oven. Such ovens can be
+purchased online, but I built one using a toaster oven and 
+this <a href='https://whizoo.com/pages/buildguide'>kit</a>. 
 </p>
 <p>While it is possible to 3D print a solder paste mask from the gerber files you will get if you buy a PCB from expresspcb, I
 did the paste spreading by hand. For
@@ -365,7 +364,7 @@ of paste, but don't leave any big blobs. I found that if I could get the paste t
 from my wire tool, that one strand of that thin string laid down across the entire row of 10 pins from pins 1 through 10
  of the LED driver baked just fine. </p>
 <p>
-The SMD ICs put up with some abuse from my mistakes. I had placed the 6 pin battery to 5V step up IC rotated 180 
+The SMD ICs put up with some abuse from my mistakes. I had placed the 6 pin 5V step-up IC rotated 180 
 degrees from its proper position. 
 When the board wouldn't do battery power and I diagnosed my error, I was able to use a hot air SMD tool to 
 remove it, rotate it, and I put the
@@ -374,19 +373,26 @@ the 20 pin LED driver ICs
 from an early prototype board and mount them on an updated PCB successfully.
 </p>
 <p>
-You can use the Arduino IDE to program the sketch onto the Sparkfun Pro Mini board (be sure to get the 5V version of the Pro Mini!) 
-Its recommended you first program the LedTest sketch here and type its various commands after you get the LEDs connected, but
+You can use the Arduino IDE to program the sketch onto the Sparkfun Pro Mini board 
+(be sure to get the 5V version of the Pro Mini!) 
+Its recommended you first program the LedTest sketch here and type its 
+various commands after you get the LEDs connected, but
 before you install the PCB in the console. 
 </p>
 <p>
 Program the PowerMeter.ino sketch when you are happy the board is OK. Do <i>not</i> change that sketch's disable 
 watchdog timer <code>#define</code>
-unless you are willing to learn how to program the Arduino using the 6 pin ISP positions on the PCB. The default bootloader in
+unless you are willing to learn how to program the Arduino using the 6 pin ISP positions 
+on the PCB. The default bootloader in
 the Pro Mini does not properly support watchdog timer reset. Have a look at
-boards-to-add.txt for hints on how to update the Arduino IDE install to support the WDT. Do you need the WDT? My prototyped
-version of this sketch on an Arduino PRO I left unmodified for 5 years without thinking I might want the watchdog. I
-saw one hang during the testing of this new custom PCB version (that runs essentially the same sketch on essentially the
-same hardware) and therefore decided to "throw in" WDT (watchdog timer) support. At that point I discovered 
+boards-to-add.txt for hints on how to update the Arduino IDE install to support the WDT. 
+Do you need the WDT? My prototyped
+version of this sketch on an Arduino PRO I left unmodified for 5 years without thinking I 
+might want the watchdog. I
+saw one hang during the testing of this new custom PCB version (that runs essentially the 
+same sketch on essentially the
+same hardware) and therefore decided to "throw in" WDT (watchdog timer) support. At that 
+point I discovered 
 it was not as simple as
 I wanted, but if you have an ISP programmer, its manageable.
 </p>
