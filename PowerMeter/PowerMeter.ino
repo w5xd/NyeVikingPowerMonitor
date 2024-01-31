@@ -167,7 +167,7 @@ namespace {
     enum EEPROM_ASSIGNMENTS {
         EEPROM_SWR_LOCK, EEPROM_PWR_LOCK, EEPROM_FWD_CALIBRATION, EEPROM_REFL_CALIBRATION, EEPROM_POT_MAX,
         EEPROM_POT_REVERSE = EEPROM_POT_MAX + 2,
-        EEPROM_IREF, EEPROM_BRIGHTNESS
+        EEPROM_IREF, EEPROM_BRIGHTNESS = EEPROM_IREF+2
     };
 }
 
@@ -479,7 +479,17 @@ void loop()
             else if (strncmp(buf, "IREF=", 5) == 0)
                 EEPROM.put((int)EEPROM_IREF, atoi(buf+5));
             else if (strcmp(buf, "LED") == 0)
+            {
+                Serial.println("LED test");
+#ifdef SUPPORT_WDT
+                wdt_disable();
+#endif
                 leds.test();
+#ifdef SUPPORT_WDT
+                wdt_enable(WDTO_1S);
+#endif
+                Serial.println("LED test end");
+            }
             else if (strcmp(buf, "ADC") == 0)
                 AdcTest();
             else if (strncmp(buf, "BRI=", 4) == 0)
