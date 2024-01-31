@@ -102,6 +102,9 @@ void setup() {
         Serial.println("W5XD LedTest 1.0");
 
         leds.begin();
+        leds.setAll(true);
+        delay(1000);
+        leds.setAll(false);
         leds.SetLowLed(false,true);
         leds.BlinkLed(PowerMeterLeds::FrontPanel::RANGE_LOW, true);
 }

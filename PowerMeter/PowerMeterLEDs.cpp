@@ -281,3 +281,12 @@ void PowerMeterLeds::test()
     m_BankLeft.UpdatePWM(bright);
 
 }
+
+void PowerMeterLeds::setAll(bool turnOn)
+{
+    uint8_t bright[8];
+    for (int j = 0; j < 8; j++)
+        bright[j] = turnOn ? m_brightness : 0;
+    m_BankLeft.UpdatePWM(bright);
+    m_BankRight.UpdatePWM(bright);
+}

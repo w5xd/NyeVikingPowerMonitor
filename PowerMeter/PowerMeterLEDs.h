@@ -30,6 +30,7 @@ public:
     void wake();
 
     void test();
+    void setAll(bool);
 
     Tlc59108 &LeftDevice() {return m_BankLeft;}
     Tlc59108 &RightDevice() {return m_BankRight;}
