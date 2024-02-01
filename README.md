@@ -263,9 +263,7 @@ sketch accordingly.
 <p>I was able to acquire an RFM-003 in good cosmetic condition; all the front and back panel components were good. The OEM
 PCB is easily replaced with the Arduino unit described here. But this was my second RFM-003 and it came without a coupler. 
 
-A
-build-it-yourself
-coupler schematic is here: <a href="PCB/schematics.pdf"><img alt='page1' src='PCB/schematics-1.png'/></a>
+A build-it-yourself coupler schematic is here: <a href="PCB/schematics.pdf"><img alt='page1' src='PCB/schematics-1.png'/></a>
  A two layer PCB documented in the PCB folder makes it easy to construct.
  <p>This coupler's detection sensistivity does not match
 the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's, and 

@@ -1,4 +1,4 @@
-# Console 3D print
+# Console 3D print and assembly procedure
 <ul>
 The names of the parts are:
 <ul>
