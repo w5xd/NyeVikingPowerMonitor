@@ -35,6 +35,7 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
  * c) RGB LEDs for the front panel 
         versus RGY.
         (which LED gets turned on when differs)
+*  d) Watchdog timer support. This is an extra reliability feature that requires access to an ISP
  */
 
 // Use one of the following two. 
@@ -53,8 +54,7 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 
 // There is one more compile time option in PowerMeterLEDs.h
 
-typedef uint16_t AcquiredVolts_t; // maxes at ADC max (1024) * VOLTS_LOW_MULTIPLIER 
-typedef uint32_t DisplayPower_t; // In units of  1/128  Watt (e.g. value 128 is 1 watt )
+//#define SUPPORT_WDT /* READ THE PARAGRAPH BELOW*/
 
 /* do NOT enable the SUPPORT_WDT symbol when using the Pro Mini with its default boot loader.
 ** If you do not know what "default boot loader" means, then also do NOT enable SUPPORT_WDT
@@ -68,8 +68,9 @@ typedef uint32_t DisplayPower_t; // In units of  1/128  Watt (e.g. value 128 is 
 ** AA cells. The author used a programmer ("Arduino as ISP") to replace the bootloader with the
 ** optiboot loader. That requires changes to boards.txt in the Arduino IDE and, of course,
 ** access to an Arduino as ISP programmer. */
-//#define SUPPORT_WDT /* READ THE ABOVE PARAGRAPH*/
 
+typedef uint16_t AcquiredVolts_t; // maxes at ADC max (1024) * VOLTS_LOW_MULTIPLIER 
+typedef uint32_t DisplayPower_t; // In units of  1/128  Watt (e.g. value 128 is 1 watt )
 namespace {
     // pin assignments on the PCB
     const int PIN_TXD = 1; // directly control TX pin in sleep mode
@@ -245,32 +246,32 @@ namespace Alo {
 }
 
 namespace sleep {
-        void SleepNow();
+    void SleepNow();
 
-        void pullUpPins(bool on)
+    void pullUpPins(bool on)
+    {
+        if (on)
         {
-            if (on)
-            {
-                pinMode(ALOtripSwitchPinIn, INPUT_PULLUP);
-                pinMode(PowerForwReflSwitchPinIn, INPUT_PULLUP);
-                pinMode(PeakSwitchPinIn, INPUT_PULLUP);
-                pinMode(AverageSwitchPinIn, INPUT_PULLUP);
-            }
-            else
-            {   // Pins that are being pulled down now, switch to INPUT mode
-                if (digitalRead(ALOtripSwitchPinIn) == LOW)
-                    pinMode(ALOtripSwitchPinIn, INPUT);
-                if (digitalRead(PowerForwReflSwitchPinIn) == LOW)
-                    pinMode(PowerForwReflSwitchPinIn, INPUT);
-                if (digitalRead(PeakSwitchPinIn) == LOW)
-                    pinMode(PeakSwitchPinIn, INPUT);
-                if (digitalRead(AverageSwitchPinIn) == LOW)
-                    pinMode(AverageSwitchPinIn, INPUT);
-                /* if any of the above pins is touched by the human while in sleep mode,
-                ** then current consumption will go up until the CPU is waked up, which only
-                ** happens via external interrupts on D2 (RF detected) or D3 (back panel CALI button) */
-            }
+            pinMode(ALOtripSwitchPinIn, INPUT_PULLUP);
+            pinMode(PowerForwReflSwitchPinIn, INPUT_PULLUP);
+            pinMode(PeakSwitchPinIn, INPUT_PULLUP);
+            pinMode(AverageSwitchPinIn, INPUT_PULLUP);
         }
+        else
+        {   // Pins that are being pulled down now, switch to INPUT mode
+            if (digitalRead(ALOtripSwitchPinIn) == LOW)
+                pinMode(ALOtripSwitchPinIn, INPUT);
+            if (digitalRead(PowerForwReflSwitchPinIn) == LOW)
+                pinMode(PowerForwReflSwitchPinIn, INPUT);
+            if (digitalRead(PeakSwitchPinIn) == LOW)
+                pinMode(PeakSwitchPinIn, INPUT);
+            if (digitalRead(AverageSwitchPinIn) == LOW)
+                pinMode(AverageSwitchPinIn, INPUT);
+            /* if any of the above pins is touched by the human while in sleep mode,
+            ** then current consumption will go up until the CPU is waked up, which only
+            ** happens via external interrupts on D2 (RF detected) or D3 (back panel CALI button) */
+        }
+    }
 }
 
 namespace {
@@ -425,6 +426,8 @@ void setup() {
 
 #ifdef SUPPORT_WDT
     wdt_enable(WDTO_1S);
+    /* FYI: any call to delay() for more than 1S will trigger the watchdog 
+    ** unless wdt_disable() is called first. And, of course, wdt_enable */
 #endif
 }
 

@@ -1,4 +1,4 @@
-# Nye Viking Power Monitor
+# Nye Viking RF Power Monitor
 Brain transplant for Nye Viking Power Monitor RFM-003
 
 My old RFM-003 quit working. I had purchased it new in 1988 and it has been my go-to device
@@ -119,7 +119,7 @@ tries the undivided voltage first, notes if it is maxed out (or close) and tries
 strategy gives good low power resolution while still accommodating 3000W without overflowing the ADC.
 </p>
 
-<h2>How the Console is Powered</h2>
+<h2>How the Console gets DC Power</h2>
 <p>The DC power supply design here has one, but only one, important similarity to the OEM design: it can  
 accept external DC input at (about) 12VDC, or seamlessly switchover to battery power when external DC is not present. 
 The OEM design included four rechargable NiCad AA cells which served not only as the
@@ -178,7 +178,8 @@ function.
 
 Acheiving the less-than-100uA standby current is dependent on the details of how the FT232H 
 serial breakout is
-set up, as detailed in the following section.
+set up, as detailed in the following section. And the SJ1 solder jumper on the Arduino Pro Mini
+must be separated.
 
 <p>To populate a PCB without battery power support, the following part positions on the PCB may
 be left empty: LTC3525, L1, Q5, Q6, Q7, NPC603.
@@ -202,20 +203,25 @@ Use that application to set the FT232H C0 output to Drive_0, which enables the
 Arduino IDE to invoke a reset on the PCB using serial port DTR as is typical for Arduino FTDI headers.
 The programming screen looks like this:
 <p align = 'center'><img alt='FT_Prog' src='FT_prog.png'/></p>
-That setup makes it easy to upload sketches. Be aware, however, that the <code>C0 at Drive_0</code> setting draws about 200 uA 
+That setup makes it easy to upload sketches. Be aware, however, that the <code>C0 at Drive_0</code> 
+setting draws about 200 uA 
 continuously as long as the FT232H is connected to a powered USB port.
  If the PCB has USB power without back panel 12V DC, this will draw down the battery much more quickly.
-Use FT_Prog to set C0 to Tristate to reduce the drain, but that setting makes it more difficult to program the Arduino
+Use FT_Prog to set C0 to Tristate to reduce the drain, but that setting makes it 
+more difficult to program the Arduino
 through the serial port.
-The C8 and C9 outputs driving TXLED and RXLED shown in the screen above are for convenience. They make it easy to see that the 
+The C8 and C9 outputs driving TXLED and RXLED shown in the screen above are for 
+convenience. They make it easy to see that the 
 Arduino program upload is proceeding as expected.</p>
 
-Another 200uA (or so) is consumed, regardless of the FT232H EEPROM settings if the DTR on the FT232H's serial port is
+Another 200uA (or so) is consumed, regardless of the FT232H EEPROM settings if the DTR on 
+the FT232H's serial port is
 not asserted. This 200 uA can also be eliminated any of these ways:
 <ol type='a'>
 <li>Unplug the FT232H from the circuit such that there is no USB at all.
 <li>Power the FT232H's USB only while 12VDC is presented on the back panel. (Conversely: 
-if there is no 12VDC on the back panel, but there is power to the USB, the DTR pullup circuit on the PCB will draw
+if there is no 12VDC on the back panel, but there is power to the USB, the DTR pullup circuit 
+on the PCB will draw
 about 200uA that otherwise would not be consumed.)
 </ol>
 
@@ -224,7 +230,8 @@ about 200uA that otherwise would not be consumed.)
 up to 16 diodes on a common annode. The PCB routes those 16 outputs to 6 physical positions corresponding to
 the OEM console's front panel LEDs (labeled, left to right, SENSE, LOCK, SAMPLE, HOLD, LOW and HIGH.) 
 
-<p>Of the six front panel LED positions, the LOCK and the HOLD positions only support 2 color LEDs (because the IC's 16 channels
+<p>Of the six front panel LED positions, the LOCK and the HOLD positions only support 2 color LEDs 
+(because the IC's 16 channels
 cannot support 3 channels on all 6 posiitions) </p>
 
 To easily retrofit into the OEM case, use the same size T1-3/4 diodes (5mm diameter.) Instead of the OEM's 
@@ -233,14 +240,20 @@ diode at each of the six positions, I chose six identical RGB diodes (part numbe
  and programmed the sketch to synthesize 
 the yellow and amber from
 the 3 colors available.
-The sketch includes compile time conditionals for supporting either six of RGB or six of RGY diodes. Modify the sketch to use whatever 
+The sketch includes compile time conditionals for supporting either six of RGB or six of RGY diodes. 
+Modify the sketch to use whatever 
 color scheme you want.
-The amber SENSE LED and the yellow SAMPLE LED on the OEM device cannot be perfectly replicated using RGB. (Regardless
-of what you may have heard about being able to synthesize all visual colors from three. That is an approximation
-that sometimes works because of limitations in the way the human eye reports colors to the brain. There is 
-more color in the world than you can see on a computer screen, and you eye can see the difference between the
+The amber SENSE LED and the yellow SAMPLE LED on the OEM device cannot be perfectly replicated using 
+RGB. (Regardless
+of what you may have heard about being able to synthesize all visual colors from three. That is an 
+approximation
+that sometimes works because of limitations in the way the human eye reports colors to the brain. 
+There is 
+more color in the world than you can see on a computer screen, and you eye can see the difference 
+between the
 OEM single wavelength LEDs and the RGB simulation in the retrofit.) 
-The sketch simulates an amber color using a combination of two parts red with one part green, and simulates yellow with
+The sketch simulates an amber color using a combination of two parts red with one part green, and 
+simulates yellow with
 equal parts red and green.
 Alternatively, you can scavange the six OEM LEDS
 when you retrofit, and you can make this PCB successfully drive them, but you'll need to modify the
