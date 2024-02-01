@@ -321,6 +321,8 @@ which places the front panel away from the PCB edge. There is also a <code>conso
 currently only a design concept for
 an enclosure that places the PCB inside a commercically available aluminum box for shielding.
 </ul>
+Its a bit of a puzzle to assemble. See the instructions in the 
+<a href='STL/console2'>STL/console2</a> folder.
 
  <h2>Calibration</h2>
  <p>The sketch supports four settings in EEPROM. These (roughly) correspond to 
