@@ -254,39 +254,64 @@ void PowerMeterLeds::test()
             bright[i] = 0;
         m_BankLeft.UpdatePWM(bright);
         m_BankRight.UpdatePWM(bright);
-        delay(1000);
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
                     bright[j] = (j==i) ? m_brightness : 0;
             m_BankLeft.UpdatePWM(bright);
-            delay(1000);
+            delay(400);
         }
         for (int i = 0; i < 8; i++)
             bright[i] = 0;
         m_BankRight.UpdatePWM(bright);
         m_BankLeft.UpdatePWM(bright);
-        delay(1000);
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
                 bright[j] = (j == i) ? m_brightness : 0;
             m_BankRight.UpdatePWM(bright);
-            delay(1000);
+            delay(400);
         }
     }
-    for (int i = 0; i < 8; i++)
-        m_StateLeft[i] = m_StateRight[i] = bright[i] = 0;
-    m_BankRight.UpdatePWM(bright);
-    m_BankLeft.UpdatePWM(bright);
+    setAll(false);
+    Serial.println("SENSE");
+    SetSenseLed(true);
+    loop(millis());
+    delay(1000);
+    Serial.println("LOCK");
+    SetSenseLed(false);
+    SetAloLock(true);
+    loop(millis());
+    delay(1000);
+    Serial.println("SAMPLE");
+    SetAloLock(false);
+    SetSampleLed(true);
+    loop(millis());
+    delay(1000);
+    Serial.println("HOLD");
+    SetSampleLed(false);
+    SetHoldLed(true);
+    loop(millis());
+    delay(1000);
+    Serial.println("LOW");
+    SetHoldLed(false);
+    SetLowLed(true);
+    loop(millis());
+    delay(1000);
+    Serial.println("HIGH");
+    SetLowLed(false);
+    SetHighLed(true);
+    loop(millis());
+    delay(1000);
 
+    setAll(false);
 }
 
 void PowerMeterLeds::setAll(bool turnOn)
 {
     uint8_t bright[8];
     for (int j = 0; j < 8; j++)
-        bright[j] = turnOn ? m_brightness : 0;
+        m_StateLeft[j] = m_StateRight[j] = bright[j] = turnOn ? m_brightness : 0;
     m_BankLeft.UpdatePWM(bright);
     m_BankRight.UpdatePWM(bright);
 }

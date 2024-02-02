@@ -40,19 +40,19 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 
 // Use one of the following two. 
 // Affects the arithmetic calculating power/SWR from the ADCs
-#define OEM_COUPLER // The OEM coupler, which, in turn requires a 15/115 input voltage divider at R12/R13/R16/R17
-//#define W5XD_COUPLER // The coupler in ths report, wich requires a 100/320 voltage divider
+//#define OEM_COUPLER // The OEM coupler, which, in turn requires a 15/115 input voltage divider at R12/R13/R16/R17
+#define W5XD_COUPLER // The coupler in ths report, wich requires a 100/320 voltage divider
 
 // Use one of the following two
-#define OEM_METER_SCALES  // the meters are series resistor with PWM=250 is full scale, as painted by Nye Viking
-//#define CUSTOM_METER_SCALES // the meters are series resistor with PWM=250 is full scale, with meter face backings printed per this repo
+//#define OEM_METER_SCALES  // the meters are series resistor with PWM=250 is full scale, as painted by Nye Viking
+#define CUSTOM_METER_SCALES // the meters are series resistor with PWM=250 is full scale, with meter face backings printed per this repo
 
 /* The above two compile directives switch between look up table entries. Those look up tables are part of
 ** the elimination of any need floating point at run time, and any need for trig or log functions.
 ** We do end up with some 32 bit and 64 bit long integer arithmetic, including divides, but floating point
 ** is avoided by using the two fixed point integer typedef's below, AcquiredVolts_t and DisplayPower_t. */
 
-// There is one more compile time option in PowerMeterLEDs.h
+// There is another compile time option in PowerMeterLEDs.h
 
 //#define SUPPORT_WDT /* READ THE PARAGRAPH BELOW*/
 
@@ -89,8 +89,8 @@ namespace {
     const int ReversePwrAnalogLowPinIn = A7;
     const int ForwardPwrAnalogLowPinIn = A0;
     const int HoldTimePotAnalogPinIn = A3;
-    const int AverageSwitchPinIn = 7;
-    const int PeakSwitchPinIn = 6;
+    const int SP3TinPinIn1 = 7;
+    const int SP3TinPinIn2 = 6;
 
     const int MAXED_ADC = 1022; // this is the highest number we'll believe
     const int SWR_SCALE_PWR = 7;
@@ -164,11 +164,14 @@ namespace {
         static_cast<AcquiredVolts_t>(VOLTS_UNDIVIDED_MULTIPLER * SchottkeyBarrierVolts * ADC_RESOLUTION / 5.0); // multiply into AcquiredVolts_t
 
     PowerMeterLeds leds(Tlc59108PowerEnablePinOut);
+    int8_t AverageSwitchPinIn = SP3TinPinIn1;
+    int8_t PeakSwitchPinIn = SP3TinPinIn2;
 
     enum EEPROM_ASSIGNMENTS {
         EEPROM_SWR_LOCK, EEPROM_PWR_LOCK, EEPROM_FWD_CALIBRATION, EEPROM_REFL_CALIBRATION, EEPROM_POT_MAX,
         EEPROM_POT_REVERSE = EEPROM_POT_MAX + 2,
-        EEPROM_IREF, EEPROM_BRIGHTNESS = EEPROM_IREF+2
+        EEPROM_IREF, EEPROM_BRIGHTNESS = EEPROM_IREF+2,
+        EEPROM_SP3T_REVERSE,
     };
 }
 
@@ -254,8 +257,8 @@ namespace sleep {
         {
             pinMode(ALOtripSwitchPinIn, INPUT_PULLUP);
             pinMode(PowerForwReflSwitchPinIn, INPUT_PULLUP);
-            pinMode(PeakSwitchPinIn, INPUT_PULLUP);
-            pinMode(AverageSwitchPinIn, INPUT_PULLUP);
+            pinMode(SP3TinPinIn2, INPUT_PULLUP);
+            pinMode(SP3TinPinIn1, INPUT_PULLUP);
         }
         else
         {   // Pins that are being pulled down now, switch to INPUT mode
@@ -263,10 +266,10 @@ namespace sleep {
                 pinMode(ALOtripSwitchPinIn, INPUT);
             if (digitalRead(PowerForwReflSwitchPinIn) == LOW)
                 pinMode(PowerForwReflSwitchPinIn, INPUT);
-            if (digitalRead(PeakSwitchPinIn) == LOW)
-                pinMode(PeakSwitchPinIn, INPUT);
-            if (digitalRead(AverageSwitchPinIn) == LOW)
-                pinMode(AverageSwitchPinIn, INPUT);
+            if (digitalRead(SP3TinPinIn2) == LOW)
+                pinMode(SP3TinPinIn2, INPUT);
+            if (digitalRead(SP3TinPinIn1) == LOW)
+                pinMode(SP3TinPinIn1, INPUT);
             /* if any of the above pins is touched by the human while in sleep mode,
             ** then current consumption will go up until the CPU is waked up, which only
             ** happens via external interrupts on D2 (RF detected) or D3 (back panel CALI button) */
@@ -398,6 +401,17 @@ void setup() {
     leds.LeftDevice().SetCurrent(iref);
     leds.RightDevice().SetCurrent(iref);
 
+    if (EEPROM.read((int)EEPROM_SP3T_REVERSE) != 0)
+    {
+        AverageSwitchPinIn = SP3TinPinIn1;
+        PeakSwitchPinIn = SP3TinPinIn2;
+    }
+    else
+    {
+        AverageSwitchPinIn = SP3TinPinIn2;
+        PeakSwitchPinIn = SP3TinPinIn1;
+    }
+
     // present some info about our calibration and version number
     Serial.begin(SERIAL_BAUD);
     Serial.println(F("W5XD PowerMeter 2.1"));
@@ -423,6 +437,8 @@ void setup() {
 
     Serial.print(F("Coupler resistance cal: "));
     Serial.println(NominalCouplerResistance);
+    Serial.print(F("SP3TUPDOWN = "));
+    Serial.println(EEPROM.read((int)EEPROM_SP3T_REVERSE) != 0 ? "0" : "1");
 
 #ifdef SUPPORT_WDT
     wdt_enable(WDTO_1S);
@@ -469,6 +485,21 @@ void loop()
             {
                 uint16_t pmax = atoi(buf+7);
                 EEPROM.put((int)EEPROM_POT_MAX, pmax);
+            }
+            else if (strncmp(buf, "SP3TUPDOWN=", 11) == 0)
+            {
+                bool reverse = buf[11] == '1';
+                EEPROM.write((int)EEPROM_SP3T_REVERSE, static_cast<uint8_t>(reverse ? 0 : 1));
+                if (reverse)
+                {
+                    AverageSwitchPinIn = SP3TinPinIn2;
+                    PeakSwitchPinIn = SP3TinPinIn1;
+                }
+                else
+                {
+                    AverageSwitchPinIn = SP3TinPinIn1;
+                    PeakSwitchPinIn = SP3TinPinIn2;
+                }
             }
             else if (strcmp(buf, "POT") == 0)
             {

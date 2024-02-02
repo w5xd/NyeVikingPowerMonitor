@@ -22,13 +22,17 @@ you need to.
 <ol>
 <li>There are slots for 7 #4 machine screw square nuts in Base2. Place all of them.
 The ones that won't stay in with friction, use cellophane tape to keep them in place.
-<li>Wire both the AA cell holders to each other and the PCB.  
+<li>If you built the PCB with SMT LEDs, then the base you printed has 6 channels for the
+2mm x end glow fibert optic cable. Place that fiber optic cable now. Leave the ends too long
+and cut them to size after both the PCB and front panel are placed.
+<li>Wire both the AA cell holders to each other and the PCB. On the PCB, insert the wires
+from the bottom so they route under the PCB.
 <li>Wire all 6 LEDs on flying wires to the PCB.
-<li>Fasten the PCB with two #4 machine screws. There are 3 mounting posts. Use only
+<li>Fasten the PCB with two #4 x 5/16" machine screws. There are 3 mounting posts. Use only
 the two closest to the front panel.
 <li>Fasten the horizontal AA cell holder. The + side is against the back panel. The
 horizontal one is the one whose + side is wired to the PCB (as opposed to the other
-AA cell holder.) Use two #2 x 3/16" machine screws. Do not over tighten.
+AA cell holder.) Use two #2 x 1/4" machine screws. Do not over tighten.
 <li>Solder 3 wires between the front panel Hold Time pot and its 3 pin connector.
 Route the connector wire through the hole in the base and plug it into the
 connector on the PCB.
