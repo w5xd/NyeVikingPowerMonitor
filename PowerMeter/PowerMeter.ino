@@ -54,7 +54,7 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 
 // There is another compile time option in PowerMeterLEDs.h
 
-//#define SUPPORT_WDT /* READ THE PARAGRAPH BELOW*/
+#define SUPPORT_WDT /* READ THE PARAGRAPH BELOW*/
 
 /* do NOT enable the SUPPORT_WDT symbol when using the Pro Mini with its default boot loader.
 ** If you do not know what "default boot loader" means, then also do NOT enable SUPPORT_WDT
@@ -173,6 +173,8 @@ namespace {
         EEPROM_IREF, EEPROM_BRIGHTNESS = EEPROM_IREF+2,
         EEPROM_SP3T_REVERSE,
     };
+    uint8_t SwrToMeter(uint16_t swrCoded);
+    void PwrToMeter(uint16_t toDisplay); // units of PWR_SCALE
 }
 
 namespace movingAverage{
@@ -523,6 +525,44 @@ void loop()
                 wdt_enable(WDTO_1S);
 #endif
                 Serial.println("LED test end");
+            }
+            else if (strcmp(buf, "METERS") == 0)
+            {
+                static const int NUM_TESTS = 6;
+                static const uint16_t PowersToDisplay[NUM_TESTS] = 
+                {
+                    PWR_SCALE * 5,
+                    PWR_SCALE * 20,
+                    PWR_SCALE * 50,
+                    PWR_SCALE * 100,
+                    PWR_SCALE * 200,
+                    PWR_SCALE * 300
+                };
+                static const uint16_t SwrsToDisplay[NUM_TESTS] = 
+                {
+                    static_cast<uint16_t>(1.5f * (1 << SWR_SCALE_PWR)),
+                    static_cast<uint16_t>(2.f * (1 << SWR_SCALE_PWR)),
+                    static_cast<uint16_t>(3.f * (1 << SWR_SCALE_PWR)),
+                    static_cast<uint16_t>(4.f * (1 << SWR_SCALE_PWR)),
+                    static_cast<uint16_t>(6.f * (1 << SWR_SCALE_PWR)),
+                    static_cast<uint16_t>(10.f * (1 << SWR_SCALE_PWR)),
+                };
+#ifdef SUPPORT_WDT
+                wdt_disable();
+#endif
+                for (uint8_t i = 0; i < NUM_TESTS; i += 1)
+                {
+                    for (uint8_t j = 0; j < 10; j++)
+                    {
+                        PwrToMeter(PowersToDisplay[i]);
+                        SwrToMeter(SwrsToDisplay[i]);
+                        delay(10);
+                    }
+                    delay(1000);
+                }
+#ifdef SUPPORT_WDT
+                wdt_enable(WDTO_1S);
+#endif
             }
             else if (strcmp(buf, "ADC") == 0)
                 AdcTest();
@@ -1419,6 +1459,15 @@ namespace {
         }
     };
 
+    uint8_t SwrToMeter(uint16_t swrCoded)
+    {
+        uint16_t v = MeterInvert<SwrMeter::PWR_ENTRIES>::TableLookup(swrCoded, SwrMeter::PwmToSwr);
+        v = MeterInvert<SwrMeter::PWR_ENTRIES>::map(v);
+        static MeterFilter meterFilter; // don't jerk the meter around too quickly
+        analogWrite(SwrMeterPinOut, meterFilter.apply(v));
+        return (uint8_t)v;
+    }
+
     uint8_t DisplaySwr()
     {
         static movingAverage::AvgSinceLastCheck average;
@@ -1447,12 +1496,7 @@ namespace {
             else
                 displayValue = INFINITE_SWR << SWR_SCALE_PWR;
         }
-        uint16_t swrCoded = (uint16_t)displayValue;
-        uint16_t v = MeterInvert<SwrMeter::PWR_ENTRIES>::TableLookup(swrCoded, SwrMeter::PwmToSwr);
-        v = MeterInvert<SwrMeter::PWR_ENTRIES>::map(v);
-        static MeterFilter meterFilter; // don't jerk the meter around too quickly
-        analogWrite(SwrMeterPinOut, meterFilter.apply(v));
-        return (uint8_t)v;
+        return SwrToMeter(static_cast<uint16_t>(displayValue));
     }
 
     bool FrontPanelLamps()
@@ -2093,6 +2137,14 @@ namespace {
 #endif
     }
 
+    void PwrToMeter(uint16_t toDisplay)
+    {
+        uint16_t m = MeterInvert<PwrMeter::PWR_ENTRIES>::TableLookup(toDisplay, PwrMeter::PwmToPwr);
+        auto v = MeterInvert<PwrMeter::PWR_ENTRIES>::map(m);
+        static MeterFilter meterFilter;
+        analogWrite(RfMeterPinOut, meterFilter.apply(v));
+    }
+
     void DisplayPwr(DisplayPower_t v)
     {
         static unsigned long lastHighTime;
@@ -2157,10 +2209,7 @@ namespace {
                 leds.SetHighLed(false);
             }
         }
-        uint16_t m = MeterInvert<PwrMeter::PWR_ENTRIES>::TableLookup(toDisplay, PwrMeter::PwmToPwr);
-        v = MeterInvert<PwrMeter::PWR_ENTRIES>::map(m);
-        static MeterFilter meterFilter;
-        analogWrite(RfMeterPinOut, meterFilter.apply(v));
+        PwrToMeter(toDisplay);
     }
 }
 
