@@ -54,7 +54,7 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 
 // There is another compile time option in PowerMeterLEDs.h
 
-#define SUPPORT_WDT /* READ THE PARAGRAPH BELOW*/
+//#define SUPPORT_WDT /* READ THE PARAGRAPH BELOW*/
 
 /* do NOT enable the SUPPORT_WDT symbol when using the Pro Mini with its default boot loader.
 ** If you do not know what "default boot loader" means, then also do NOT enable SUPPORT_WDT

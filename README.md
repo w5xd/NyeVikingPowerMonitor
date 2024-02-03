@@ -46,7 +46,8 @@ for duplicating this retrofit are linked below. Two additional projects are docu
 <li>A work-alike console can be bult using the same retrofit PCB and it fits in the 3D printed enclosure documented below.
 <li>The directional coupler documented below supports the range 1.8MHz to 29MHz and power between 5W to 3000W. 
 and the retrofit PCB will work with it, whether in an OEM console that maybe came without a coupler, or with
-the work-alike console. (The unmodifed OEM console will <i>not</i> work with this coupler, even though the
+the work-alike console. (The only combination that doesn't work is the 
+unmodifed OEM console will <i>not</i> work with this coupler, even though the
 connectors are compatible.)
 </ul>
 
@@ -346,8 +347,8 @@ Two machines screws, #2 x 7/16" with nuts hold the LED holder to the bracket.
 <li>The mating DC power connector for the OEM console is the 
 <a href='https://www.digikey.com/en/products/detail/cui-devices/PP3-002B/992137'>CUI Device 3-002B</a>.</li>
 <li>Quantity 6 of the 5mm T 1-3/4 RGB LED 
-<a href='https://www.digikey.com/en/products/detail/everlight-electronics-co-ltd/EALP05RDMRGBA0/11200826'>
-https://www.digikey.com/en/products/detail/everlight-electronics-co-ltd/EALP05RDMRGBA0/11200826</a>. These
+<a href='https://www.digikey.com/en/products/detail/kingbright/WP154A4SEJ3VBDZGW-CA/6569334'>
+https://www.digikey.com/en/products/detail/kingbright/WP154A4SEJ3VBDZGW-CA/6569334</a>. These
 LEDs are needed if you either retrofit an OEM console and want to use RGB LEDs, or if you build a 
 stand alone work-alike
 console.</li>
