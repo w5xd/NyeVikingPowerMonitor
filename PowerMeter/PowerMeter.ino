@@ -540,12 +540,12 @@ void loop()
                 };
                 static const uint16_t SwrsToDisplay[NUM_TESTS] = 
                 {
-                    static_cast<uint16_t>(1.5f * (1 << SWR_SCALE_PWR)),
-                    static_cast<uint16_t>(2.f * (1 << SWR_SCALE_PWR)),
-                    static_cast<uint16_t>(3.f * (1 << SWR_SCALE_PWR)),
-                    static_cast<uint16_t>(4.f * (1 << SWR_SCALE_PWR)),
-                    static_cast<uint16_t>(6.f * (1 << SWR_SCALE_PWR)),
-                    static_cast<uint16_t>(10.f * (1 << SWR_SCALE_PWR)),
+                    static_cast<uint16_t>(1.5f * SWR_SCALE),
+                    static_cast<uint16_t>(2.f * SWR_SCALE),
+                    static_cast<uint16_t>(3.f * SWR_SCALE),
+                    static_cast<uint16_t>(4.f * SWR_SCALE),
+                    static_cast<uint16_t>(6.f * SWR_SCALE),
+                    static_cast<uint16_t>(10.f * SWR_SCALE),
                 };
 #ifdef SUPPORT_WDT
                 wdt_disable();
