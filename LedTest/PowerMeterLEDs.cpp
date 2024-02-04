@@ -1,5 +1,5 @@
 #include "PowerMeterLEDs.h"
-
+#define DEBUG 0
 static const int AloLockPinOut = 13;
         
 PowerMeterLeds::PowerMeterLeds(uint8_t pwrPin, uint8_t Laddr, uint8_t Raddr)
@@ -274,37 +274,39 @@ void PowerMeterLeds::test()
         }
     }
     setAll(false);
-    Serial.println("SENSE");
+#if DEBUG
+    Serial.println(F("SENSE"));
     SetSenseLed(true);
     loop(millis());
     delay(1000);
-    Serial.println("LOCK");
+    Serial.println(F("LOCK"));
     SetSenseLed(false);
     SetAloLock(true);
     loop(millis());
     delay(1000);
-    Serial.println("SAMPLE");
+    Serial.println(F("SAMPLE"));
     SetAloLock(false);
     SetSampleLed(true);
     loop(millis());
     delay(1000);
-    Serial.println("HOLD");
+    Serial.println(F("HOLD"));
     SetSampleLed(false);
     SetHoldLed(true);
     loop(millis());
     delay(1000);
-    Serial.println("LOW");
+    Serial.println(F("LOW"));
     SetHoldLed(false);
     SetLowLed(true);
     loop(millis());
     delay(1000);
-    Serial.println("HIGH");
+    Serial.println(F("HIGH"));
     SetLowLed(false);
     SetHighLed(true);
     loop(millis());
     delay(1000);
 
     setAll(false);
+#endif
 }
 
 void PowerMeterLeds::setAll(bool turnOn)

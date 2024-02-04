@@ -166,12 +166,14 @@ namespace {
     PowerMeterLeds leds(Tlc59108PowerEnablePinOut);
     int8_t AverageSwitchPinIn = SP3TinPinIn1;
     int8_t PeakSwitchPinIn = SP3TinPinIn2;
+    uint16_t PowerMinToDisplay = 10; // in DisplayPower_t units, 1/128 W
 
     enum EEPROM_ASSIGNMENTS {
         EEPROM_SWR_LOCK, EEPROM_PWR_LOCK, EEPROM_FWD_CALIBRATION, EEPROM_REFL_CALIBRATION, EEPROM_POT_MAX,
         EEPROM_POT_REVERSE = EEPROM_POT_MAX + 2,
         EEPROM_IREF, EEPROM_BRIGHTNESS = EEPROM_IREF+2,
-        EEPROM_SP3T_REVERSE,
+        EEPROM_SP3T_REVERSE, EEPROM_MINPWR,
+        EEPROM_USED = EEPROM_MINPWR + 2
     };
     uint8_t SwrToMeter(uint16_t swrCoded);
     void PwrToMeter(uint16_t toDisplay); // units of PWR_SCALE
@@ -361,6 +363,7 @@ namespace Comm {
     enum OutputToSerial_t { NO_OUTPUT_TO_SERIAL, AVG_OUTPUT_TO_SERIAL, PEAK_OUTPUT_TO_SERIAL };
         OutputToSerial_t OutputToSerial;
         unsigned long OutputStartedMsec;
+        bool forever = false;
         void CommUpdateForwardAndReverse();
         const unsigned long OUTPUT_TIMEOUT_MSEC = 10000;
 }
@@ -414,6 +417,7 @@ void setup() {
         PeakSwitchPinIn = SP3TinPinIn1;
     }
 
+
     // present some info about our calibration and version number
     Serial.begin(SERIAL_BAUD);
     Serial.println(F("W5XD PowerMeter 2.1"));
@@ -441,6 +445,12 @@ void setup() {
     Serial.println(NominalCouplerResistance);
     Serial.print(F("SP3TUPDOWN = "));
     Serial.println(EEPROM.read((int)EEPROM_SP3T_REVERSE) != 0 ? "0" : "1");
+    uint16_t pmin;
+    EEPROM.get((int)EEPROM_MINPWR, pmin);
+    if (pmin != 0xFFFF)
+        PowerMinToDisplay = pmin;
+    Serial.print(F("PMIN="));
+    Serial.println(PowerMinToDisplay);
 
 #ifdef SUPPORT_WDT
     wdt_enable(WDTO_1S);
@@ -481,6 +491,12 @@ void loop()
                 Comm::OutputToSerial = Comm::PEAK_OUTPUT_TO_SERIAL;
                 Comm::OutputStartedMsec = now;
             }
+            else if (strcmp(buf, "P FOREVER") == 0)
+            {
+                Comm::forever = !Comm::forever;
+                Serial.print(F("P Forever ="));
+                Serial.println(Comm::forever ? "1" : "0");
+            }
             else if (strncmp(buf, "POTREVERSE=", 11) == 0)
                 EEPROM.write((int)EEPROM_POT_REVERSE, static_cast<uint8_t>(buf[11] == '1' ? 0 : 1));
             else if (strncmp(buf, "POTMAX=", 7) == 0)
@@ -502,6 +518,11 @@ void loop()
                     AverageSwitchPinIn = SP3TinPinIn1;
                     PeakSwitchPinIn = SP3TinPinIn2;
                 }
+            }
+            else if (strncmp(buf, "PMIN=", 5) == 0)
+            {
+                PowerMinToDisplay = atoi(buf+5);
+                EEPROM.put((int)EEPROM_MINPWR, PowerMinToDisplay);
             }
             else if (strcmp(buf, "POT") == 0)
             {
@@ -645,14 +666,13 @@ void loop()
         leds.SetAloLock(false);
     }
 
-    if (now - Comm::OutputStartedMsec > Comm::OUTPUT_TIMEOUT_MSEC)
+    if (!Comm::forever && (now - Comm::OutputStartedMsec > Comm::OUTPUT_TIMEOUT_MSEC))
         Comm::OutputToSerial = Comm::NO_OUTPUT_TO_SERIAL;
 
     if (now - CommUpdateTime >= CommUpdateIntervalMsec)
     {
         CommUpdateTime = now;
-        if (Comm::OutputToSerial != Comm::NO_OUTPUT_TO_SERIAL)
-            Comm::CommUpdateForwardAndReverse();
+        Comm::CommUpdateForwardAndReverse();
     }
 
     // Update the displays less frequently than loop() can excute
@@ -2153,14 +2173,16 @@ namespace {
         uint16_t toDisplay = v;
 
         unsigned long now = millis();
-        if (v == 0)
+        if (v < PowerMinToDisplay)
         {
             unsigned long timeOn = now - lastOnTime;
             if ((timeOn > HoldPwrLampsOnMsec) && (timeOn > HoldTimePotMsec))
             {
                 leds.SetLowLed(false);
+                leds.BlinkLed(PowerMeterLeds::FrontPanel::RANGE_LOW, false);
                 leds.SetHighLed(false);
             }
+            toDisplay = 0;
         }
         else
         {
@@ -2467,6 +2489,8 @@ namespace sleep {
 namespace Comm {
         void CommUpdateForwardAndReverse()
         {
+            if (OutputToSerial == NO_OUTPUT_TO_SERIAL)
+                return;
             static bool printedZero = false;
             static movingAverage::AvgSinceLastCheck average;
             uint32_t fV;
