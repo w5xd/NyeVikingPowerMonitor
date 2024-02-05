@@ -2,8 +2,8 @@
 #include "Tlc59108.h"
 
 //only one of the below
-#define LEDS_ARE_RGY
-///#define LEDS_ARE_RGB
+//#define LEDS_ARE_RGY
+#define LEDS_ARE_RGB
 
 class PowerMeterLeds {
 public: 
@@ -30,6 +30,7 @@ public:
     void wake();
 
     void test();
+    void setAll(bool);
 
     Tlc59108 &LeftDevice() {return m_BankLeft;}
     Tlc59108 &RightDevice() {return m_BankRight;}

@@ -1,5 +1,5 @@
 #include "PowerMeterLEDs.h"
-
+#define DEBUG 0
 static const int AloLockPinOut = 13;
         
 PowerMeterLeds::PowerMeterLeds(uint8_t pwrPin, uint8_t Laddr, uint8_t Raddr)
@@ -254,30 +254,66 @@ void PowerMeterLeds::test()
             bright[i] = 0;
         m_BankLeft.UpdatePWM(bright);
         m_BankRight.UpdatePWM(bright);
-        delay(1000);
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
                     bright[j] = (j==i) ? m_brightness : 0;
             m_BankLeft.UpdatePWM(bright);
-            delay(1000);
+            delay(400);
         }
         for (int i = 0; i < 8; i++)
             bright[i] = 0;
         m_BankRight.UpdatePWM(bright);
         m_BankLeft.UpdatePWM(bright);
-        delay(1000);
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
                 bright[j] = (j == i) ? m_brightness : 0;
             m_BankRight.UpdatePWM(bright);
-            delay(1000);
+            delay(400);
         }
     }
-    for (int i = 0; i < 8; i++)
-        m_StateLeft[i] = m_StateRight[i] = bright[i] = 0;
-    m_BankRight.UpdatePWM(bright);
-    m_BankLeft.UpdatePWM(bright);
+    setAll(false);
+#if DEBUG
+    Serial.println(F("SENSE"));
+    SetSenseLed(true);
+    loop(millis());
+    delay(1000);
+    Serial.println(F("LOCK"));
+    SetSenseLed(false);
+    SetAloLock(true);
+    loop(millis());
+    delay(1000);
+    Serial.println(F("SAMPLE"));
+    SetAloLock(false);
+    SetSampleLed(true);
+    loop(millis());
+    delay(1000);
+    Serial.println(F("HOLD"));
+    SetSampleLed(false);
+    SetHoldLed(true);
+    loop(millis());
+    delay(1000);
+    Serial.println(F("LOW"));
+    SetHoldLed(false);
+    SetLowLed(true);
+    loop(millis());
+    delay(1000);
+    Serial.println(F("HIGH"));
+    SetLowLed(false);
+    SetHighLed(true);
+    loop(millis());
+    delay(1000);
 
+    setAll(false);
+#endif
+}
+
+void PowerMeterLeds::setAll(bool turnOn)
+{
+    uint8_t bright[8];
+    for (int j = 0; j < 8; j++)
+        m_StateLeft[j] = m_StateRight[j] = bright[j] = turnOn ? m_brightness : 0;
+    m_BankLeft.UpdatePWM(bright);
+    m_BankRight.UpdatePWM(bright);
 }
