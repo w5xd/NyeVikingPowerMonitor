@@ -44,8 +44,8 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 #define W5XD_COUPLER // The coupler in ths report, wich requires a 100/320 voltage divider
 
 // Use one of the following two
-//#define OEM_METER_SCALES  // the meters are series resistor with PWM=250 is full scale, as painted by Nye Viking
-#define CUSTOM_METER_SCALES // the meters are series resistor with PWM=250 is full scale, with meter face backings printed per this repo
+#define OEM_METER_SCALES  // the meters are series resistor with PWM=250 is full scale, as painted by Nye Viking
+//#define CUSTOM_METER_SCALES // the meters are series resistor with PWM=250 is full scale, with meter face backings printed per this repo
 
 /* The above two compile directives switch between look up table entries. Those look up tables are part of
 ** the elimination of any need floating point at run time, and any need for trig or log functions.
@@ -167,13 +167,15 @@ namespace {
     int8_t AverageSwitchPinIn = SP3TinPinIn1;
     int8_t PeakSwitchPinIn = SP3TinPinIn2;
     uint16_t PowerMinToDisplay = 10; // in DisplayPower_t units, 1/128 W
+    unsigned AdcMinNonzero = 4;
 
     enum EEPROM_ASSIGNMENTS {
         EEPROM_SWR_LOCK, EEPROM_PWR_LOCK, EEPROM_FWD_CALIBRATION, EEPROM_REFL_CALIBRATION, EEPROM_POT_MAX,
         EEPROM_POT_REVERSE = EEPROM_POT_MAX + 2,
         EEPROM_IREF, EEPROM_BRIGHTNESS = EEPROM_IREF+2,
         EEPROM_SP3T_REVERSE, EEPROM_MINPWR,
-        EEPROM_USED = EEPROM_MINPWR + 2
+        EEPROM_ADCMIN = EEPROM_MINPWR + 2,
+        EEPROM_USED = EEPROM_ADCMIN + 2
     };
     uint8_t SwrToMeter(uint16_t swrCoded);
     void PwrToMeter(uint16_t toDisplay); // units of PWR_SCALE
@@ -451,12 +453,52 @@ void setup() {
         PowerMinToDisplay = pmin;
     Serial.print(F("PMIN="));
     Serial.println(PowerMinToDisplay);
+    EEPROM.get((int)EEPROM_ADCMIN, pmin);
+    if (pmin != 0xFFFF)
+        AdcMinNonzero = pmin;
+    Serial.print(F("ADCMIN="));
+    Serial.println(AdcMinNonzero);
 
 #ifdef SUPPORT_WDT
     wdt_enable(WDTO_1S);
     /* FYI: any call to delay() for more than 1S will trigger the watchdog 
     ** unless wdt_disable() is called first. And, of course, wdt_enable */
 #endif
+}
+
+namespace cmd {
+    enum COMMAND_ENUM { P_ON, P_OFF, P_PEAK, P_FOREVER, POTREVERSE, POTMAX, SP3TUPDOWN, PMIN, POT, IREF,LED, METERS, ADCX, BRI, DUMP, RSCALI, ADCMIN, NUM_COMMANDS};
+    const int MAX_COMMAND_LEN = 12;
+    const char c0[] PROGMEM = "P ON";
+    const char c1[] PROGMEM = "P OFF";
+    const char c2[] PROGMEM = "P PEAK";
+    const char c3[] PROGMEM = "P FOREVER";
+    const char c4[] PROGMEM = "POTREVERSE=";
+    const char c5[] PROGMEM = "POTMAX=";
+    const char c6[] PROGMEM = "SP3TUPDOWN=";
+    const char c7[] PROGMEM = "PMIN=";
+    const char c8[] PROGMEM = "POT";
+    const char c9[] PROGMEM = "IREF=";
+    const char c10[] PROGMEM = "LED";
+    const char c11[] PROGMEM = "METERS";
+    const char c12[] PROGMEM = "ADC";
+    const char c13[] PROGMEM = "BRI=";
+    const char c14[] PROGMEM = "DUMP";
+    const char c15[] PROGMEM = "RSCALI";
+    const char c16[] PROGMEM = "ADCMIN=";
+    const char *const tbl[NUM_COMMANDS] PROGMEM = {c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16};
+    static_assert(NUM_COMMANDS == 17, "command table mismatch");
+
+    int strncmp(const char *b, COMMAND_ENUM e, uint8_t len)
+    {
+        char cmd[MAX_COMMAND_LEN];
+        strcpy_P(cmd, (char*)pgm_read_ptr(&(tbl[static_cast<int>(e)])));
+        return ::strncmp(b, cmd, len);
+    }
+    int strcmp(const char *b, COMMAND_ENUM e)
+    {
+        return strncmp(b, e, 1 + ::strlen(b));
+    }
 }
 
 void loop()
@@ -479,32 +521,32 @@ void loop()
         if (inChar == '\r' || inChar == '\n')
         {
             buf[numInBuf] = 0;
-            if (strcmp(buf, "P ON") == 0)
+            if (cmd::strcmp(buf, cmd::P_ON) == 0)
             {
                 Comm::OutputToSerial = Comm::AVG_OUTPUT_TO_SERIAL;
                 Comm::OutputStartedMsec = now;
             }
-            else if (strcmp(buf, "P OFF") == 0)
+            else if (cmd::strcmp(buf, cmd::P_OFF) == 0)
                 Comm::OutputToSerial = Comm::NO_OUTPUT_TO_SERIAL;
-            else if (strcmp(buf, "P PEAK") == 0)
+            else if (cmd::strcmp(buf, cmd::P_PEAK) == 0)
             {
                 Comm::OutputToSerial = Comm::PEAK_OUTPUT_TO_SERIAL;
                 Comm::OutputStartedMsec = now;
             }
-            else if (strcmp(buf, "P FOREVER") == 0)
+            else if (cmd::strcmp(buf, cmd::P_FOREVER) == 0)
             {
                 Comm::forever = !Comm::forever;
                 Serial.print(F("P Forever ="));
                 Serial.println(Comm::forever ? "1" : "0");
             }
-            else if (strncmp(buf, "POTREVERSE=", 11) == 0)
+            else if (cmd::strncmp(buf, cmd::POTREVERSE, 11) == 0)
                 EEPROM.write((int)EEPROM_POT_REVERSE, static_cast<uint8_t>(buf[11] == '1' ? 0 : 1));
-            else if (strncmp(buf, "POTMAX=", 7) == 0)
+            else if (cmd::strncmp(buf, cmd::POTMAX, 7) == 0)
             {
                 uint16_t pmax = atoi(buf+7);
                 EEPROM.put((int)EEPROM_POT_MAX, pmax);
             }
-            else if (strncmp(buf, "SP3TUPDOWN=", 11) == 0)
+            else if (cmd::strncmp(buf, cmd::SP3TUPDOWN, 11) == 0)
             {
                 bool reverse = buf[11] == '1';
                 EEPROM.write((int)EEPROM_SP3T_REVERSE, static_cast<uint8_t>(reverse ? 0 : 1));
@@ -519,12 +561,12 @@ void loop()
                     PeakSwitchPinIn = SP3TinPinIn2;
                 }
             }
-            else if (strncmp(buf, "PMIN=", 5) == 0)
+            else if (cmd::strncmp(buf, cmd::PMIN, 5) == 0)
             {
                 PowerMinToDisplay = atoi(buf+5);
                 EEPROM.put((int)EEPROM_MINPWR, PowerMinToDisplay);
             }
-            else if (strcmp(buf, "POT") == 0)
+            else if (cmd::strcmp(buf, cmd::POT) == 0)
             {
                 auto potRaw = analogRead(HoldTimePotAnalogPinIn);
                 auto potRead = readHoldPot();
@@ -533,9 +575,9 @@ void loop()
                 Serial.print(F(" read= "));
                 Serial.println(potRead);
             }
-            else if (strncmp(buf, "IREF=", 5) == 0)
+            else if (cmd::strncmp(buf, cmd::IREF, 5) == 0)
                 EEPROM.put((int)EEPROM_IREF, atoi(buf+5));
-            else if (strcmp(buf, "LED") == 0)
+            else if (cmd::strcmp(buf, cmd::LED) == 0)
             {
                 Serial.println("LED test");
 #ifdef SUPPORT_WDT
@@ -547,7 +589,7 @@ void loop()
 #endif
                 Serial.println("LED test end");
             }
-            else if (strcmp(buf, "METERS") == 0)
+            else if (cmd::strcmp(buf, cmd::METERS) == 0)
             {
                 static const int NUM_TESTS = 6;
                 static const uint16_t PowersToDisplay[NUM_TESTS] = 
@@ -585,9 +627,14 @@ void loop()
                 wdt_enable(WDTO_1S);
 #endif
             }
-            else if (strcmp(buf, "ADC") == 0)
+            else if (cmd::strcmp(buf, cmd::ADCX) == 0)
                 AdcTest();
-            else if (strncmp(buf, "BRI=", 4) == 0)
+            else if (cmd::strncmp(buf, cmd::ADCMIN, 7) == 0)
+            {
+                AdcMinNonzero = atoi(buf + 7);
+                EEPROM.put((int)EEPROM_ADCMIN, AdcMinNonzero);
+            }
+            else if (cmd::strncmp(buf, cmd::BRI, 4) == 0)
             {
                 uint8_t v = atoi(buf + 4);
                 Serial.print(F("BRI="));
@@ -598,12 +645,12 @@ void loop()
                     EEPROM.write((int)EEPROM_BRIGHTNESS, v);
                 }
             }
-            else if (strcmp(buf, "DUMP") == 0)
+            else if (cmd::strcmp(buf, cmd::DUMP) == 0)
             {
                 leds.LeftDevice().dump();
                 leds.RightDevice().dump();
             }
-            else if (strcmp(buf, "RSCALI") == 0)
+            else if (cmd::strcmp(buf, cmd::RSCALI) == 0)
             {
                 EEPROM.write((int)EEPROM_FWD_CALIBRATION, 0xff);
                 EEPROM.write((int)EEPROM_REFL_CALIBRATION, 0xff);
@@ -1384,7 +1431,6 @@ namespace {
     private:
         int value;
     };
-    const unsigned INTERNAL_MIN = 4; 
 
     AcquiredVolts_t fwdHires;
     AcquiredVolts_t revHires;
@@ -1398,15 +1444,15 @@ namespace {
 
         // start with the Undivided ADC input
         fwdHires = analogRead(ForwardPwrAnalogUndividedPinIn); // 100 usec
-        if (fwdHires <= INTERNAL_MIN)
+        if (fwdHires <= AdcMinNonzero)
             fwdHires = 0;
         if (fwdHires >= MAXED_ADC)
         {   // undivided voltage at ADC is above 5V, so use the divided ones
             fwdHires = analogRead(ForwardPwrAnalogLowPinIn); // 100 usec
-            if (fwdHires <= INTERNAL_MIN)
+            if (fwdHires <= AdcMinNonzero)
                 fwdHires = 0;
             revHires = analogRead(ReversePwrAnalogLowPinIn); // 100 usec
-            if (revHires <= INTERNAL_MIN)
+            if (revHires <= AdcMinNonzero)
                 revHires = 0;
             fwdHires *= VOLTS_LOW_MULTIPLIER;
             revHires *= VOLTS_LOW_MULTIPLIER;
@@ -1414,7 +1460,7 @@ namespace {
         else
         {
             revHires = analogRead(ReversePwrAnalogUndividedPinIn); // 100 usec
-            if (revHires <= INTERNAL_MIN)
+            if (revHires <= AdcMinNonzero)
                 revHires = 0;
             fwdHires *= VOLTS_UNDIVIDED_MULTIPLER;
             revHires *= VOLTS_UNDIVIDED_MULTIPLER;
@@ -2563,11 +2609,11 @@ namespace {
         auto fRaw = movingAverage::fwdPwr();
         auto caliF = calibrateFwdPower(fRaw);
         auto watts = SquareToWatts(caliF);
-        Serial.print("fRaw=");
+        Serial.print(F("fRaw="));
         Serial.print(fRaw);
-        Serial.print("VV, caliF=");
+        Serial.print(F("VV, caliF="));
         Serial.print(caliF);
-        Serial.print("VV, W=");
+        Serial.print(F("VV, W="));
         Serial.println(watts);
     }
 }
