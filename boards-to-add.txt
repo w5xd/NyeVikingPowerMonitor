@@ -1,7 +1,7 @@
 #To support the Atmega328 watchdog timer feature when using
 #the Sparkfun Pro Mini, the bootloader must be replaced.
 #This section added to boards.txt in my Arduino IDE install
-#was enough to all a "ATmega328P (5V, Optiboot)" option to
+#was enough to add a "ATmega328P (5V, Optiboot)" option to
 #my Arduino IDE installation. I have noticed that the IDE
 #changes over time, so take this as a starting point.
 #At this time, the key differences from the standard installed

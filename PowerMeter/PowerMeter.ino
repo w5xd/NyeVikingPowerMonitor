@@ -20,10 +20,11 @@ static_assert(sizeof(int32_t)==4, "int32_t");
 static_assert(sizeof(uint64_t)==8, "uint64_t");
 
 /* Nye Viking RF Power Meter
- * Runs like the original analog circuit board, but on Arduino. This code was tested with the RFM-003, the 3000W model
+ * Behaves like the original analog circuit board, but on Arduino. This code was tested with the RFM-003, the 3000W model
  * This sketch runs on an Arduino Pro Mini installed in either of two hardware configurations:
- * a) On a PCB (also documented in this repository) installed in an RFM-003 or RFM-005 in place of the OEM analog board
- * b) On the same PCB installed in an enclosure designed to mimic the OEM enclosure. The meters are different
+ * a) On the PCB (also documented in this repository) installed in an RFM-003 in place of the OEM analog board
+ * ...OR...
+ * b) On the PCB installed in an enclosure designed to mimic the OEM enclosure. 
  * 
  * Compile time #define's distinguish the arithmetic for these hardware options:
  * a) the OEM coupler 
@@ -35,13 +36,13 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
  * c) RGB LEDs for the front panel 
         versus RGY.
         (which LED gets turned on when differs)
-*  d) Watchdog timer support. This is an extra reliability feature that requires access to an ISP
+*  d) Watchdog timer support. This is an extra reliability feature that progamming the Arduino with an ISP
  */
 
 // Use one of the following two. 
 // Affects the arithmetic calculating power/SWR from the ADCs
-//#define OEM_COUPLER // The OEM coupler, which, in turn requires a 15/115 input voltage divider at R12/R13/R16/R17
-#define W5XD_COUPLER // The coupler in ths report, wich requires a 100/320 voltage divider
+#define OEM_COUPLER // The OEM coupler, which, in turn requires a 15/115 input voltage divider at R12/R13/R16/R17
+//#define W5XD_COUPLER // The coupler in ths report, wich requires a 100/320 voltage divider
 
 // Use one of the following two
 #define OEM_METER_SCALES  // the meters are series resistor with PWM=250 is full scale, as painted by Nye Viking
@@ -52,7 +53,7 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 ** We do end up with some 32 bit and 64 bit long integer arithmetic, including divides, but floating point
 ** is avoided by using the two fixed point integer typedef's below, AcquiredVolts_t and DisplayPower_t. */
 
-// There is another compile time option in PowerMeterLEDs.h
+// There is the LEDS_ARE_RGB compile time option in PowerMeterLEDs.h
 
 //#define SUPPORT_WDT /* READ THE PARAGRAPH BELOW*/
 
@@ -63,7 +64,7 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 ** The WDT support is a backup for the case something goes horribly wrong in the sketch code below.
 ** It "resets" the arduino. But if the default boot loader is what is in FLASH on the Arduino
 ** Pro Mini (and it WILL BE unless you have used a programmer to change it) then the WDT makes
-** any problem worse. You will not get control of the Power Meter again without removing all power.
+** any such problem worse. You will not get control of the Power Meter again without removing all power.
 ** That includes removing the battery backup! You'll have to open the enclosure and pull one of the
 ** AA cells. The author used a programmer ("Arduino as ISP") to replace the bootloader with the
 ** optiboot loader. That requires changes to boards.txt in the Arduino IDE and, of course,
@@ -422,7 +423,7 @@ void setup() {
 
     // present some info about our calibration and version number
     Serial.begin(SERIAL_BAUD);
-    Serial.println(F("W5XD PowerMeter 2.1"));
+    Serial.println(F("W5XD PowerMeter 2.2"));
     Serial.print(F("Forward CAL = 0x"));
     Serial.println(fwdCalibration, HEX);
     Serial.print(F("Reflected CAL = 0x"));
@@ -522,32 +523,34 @@ void loop()
         {
             buf[numInBuf] = 0;
             if (cmd::strcmp(buf, cmd::P_ON) == 0)
-            {
+            {   // send serial port AVG power output 
                 Comm::OutputToSerial = Comm::AVG_OUTPUT_TO_SERIAL;
                 Comm::OutputStartedMsec = now;
             }
-            else if (cmd::strcmp(buf, cmd::P_OFF) == 0)
+            else if (cmd::strcmp(buf, cmd::P_OFF) == 0) // don't send serial port power
                 Comm::OutputToSerial = Comm::NO_OUTPUT_TO_SERIAL;
             else if (cmd::strcmp(buf, cmd::P_PEAK) == 0)
-            {
+            {   // send serial port PEAK power output
                 Comm::OutputToSerial = Comm::PEAK_OUTPUT_TO_SERIAL;
                 Comm::OutputStartedMsec = now;
             }
             else if (cmd::strcmp(buf, cmd::P_FOREVER) == 0)
-            {
+            {   // normal operation is that serial port output must be requested every 10 seconds. Keep it on forever
                 Comm::forever = !Comm::forever;
                 Serial.print(F("P Forever ="));
                 Serial.println(Comm::forever ? "1" : "0");
             }
             else if (cmd::strncmp(buf, cmd::POTREVERSE, 11) == 0)
+            {   /* If the hold pot is wired backwards, fix in software*/
                 EEPROM.write((int)EEPROM_POT_REVERSE, static_cast<uint8_t>(buf[11] == '1' ? 0 : 1));
+            }
             else if (cmd::strncmp(buf, cmd::POTMAX, 7) == 0)
-            {
+            {   /* If the hold pot won't go full scale, EEPROM setting of 0-1023 to specify*/
                 uint16_t pmax = atoi(buf+7);
                 EEPROM.put((int)EEPROM_POT_MAX, pmax);
             }
             else if (cmd::strncmp(buf, cmd::SP3TUPDOWN, 11) == 0)
-            {
+            {   /* The front panel SP3T switch can be installed upside down. Fix in software here*/
                 bool reverse = buf[11] == '1';
                 EEPROM.write((int)EEPROM_SP3T_REVERSE, static_cast<uint8_t>(reverse ? 0 : 1));
                 if (reverse)
@@ -563,11 +566,12 @@ void loop()
             }
             else if (cmd::strncmp(buf, cmd::PMIN, 5) == 0)
             {
+                /* Units of 1/128W, set the minium power to keep the display turned on */
                 PowerMinToDisplay = atoi(buf+5);
                 EEPROM.put((int)EEPROM_MINPWR, PowerMinToDisplay);
             }
             else if (cmd::strcmp(buf, cmd::POT) == 0)
-            {
+            {   /* diagnostic hold pot readout*/
                 auto potRaw = analogRead(HoldTimePotAnalogPinIn);
                 auto potRead = readHoldPot();
                 Serial.print(F("Pot raw= "));
@@ -576,9 +580,15 @@ void loop()
                 Serial.println(potRead);
             }
             else if (cmd::strncmp(buf, cmd::IREF, 5) == 0)
-                EEPROM.put((int)EEPROM_IREF, atoi(buf+5));
+            {   /* Set the LED driver chip IREF. (reference current.) 0 is dimmest, 255 is brightest */
+                uint8_t iref = atoi(buf + 5);
+                EEPROM.put((int)EEPROM_IREF, iref);
+                leds.LeftDevice().SetCurrent(iref);
+                leds.RightDevice().SetCurrent(iref);
+            }
             else if (cmd::strcmp(buf, cmd::LED) == 0)
             {
+                /* Turn each of the LEDS on/off*/
                 Serial.println("LED test");
 #ifdef SUPPORT_WDT
                 wdt_disable();
@@ -590,7 +600,8 @@ void loop()
                 Serial.println("LED test end");
             }
             else if (cmd::strcmp(buf, cmd::METERS) == 0)
-            {
+            {   /* Verify the meter labeling. Move meter movements to 
+                ** each tick on their printed scales. */
                 static const int NUM_TESTS = 6;
                 static const uint16_t PowersToDisplay[NUM_TESTS] = 
                 {
@@ -630,12 +641,12 @@ void loop()
             else if (cmd::strcmp(buf, cmd::ADCX) == 0)
                 AdcTest();
             else if (cmd::strncmp(buf, cmd::ADCMIN, 7) == 0)
-            {
+            {   /* The ADC might not go all the way to zero when there is no signal. Set the lowest nonzero value. 0-255*/
                 AdcMinNonzero = atoi(buf + 7);
                 EEPROM.put((int)EEPROM_ADCMIN, AdcMinNonzero);
             }
             else if (cmd::strncmp(buf, cmd::BRI, 4) == 0)
-            {
+            {   /* 0-255 sets the duty cycle on the LEDS. 255 brightest*/
                 uint8_t v = atoi(buf + 4);
                 Serial.print(F("BRI="));
                 Serial.println(v);
@@ -651,11 +662,12 @@ void loop()
                 leds.RightDevice().dump();
             }
             else if (cmd::strcmp(buf, cmd::RSCALI) == 0)
-            {
+            {   /* reset FWD/REFL calibration values to default*/
                 EEPROM.write((int)EEPROM_FWD_CALIBRATION, 0xff);
                 EEPROM.write((int)EEPROM_REFL_CALIBRATION, 0xff);
             }
 #ifdef SUPPORT_WDT
+            // force the watch dog timer to trigger
             else if (strcmp(buf, "WDTT") == 0)
                 while(true); // test watchdog timer
 #endif

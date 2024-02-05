@@ -34,7 +34,7 @@ The original instrument has a single circuit board. Here is a photo with its cov
 a replacement project done in 2023 that is based on a custom printed circuit board documented
 in the PCB folder. If you want the full history, the git tag 
 <a href='https://github.com/w5xd/NyeVikingPowerMonitor/tree/Final-Haywire-Prototype'>Final-Haywire-Prototype</a> 
-documents my first steps in this project back to 2016. </p>
+documents the first steps in this project back to 2016. </p>
 
 <h2>Construction</h2>
 The custom PCB is 2 inches by 4 inches. Its circuit diagram is <a href='PCB/schematics.pdf'>
@@ -60,11 +60,11 @@ front panel screws nor the bottom panel screws.</p>
 <p>I removed the original board by snipping each wire at its end at the circuit board. Some of the remaining wires
 will reach to their assigned position on the new PCB, but some will not. The custom PCB
 fits onto a 3D printed bracket that has holes to match the origin four #6 screws that held the OEM
-PCB in place, and that has size by 5mm LED holes to match the front panel LEDs. The bracket holds the
+PCB in place, and that has six by 5mm LED holes to match the front panel LEDs. The bracket holds the
 custom PCB at an angle.</p>
 <p align='center'><img alt='OEM view' src='CAD/OEM/PartsView01.jpg'/></p>
 <p>A prospective builder will want to know that, while the 12VDC connector at the back
-of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin, 2.5mmm) and
+of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin, 2.5mm) and
 outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match. The Arduino power plugs have
 a 2.1mm inner pin. </p>
 
@@ -114,15 +114,15 @@ the analog to digital conversion. Each signal input is fed undivided into an ADC
 This signal path is used for best resolution at low RF power up until the digitized voltage exceeds
 the 5V maximum at the ADC. The 100K resistor
 limits current under high power signals which can range up to about 15V for this coupler, or 26V for the
-OEM coupler. The same signal is voltage divided into a second ADC input channel, with the divider set to be enough to bring
+OEM 3000W coupler. The same signal is voltage divided into a second ADC input channel, with the divider set to be enough to bring
 the highest measureable power (3000W) down below the 5V maximum that can be digitized in this Arduino circuit. The program in the sketch
-tries the undivided voltage first, notes if it is maxed out (or close) and tries again with the divided input. This
-strategy gives good low power resolution while still accommodating 3000W without overflowing the ADC.
+tries the undivided voltage first, notes if it is maxed out and tries again with the divided input. This
+allocation of two ADC pins for each power input gives good low power resolution while still accommodating 3000W without overflowing the ADC.
 </p>
 
-<h2>How the Console gets DC Power</h2>
+<h2>Console DC Power</h2>
 <p>The DC power supply design here has one, but only one, important similarity to the OEM design: it can  
-accept external DC input at (about) 12VDC, or seamlessly switchover to battery power when external DC is not present. 
+accept external DC input at (about) 12VDC, and seamlessly switchover to battery power when external DC is not present. 
 The OEM design included four rechargable NiCad AA cells which served not only as the
 battery power source, but also as the voltage regulator to convert the 12VDC input to 
 regulated ~5VDC on its PCB circuits.</p>
@@ -136,50 +136,49 @@ design. On the other hand, it hardly needs a charger. Ninety seconds after last 
 Arduino sketch puts the CPU into
 power down sleep mode, which consumes less than 100 micro Amps (uA). Even a very modest battery, a single AAA alkaline cell,
 will 
-last through over 1000 hours of standby. The IC maintains a steady 5VDC power supply for the monitor as the battery
+last for over 1000 hours of standby. The IC maintains a steady 5VDC power supply for the monitor as the battery
 loses voltage until the battery can no longer maintain about 1V at the LTC3525, at which point the IC shuts down.
-There is no off switch, and similarly, it hardly needs one.
+There is no off switch. It doesn't need one.
 
 The maximum number of AA or AAA cells in a battery for the LTC8525 part is <b>three</b>.
 This limit is necessary in order to stay below
 its 6VDC absolute maximum battery voltage input for the LTC8525. The OEM meter from Nye Viking
-housed 4 AA NiCads. Its battery holder can be used, but one of the cells <b>must be replaced</b> with a
+houses 4 AA NiCads. That battery holder can be used, but one of the cells <b>must be replaced</b> with a
 dummy AA battery to stay
-within the ratings. The NiCads can be used (if they still work after all these years! but, again, 
+within the ratings. The original NiCads can be used (if they still work after all these years! but, again, 
 only <i>three</i> of them) and 
 they'll have to be recharged outside the
 meter.
 
 The seamless battery power switchover is implemented by Q5, Q6, and Q7. The first two are 
 complimentary MOSFETs, P-channel
-and N-channel, respectively, in a push-pull arrangement with both gates driven from the back panel DC input jack voltage.
+and N-channel, respectively, in a push-pull arrangement with their gates driven from the back panel DC input jack voltage.
 Their drain pins control the
 DC-to-DC converter's shutdown input. When that back panel jack is not
 powered, the gates are at ground voltage, which turns on the P channel, Q5, (its source pin 
 as at the battery 
 voltage, which, of course, must be present to run the device on battery power) while the 
 N channel, Q6, is off. 
-This is the battery power state of the switch. Apply power to the back panel 
+That is the battery power state of the solid state switch. Apply power to the back panel 
 jack (which will get Q6's gate above its threshold turn-on voltage) and it
 turns on the N-channel while turning the P-channel off. The drains of both Q5 & Q6 drive the SHDN input 
 of the DC-to-DC converter, 
 which turns it on in the former case of battery
 power, or off for external DC power. The 4.7K resistor limits the drain currents in the case 
-(which should never happen anyway) of both Q5 and Q6 turning on simultaneously.
+(which should never happen) of both Q5 and Q6 turning on simultaneously.
 
-The LM7805 regulator's 5V output terminal would pull 30mA or more in battery power mode if connected directly, but
- the Q7 "ideal diode" implementation
+The Q7 "ideal diode" implementation
 connects the LM7805 output
- only when DC power is present on the back panel. External
+ only when DC power is present on the back panel, because an inactive LM7805 draws about 30mA
+ when 5VDC is connected to its output. External
 DC input pulls Q7's gate more than its gate threshold above the 5V regulated power (i.e. 
-about 7V input turns on Q7 for
-its gate threshold specified at about 2V.) The LTC3525 does not need a disconnect as its SHDN 
-input accomplishes that
-function.
+~7V input turns Q7 on as
+its gate threshold specification is about 2V.) The LTC3525 does not need a disconnect as its SHDN 
+input accomplishes that function.
 
 Acheiving the less-than-100uA standby current is dependent on the details of how the FT232H 
 serial breakout is
-set up, as detailed in the following section. And the SJ1 solder jumper on the Arduino Pro Mini
+set up, as detailed in the following section. Also, the SJ1 solder jumper on the Arduino Pro Mini
 must be separated.
 
 <p>To populate a PCB without battery power support, the following part positions on the PCB may
@@ -193,18 +192,21 @@ jumpered: jp1 (near the NPC603) and jp2
 <p>
 This design has a USB interface using the FT232H that presents on a PC as a COM port. The sketch supports
 some simple Serial port commands that can be used to remotely monitor forward and reverse voltages. A USB
- jack can be installed on the back of the OEM console (if you are willing to violate any "no holes" requirement
- for your vintage part.) A USB-C port fits in a small hole drilled in the back panel's
+ jack can be installed on the back of the OEM console (if you are willing to violate a "no holes" requirement
+ for your vintage enclosure.) A USB-C port will fit in a small hole drilled in the back panel's
 upper right corner, just above the 12VDC external power jack, should you choose to drill.
 </p>
-<p> For convenience, the sketch can be
-uploaded onto the Arduino using USB. The FT232H on the Adafruit breakout board has an EEPROM that can
-be configured using <a href='https://ftdichip.com/utilities/#ft_prog'>FTDI's FT_Prog.exe</a>. 
-Use that application to set the FT232H C0 output to Drive_0, which enables the
-Arduino IDE to invoke a reset on the PCB using serial port DTR as is typical for Arduino FTDI headers.
-The programming screen looks like this:
+<p> The sketch can be
+uploaded onto the Arduino using USB. (The ISP pads can also be used to program the Arduino.) 
+ The FT232H on the Adafruit breakout board has an EEPROM that can
+be configured using <a href='https://ftdichip.com/utilities/#ft_prog'>FTDI's FT_Prog.exe</a>, also over
+ that same USB port. 
+To program the Arduino, use the FT_Prog application to set the FT232H C0 output to Drive_0. The Drive_0 setting
+ enables the
+Arduino IDE to invoke a reset on the PCB using serial port DTR per the usual convention for Arduino FTDI headers.
+The FTDI programming screen looks like this:
 <p align = 'center'><img alt='FT_Prog' src='FT_prog.png'/></p>
-That setup makes it easy to upload sketches. Be aware, however, that the <code>C0 at Drive_0</code> 
+The setup as shown makes it easy to upload sketches. Be aware, however, that the <code>C0 at Drive_0</code> 
 setting draws about 200 uA 
 continuously as long as the FT232H is connected to a powered USB port.
  If the PCB has USB power without back panel 12V DC, this will draw down the battery much more quickly.
@@ -215,15 +217,15 @@ The C8 and C9 outputs driving TXLED and RXLED shown in the screen above are for
 convenience. They make it easy to see that the 
 Arduino program upload is proceeding as expected.</p>
 
-Another 200uA (or so) is consumed, regardless of the FT232H EEPROM settings if the DTR on 
+Another ~200uA is consumed, regardless of the FT232H EEPROM settings if the DTR on 
 the FT232H's serial port is
 not asserted. This 200 uA can also be eliminated any of these ways:
 <ol type='a'>
 <li>Unplug the FT232H from the circuit such that there is no USB at all.
-<li>Power the FT232H's USB only while 12VDC is presented on the back panel. (Conversely: 
+<li>Power the FT232H's USB only while 12VDC is presented on the back panel. (Said another way: 
 if there is no 12VDC on the back panel, but there is power to the USB, the DTR pullup circuit 
 on the PCB will draw
-about 200uA that otherwise would not be consumed.)
+about 200uA from the battery.)
 </ol>
 
 <h2>Front Panel LEDs</h2>
@@ -235,7 +237,7 @@ the OEM console's front panel LEDs (labeled, left to right, SENSE, LOCK, SAMPLE,
 (because the IC's 16 channels
 cannot support 3 channels on all 6 posiitions) </p>
 
-To easily retrofit into the OEM case, use the same size T1-3/4 diodes (5mm diameter.) Instead of the OEM's 
+To easily retrofit into the OEM case, use size T1-3/4 diodes (5mm diameter.) Instead of the OEM's 
 specific color 
 diode at each of the six positions, I chose six identical RGB diodes (part number listed below)
  and programmed the sketch to synthesize 
@@ -262,7 +264,7 @@ sketch accordingly.
 
 <h2 id='Couplers'>Couplers</h2>
 <p>I was able to acquire an RFM-003 in good cosmetic condition; all the front and back panel components were good. The OEM
-PCB is easily replaced with the Arduino unit described here. But this was my second RFM-003 and it came without a coupler. 
+PCB is easily replaced with the Arduino unit described here. This was my second RFM-003 and it came without a coupler. 
 
 A build-it-yourself coupler schematic is here: <a href="PCB/schematics.pdf"><img alt='page1' src='PCB/schematics-1.png'/></a>
  A two layer PCB documented in the PCB folder makes it easy to construct.
@@ -278,18 +280,24 @@ Nye Viking design. Decreasing the turns ratio would
 increase the voltage readout, but that reduction also reduces the transformer's inductive reactance. 
 The trio of T80-2's is already just
 barely inductive enough to be used at 1.8MHz (and I don't think the 2008 Handbook design 
-really worked well at 1.8MHz.)
+worked very well at 1.8MHz.)
 The coupler as described displays the equivalent of about 7 ohms of inductive
-reactance in series with a pure 50 ohm load at 1.8MHz, and that shows up as about a 1.15:1 SWR looking into the coupler from 
-the transmitter at that frequency, even though the coupler reads out zero reflected power. The reactance of the coupler
+reactance in series with a pure 50 ohm load at 1.8MHz which shows up as about a 1.15:1 SWR looking into the coupler from 
+the transmitter at that frequency, even though the coupler reads out 1:1. The reactance of the coupler
 measured as insignificant on all the remaining HF amateur bands 3.5MHz through 29MHz. 
 <a href='PCB/CouplerPcbMap.pdf'>Map of the coupler PCB</a>
 
 <p align='center'><img alt='OEM view' src='CAD/coupler/CouplerView01.jpg'/></p>
 
 <h2>Build a Console from Scratch</h2>
+<p align='center'><img alt='NyeVikingRetrofitView02.jpg' src='NyeVikingRetrofitView02.jpg'/></p>
 <p>If you don't have an existing OEM unit to retrofit an entire workalike unit can be built using the 
-design in this repository. 
+design in this repository. The photo shows a retrofitted OEM unit on the left, and, on the
+right, a complete workalike in a 3D printed enclosure build around the same PCB. (This 
+is not the only Nye Viking RFM-3000 workalike that has been designed. 
+See the <a href='https://www.eham.net/reviews/view-product?id=4907'>RadioCraft 3000 Pro</a>.)
+</p>
+<p>
 You'll need both a coupler and a console. Resistor value choices in this workalike console
 support either the voltage levels presented by the OEM coupler, or those from the couple documented
 above. </p>
@@ -303,7 +311,8 @@ The meter faces can be replaced using those drawn by the MeterFaces program <a h
 <img alt='swr' width='400' src='MeterFaces/Swr.jpg'/></td><td><img alt='power' width='400' src='MeterFaces/Power.jpg'/>
 </td></tr></table>
 I tried several different LED parts for the workalike. Eventually, I gave up trying to successfully mount SMT
-LEDs on the PCB. Here is what the hole pattern on the PCB supports, but I recommend only the first:
+LEDs on the PCB. The hole pattern on the PCB supports the following two LED mounting schemes,
+ but I recommend only the first:
 <ul>
 <li>RGB T1-3/4 LED lamps, which are 5mm diameter. These mount through holes in the front panel,
 and require individually routing 4 wires to each of the LEDs from the PCB edge.
@@ -312,19 +321,25 @@ transfer the light to the front panel.
 There are (at least) two different LED products that fit the SMT pad layout: one in RGB, and the other in RGY.
 The 3D enclosure has six routing tubes to accommodate fiber optic cable from the LED on the
 PCB to the front panel. 
-<br/><br/>A historical note: the <code>console.asm</code> is the SolidEdge 3D design for
+<br/><br/>A historical note: There is an older 3D model, <code>console.asm</code>, in this repository
+which is the SolidEdge 3D design for
 an enclosure that places the front panel and back panel of the enclosure in direct contact with the PCB.
-No fiber optic cable is needed. But I disliked the cosmetics. Then I designed the
-enclosure presented here, <code>console2.asm</code>, 
-which places the front panel away from the PCB edge. There is also a <code>console3.asm</code> which is 
+No fiber optic cable is needed. But I disliked the cosmetics and the difficulty of assembly. Then I designed the
+enclosure presented here, <code>console2.asm</code>. 
+It places the front panel away from the PCB edge. 
+</p><p>There is also a <code>console3.asm</code> which is 
 currently only a design concept for
-an enclosure that places the PCB inside a commercically available aluminum box for shielding.
+an enclosure that places the PCB inside a commercically available aluminum box if you need
+ improved shielding. 
+The 4 layer PCB provides adequate shielding for my own shack, even with full legal limit power
+output to a tribander directly above the operating position.
 </ul>
-Its a bit of a puzzle to assemble. See the instructions in the 
+Its a bit of a puzzle to assemble the 3D printed enclosure. See the instructions in the 
 <a href='STL/console2'>STL/console2</a> folder.
 
  <h2>Calibration</h2>
- <p>The sketch supports four settings in EEPROM. These (roughly) correspond to 
+ <p>The sketch supports four calibrations in EEPROM accessible using the back panel
+calibrate push button. These four roughly correspond to 
  potentiometers on the original analog board. The EEPROM settings are:
  <br/>ALO SWR lock-out threshold
  <br/>ALO PWR lock-out threshold
@@ -334,6 +349,8 @@ Its a bit of a puzzle to assemble. See the instructions in the
  Setting the EEPROM values is accomplished using the back panel pushbutton switch
  followed by turning the front panel HOLD pot. See the code for full instructions.
  </p>
+The sketch has additional settings accessible only through its serial port interface. See
+the <a href='PowerMeter/PowerMeter.ino'>ino file</a> for details.
  
 <h2>Parts Lists</h2>
 <ul>
@@ -363,20 +380,22 @@ and the custom <code>PCB/Power Coupler.rrb</code>.
 </ul>
 
 <h2>Construction Notes</h2>
-<p>The console PCB in particular sports SMT devices with lead spacing way too small for me to 
+<p>The console PCB in particular sports SMT devices with lead spacing way too small (0.65 mm) for me to 
 hand solder. I use an SMD oven. Such ovens can be
 purchased online, but I built one using a toaster oven and 
 this <a href='https://whizoo.com/pages/buildguide'>kit</a>. 
 </p>
-<p>While it is possible to 3D print a solder paste mask from the gerber files you will get if you buy a PCB from expresspcb, I
+<p>While it is possible to 3D generate and print a solder paste mask starting 
+from the gerber files you will get if you buy a PCB from expresspcb, I
 did the paste spreading by hand. For
-parts with leads this small, I have had better luck spreading the solder paste using a piece of bare wire, #20 or #22, as a tool.
+parts with leads this small, I have had better luck spreading the solder paste using a piece of 
+bare wire, #20 or #22, as a tool.
 I squeeze out a small amount of solder paste on a piece of scrap paper and dab it onto all the pads on the PCB. It will take
 some practice to know how much paste is enough, but here is a rule: too much paste is far harder to repair later than too little.
 And it is surprising how little will work. It is not necessary for the space between the pads to be completely clear
 of paste, but don't leave any big blobs. I found that if I could get the paste to form a thing string
 from my wire tool, that one strand of that thin string laid down across the entire row of 10 pins from pins 1 through 10
- of the LED driver baked just fine. </p>
+ of the LED driver baked well. </p>
 <p>
 The SMD ICs put up with some abuse from my mistakes. I had placed the 6 pin 5V step-up IC rotated 180 
 degrees from its proper position. 
@@ -394,21 +413,21 @@ various commands after you get the LEDs connected, but
 before you install the PCB in the console. 
 </p>
 <p>
-Program the PowerMeter.ino sketch when you are happy the board is OK. Do <i>not</i> change that sketch's disable 
+Program the PowerMeter.ino sketch when you are happy the board is OK. 
+Do <i>not</i> change that sketch's disable 
 watchdog timer <code>#define</code>
-unless you are willing to learn how to program the Arduino using the 6 pin ISP positions 
+unless you are willing to learn how to program the Arduino using the 6 pin ISP pads 
 on the PCB. The default bootloader in
-the Pro Mini does not properly support watchdog timer reset. Have a look at
+the Pro Mini completely fails on the hardware watchdog timer reset. Have a look at
 boards-to-add.txt for hints on how to update the Arduino IDE install to support the WDT. 
 Do you need the WDT? My prototyped
 version of this sketch on an Arduino PRO I left unmodified for 5 years without thinking I 
 might want the watchdog. I
-saw one hang during the testing of this new custom PCB version (that runs essentially the 
-same sketch on essentially the
-same hardware) and therefore decided to "throw in" WDT (watchdog timer) support. At that 
+saw one hang during the testing of a prototype of this custom PCB version. Then I decided 
+to throw in WDT (watchdog timer) support. At that 
 point I discovered 
 it was not as simple as
-I wanted, but if you have an ISP programmer, its manageable.
+I wanted, but if you have an ISP programmer and figure out how to use it, its manageable.
 </p>
 <h2 id='RFM005'>What about the RFM-005?</h2>
 <p>I don't have one to test with, but it should work with some modest 
