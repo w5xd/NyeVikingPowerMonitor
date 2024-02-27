@@ -1,5 +1,6 @@
 # Coupler Details
-The hole pattern for the 1411B aluminum box sides are:
+A build-it-yourself coupler schematic is here: <a href="../PCB/schematics.pdf"><img alt='page1' src='../PCB/schematics-1.png'/></a>
+ A two layer PCB documented in the PCB folder makes it easy to construct.The hole pattern for the 1411B aluminum box sides are:
 <ul>
 <li><a href='Front-template.pdf'>Front-template.pdf</a>
 <li><a href='back-template.pdf'>back-template.pdf</a>
