@@ -1,12 +1,16 @@
 # Coupler Details
 A build-it-yourself coupler schematic is here: <a href="../PCB/schematics.pdf"><img alt='page1' src='../PCB/schematics-1.png'/></a>
- A two layer PCB documented in the PCB folder makes it easy to construct.The hole pattern for the 1411B aluminum box sides are:
+ A two layer PCB documented in the PCB folder makes it easy to construct.
+The hole pattern for the 1411B aluminum box sides are:
 <ul>
 <li><a href='Front-template.pdf'>Front-template.pdf</a>
 <li><a href='back-template.pdf'>back-template.pdf</a>
 <li><a href='bottom-template.pdf'>bottom-template.pdf</a>
 </ul>
+<a href='PCB/CouplerPcbMap.pdf'>Map of the coupler PCB</a>
+<p>The T1 side of the coupler:</p>
 <p align='center'><img src='T1-side.jpg' alt='T1-side.jpg' /></p>
+<p>The T2 side of the coupler:</p>
 <p align='center'><img src='T2-side.jpg' alt='T2-side.jpg' /></p>
 The PCB holes for the 40-turn sides of T1 and T2 are such that routing their wires to the
 closest holes reverses the Forward and Reflected voltages at the output. Get the right voltages

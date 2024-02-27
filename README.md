@@ -265,8 +265,6 @@ sketch accordingly.
 <h2 id='Couplers'>Couplers</h2>
 <p>I was able to acquire an RFM-003 in good cosmetic condition; all the front and back panel components were good. The OEM
 PCB is easily replaced with the Arduino unit described here. This was my second RFM-003 and it came without a coupler. 
-
-
  <p>This <a href='./coupler'>coupler's</a> detection sensistivity does not match
 the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's, and 
 some different coefficients in the sketch's ino file.
@@ -284,7 +282,6 @@ The coupler as described displays the equivalent of about 7 ohms of inductive
 reactance in series with a pure 50 ohm load at 1.8MHz which shows up as about a 1.15:1 SWR looking into the coupler from 
 the transmitter at that frequency, even though the coupler reads out 1:1. The reactance of the coupler
 measured as insignificant on all the remaining HF amateur bands 3.5MHz through 29MHz. 
-<a href='PCB/CouplerPcbMap.pdf'>Map of the coupler PCB</a>
 
 <p align='center'><img alt='OEM view' src='CAD/coupler/CouplerView01.jpg'/></p>
 <p>Details are in the <a href='./coupler'>coupler</a> folder.</p>
