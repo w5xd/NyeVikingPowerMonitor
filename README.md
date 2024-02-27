@@ -288,6 +288,7 @@ measured as insignificant on all the remaining HF amateur bands 3.5MHz through 2
 <a href='PCB/CouplerPcbMap.pdf'>Map of the coupler PCB</a>
 
 <p align='center'><img alt='OEM view' src='CAD/coupler/CouplerView01.jpg'/></p>
+<p>Details are in the <a href='./coupler'>coupler</a> folder.</p>
 
 <h2>Build a Console from Scratch</h2>
 <p align='center'><img alt='NyeVikingRetrofitView02.jpg' src='NyeVikingRetrofitView02.jpg'/></p>
