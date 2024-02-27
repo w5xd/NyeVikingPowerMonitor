@@ -7,7 +7,7 @@ The hole pattern for the 1411B aluminum box sides are:
 <li><a href='back-template.pdf'>back-template.pdf</a>
 <li><a href='bottom-template.pdf'>bottom-template.pdf</a>
 </ul>
-<a href='PCB/CouplerPcbMap.pdf'>Map of the coupler PCB</a>
+<a href='../PCB/CouplerPcbMap.pdf'>Map of the coupler PCB</a>
 <p>The T1 side of the coupler:</p>
 <p align='center'><img src='T1-side.jpg' alt='T1-side.jpg' /></p>
 <p>The T2 side of the coupler:</p>
