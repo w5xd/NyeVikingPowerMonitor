@@ -1,9 +1,9 @@
 # Coupler Details
 The hole pattern for the 1411B aluminum box sides are:
 <ul>
-<li>Front-template.pdf
-<li>back-template.pdf
-<li>bottom-template.pdf
+<li><a href='Front-template.pdf'>Front-template.pdf</a>
+<li><a href='back-template.pdf'>back-template.pdf</a>
+<li><a href='bottom-template.pdf'>bottom-template.pdf</a>
 </ul>
 <p align='center'><img src='T1-side.jpg' alt='T1-side.jpg' /></p>
 <p align='center'><img src='T2-side.jpg' alt='T2-side.jpg' /></p>
