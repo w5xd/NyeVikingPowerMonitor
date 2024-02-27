@@ -270,7 +270,11 @@ the OEM coupler, which requires different resistors in the voltage dividers feed
 some different coefficients in the sketch's ino file.
 It is enclosed in a commerically available clam shell aluminum box.
 This coupler design is based on one published in the 2008 ARRL
-Handbook, but with a more inductive toroid transformer design (a stacked trio of T80-2 toroids instead of a single T68-2).
+Handbook. The primary advantage of this particular coupler design is that its balance depends only on
+your ability to wind two identical transformers, and use sufficiently matched resistors. There are no balance or level
+adjustments.
+This one has a more inductive toroid transformer design (a stacked trio of T80-2 toroids instead of a single T68-2)
+which improves 1.8MHz performance.
 The 40:1 turns
 ratio (which was the Handbook design, which this unit matches) gives somewhat smaller DC voltages at its detectors than the OEM 
 Nye Viking design. Decreasing the turns ratio would
