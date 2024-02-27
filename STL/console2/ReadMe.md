@@ -45,7 +45,7 @@ connector on the PCB.
 connector through
 the hole in the base.
 <li>Place the meters and screw them down.
-<li>Place the vertical AA meter and screw it down.
+<li>Place the vertical AA cell holder and screw it down.
 <li>Put the potentiometer and the SP3T and LEDs in their front panel holes.
 <li>Place two #4 square nuts in the front panel. Use tape to keep them in place.
 <li>Use the strain reliefs in the <code>meter backlight cover.stl</code> to hold
