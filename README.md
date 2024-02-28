@@ -386,9 +386,9 @@ hand solder. I use an SMD oven. Such ovens can be
 purchased online, but I built one using a toaster oven and 
 this <a href='https://whizoo.com/pages/buildguide'>kit</a>. 
 </p>
-<p>While it is possible to 3D generate and print a solder paste mask starting 
+<p>While it is possible to generate and 3D print a solder paste mask starting 
 from the gerber files you will get if you buy a PCB from expresspcb, I
-did the paste spreading by hand. For
+did the solder paste spreading by hand. For
 parts with leads this small, I have had better luck spreading the solder paste using a piece of 
 bare wire, #20 or #22, as a tool.
 I squeeze out a small amount of solder paste on a piece of scrap paper and dab it onto all the pads on the PCB. It will take
@@ -415,7 +415,7 @@ before you install the PCB in the console.
 </p>
 <p>
 Program the PowerMeter.ino sketch when you are happy the board is OK. 
-Do <i>not</i> change that sketch's disable 
+Do <i>not</i> change that sketch's disable of the
 watchdog timer <code>#define</code>
 unless you are willing to learn how to program the Arduino using the 6 pin ISP pads 
 on the PCB. The default bootloader in
@@ -435,7 +435,8 @@ I wanted, but if you have an ISP programmer and figure out how to use it, its ma
 modifications. Based on the comment in the OEM manual that all the Nye Viking
 "directional couplers are calibrated for complete interchangeability" I deduce
 that the resistor values as labeled on this PCB for the OEM coupler 
-will work for any Nye Viking coupler</p>
+will work for any Nye Viking coupler under the assumption that "complete interchangeability"
+ implies no internal adjustments are needed.</p>
 <p>The RFM-005's front panel power meter, however, will require modifying
 at least the <code>PwmToPwr</code> lookup table in the sketch. If 
 the meter movement in the RFM-005 happens to be 0.5mA full scale
