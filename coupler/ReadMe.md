@@ -60,7 +60,7 @@ if I<sub>G</sub> happens to be matched and thus equal to  V<sub>L</sub>&nbsp;/&n
 we can see that the forward voltage is 1/N of the load voltage
 and the reflected voltage is zero, and the SWR equation results in 1:1. This analysis is not frequency nor time dependent,
 but its easy to see that to achieve zero V<sub>R</sub> at the diode detector,
-that I<sub>G</sub> must note only have the matching amplitude, but also must
+that I<sub>G</sub> must not only have the matching amplitude, but also must
  be in phase with V<sub>L</sub>. That is to say, the
 only way to get zero detected reflected voltage is for the load to be Z<sub>0</sub> resistive.</p>
 <p>The infinite SWR cases are also correctly covered. If the load is shorted, then V<sub>L</sub> is zero, or
@@ -69,7 +69,8 @@ having equal magnitudes to each other. When their amplitudes match, the SWR divi
 is correct. (Their phases might not match each other, but the diode detectors
 don't detect phase differences between V<sub>F</sub> and V<sub>R</sub>, while they are sensitive to
 phase differences between V<sub>L</sub> and I<sub>G</sub>.)</p>
-<p>To look at the more general case of arbitrary and possibly reactive load impedance, assume that T2's primary current is neglible, and introduce the load impedance as Z<sub>L</sub> , we can substitute:
+<p>To look at the more general case of arbitrary and possibly reactive load impedance, assume that T2's primary current is 
+ neglible, and introduce the load impedance as Z<sub>L</sub> , we can substitute:
 <br/>V<sub>L</sub>&nbsp;/&nbsp;Z<sub>L</sub> =&nbsp;I<sub>G</sub></p>
 <p>Rearrange:
 <br/>&nbsp;&nbsp;V<sub>F</sub>&nbsp;=&nbsp;V<sub>L</sub>&nbsp;/&nbsp;2N&nbsp;(1&nbsp;+&nbsp;Z<sub>0</sub>/Z<sub>L</sub>)
