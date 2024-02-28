@@ -263,14 +263,14 @@ when you retrofit, and you can make this PCB successfully drive them, but you'll
 sketch accordingly. 
 
 <h2 id='Couplers'>Couplers</h2>
-<p>I was able to acquire an RFM-003 in good cosmetic condition; all the front and back panel components were good. The OEM
-PCB is easily replaced with the Arduino unit described here. This was my second RFM-003 and it came without a coupler. 
+The PCB and sketch support two different couplers.
+<ol><li>The OEM 3000Wc coupler</li>
+<li>This build-it-yourself <a href='./coupler'>coupler</a> based on the design in the 2008 Radio Amateur's Handbook.</li></ol>
  <p>This <a href='./coupler'>coupler's</a> detection sensistivity does not match
 the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's, and 
 some different coefficients in the sketch's ino file.
 It is enclosed in a commerically available clam shell aluminum box.
-This coupler design is based on one published in the 2008 ARRL
-Handbook. The primary advantage of this particular coupler design is that its balance depends only on
+The primary advantage of this particular coupler design from the Handbook is that its balance depends only on
 your ability to wind two identical transformers, and use sufficiently matched resistors. There are no balance or level
 adjustments.
 This one has a more inductive toroid transformer design (a stacked trio of T80-2 toroids instead of a single T68-2)
