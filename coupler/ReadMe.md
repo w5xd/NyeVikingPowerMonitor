@@ -8,7 +8,7 @@ The hole pattern for the 1411B aluminum box sides are:
 <li><a href='bottom-template.pdf'>bottom-template.pdf</a>
 </ul>
 <a href='../PCB/CouplerPcbMap.pdf'>Map of the coupler PCB</a>
-<p>A 5/8 inch (or 16mm) metal punch is recommended for the SO-239 holes, as well as the 4-pin connector hole </p>
+<p>A 0.63 inch (or 16mm) metal punch is recommended for the SO-239 holes, as well as the 4-pin connector hole </p>
 <p>The T1 side of the coupler:</p>
 <p align='center'><img src='T1-side.jpg' alt='T1-side.jpg' /></p>
 <p>The T2 side of the coupler:</p>
