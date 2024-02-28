@@ -63,7 +63,7 @@ but its easy to see that to achieve zero V<sub>R</sub> at the diode detector,
 that I<sub>G</sub> must not only have the matching amplitude, but also must
  be in phase with V<sub>L</sub>. That is to say, the
 only way to get zero detected reflected voltage is for the load to be Z<sub>0</sub> resistive.</p>
-<p>The infinite SWR cases are also correctly covered. If the load is shorted, then V<sub>L</sub> is zero, or
+<p>The short and open infinite SWR cases are also correctly covered. If the load is shorted, then V<sub>L</sub> is zero, or
 if the load is open, then I<sub>G</sub> is zero. In both of those cases, the other term is non-zero which results in V<sub>F</sub> and V<sub>R</sub> will
 having equal magnitudes to each other. When their amplitudes match, the SWR division blows up, which
 is correct. (Their phases might not match each other, but the diode detectors
