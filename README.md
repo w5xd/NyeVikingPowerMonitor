@@ -86,7 +86,7 @@ The sketch supports a compile time option to construct lookup tables for analog 
 <ol type='a'>
 <li>the OEM meters with their original scales. This is for a retrofit.
 <li>1 mA movement meters with the mA scale replaced using the printout from the MeterFaces application here.
-Without OEM meters, constructing a workalike console requires modifying commercially available meter movements.
+Without OEM meters, constructing a workalike console requires modifying commercially available meter faces.
 </ol>
 
 <h2>Switches and Potentiometer</h2>
