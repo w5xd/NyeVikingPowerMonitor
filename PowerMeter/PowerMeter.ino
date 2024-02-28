@@ -670,6 +670,8 @@ void loop()
             // force the watch dog timer to trigger
             else if (strcmp(buf, "WDTT") == 0)
                 while(true); // test watchdog timer
+	    /* the correct result is that the sketch reboots and you see the 
+            ** the printouts from the setup() routine above after 1 second */
 #endif
             numInBuf = 0;
         }
