@@ -264,7 +264,7 @@ sketch accordingly.
 
 <h2 id='Couplers'>Couplers</h2>
 The PCB and sketch support two different couplers.
-<ol><li>The OEM 3000Wc coupler</li>
+<ol><li>The OEM 3000W coupler</li>
 <li>This build-it-yourself <a href='./coupler'>coupler</a> based on the design in the 2008 Radio Amateur's Handbook.</li></ol>
  <p>This <a href='./coupler'>coupler's</a> detection sensistivity does not match
 the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's, and 
