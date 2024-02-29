@@ -141,12 +141,18 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="CAD\Readme.md" />
+    <None Include="coupler\back-template.pdf" />
+    <None Include="coupler\bottom-template.pdf" />
+    <None Include="coupler\Front-template.pdf" />
+    <None Include="coupler\ReadMe.md" />
     <None Include="LICENSE" />
     <None Include="MeterInversionCalculations.ods" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="BeforeTransplant.jpg" />
+    <Image Include="coupler\T1-side.jpg" />
+    <Image Include="coupler\T2-side.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="boards-to-add.txt" />

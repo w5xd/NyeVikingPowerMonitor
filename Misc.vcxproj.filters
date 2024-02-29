@@ -16,6 +16,9 @@
     <Filter Include="CAD">
       <UniqueIdentifier>{86c72c6b-a11b-475a-ae86-e1c6b1603cb1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="coupler">
+      <UniqueIdentifier>{9cd854c3-fe8d-475e-b9da-4f9e5b342c59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -25,10 +28,28 @@
     <None Include="CAD\Readme.md">
       <Filter>CAD</Filter>
     </None>
+    <None Include="coupler\back-template.pdf">
+      <Filter>coupler</Filter>
+    </None>
+    <None Include="coupler\bottom-template.pdf">
+      <Filter>coupler</Filter>
+    </None>
+    <None Include="coupler\Front-template.pdf">
+      <Filter>coupler</Filter>
+    </None>
+    <None Include="coupler\ReadMe.md">
+      <Filter>coupler</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="BeforeTransplant.jpg">
       <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="coupler\T1-side.jpg">
+      <Filter>coupler</Filter>
+    </Image>
+    <Image Include="coupler\T2-side.jpg">
+      <Filter>coupler</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

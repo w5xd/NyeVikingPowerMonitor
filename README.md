@@ -86,7 +86,7 @@ The sketch supports a compile time option to construct lookup tables for analog 
 <ol type='a'>
 <li>the OEM meters with their original scales. This is for a retrofit.
 <li>1 mA movement meters with the mA scale replaced using the printout from the MeterFaces application here.
-Without OEM meters, constructing a workalike console requires modifying commercially available meter movements.
+Without OEM meters, constructing a workalike console requires modifying commercially available meter faces.
 </ol>
 
 <h2>Switches and Potentiometer</h2>
@@ -263,17 +263,18 @@ when you retrofit, and you can make this PCB successfully drive them, but you'll
 sketch accordingly. 
 
 <h2 id='Couplers'>Couplers</h2>
-<p>I was able to acquire an RFM-003 in good cosmetic condition; all the front and back panel components were good. The OEM
-PCB is easily replaced with the Arduino unit described here. This was my second RFM-003 and it came without a coupler. 
-
-A build-it-yourself coupler schematic is here: <a href="PCB/schematics.pdf"><img alt='page1' src='PCB/schematics-1.png'/></a>
- A two layer PCB documented in the PCB folder makes it easy to construct.
- <p>This coupler's detection sensistivity does not match
+The PCB and sketch support two different couplers.
+<ol><li>The OEM 3000W coupler</li>
+<li>This build-it-yourself <a href='./coupler'>coupler</a> based on the design in the 2008 Radio Amateur's Handbook.</li></ol>
+ <p>This <a href='./coupler'>coupler's</a> detection sensistivity does not match
 the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's, and 
 some different coefficients in the sketch's ino file.
 It is enclosed in a commerically available clam shell aluminum box.
-This coupler design is based on one published in the 2008 ARRL
-Handbook, but with a more inductive toroid transformer design (a stacked trio of T80-2 toroids instead of a single T68-2).
+The primary advantage of this particular coupler design from the Handbook is that its balance depends only on
+your ability to wind two identical transformers, and use well matched resistors. There are no balance or level
+adjustments.
+This one has a more inductive toroid transformer design (a stacked trio of T80-2 toroids instead of a single T68-2)
+which improves 1.8MHz performance.
 The 40:1 turns
 ratio (which was the Handbook design, which this unit matches) gives somewhat smaller DC voltages at its detectors than the OEM 
 Nye Viking design. Decreasing the turns ratio would
@@ -285,9 +286,9 @@ The coupler as described displays the equivalent of about 7 ohms of inductive
 reactance in series with a pure 50 ohm load at 1.8MHz which shows up as about a 1.15:1 SWR looking into the coupler from 
 the transmitter at that frequency, even though the coupler reads out 1:1. The reactance of the coupler
 measured as insignificant on all the remaining HF amateur bands 3.5MHz through 29MHz. 
-<a href='PCB/CouplerPcbMap.pdf'>Map of the coupler PCB</a>
 
 <p align='center'><img alt='OEM view' src='CAD/coupler/CouplerView01.jpg'/></p>
+<p>Details are in the <a href='./coupler'>coupler</a> folder.</p>
 
 <h2>Build a Console from Scratch</h2>
 <p align='center'><img alt='NyeVikingRetrofitView02.jpg' src='NyeVikingRetrofitView02.jpg'/></p>
@@ -385,9 +386,9 @@ hand solder. I use an SMD oven. Such ovens can be
 purchased online, but I built one using a toaster oven and 
 this <a href='https://whizoo.com/pages/buildguide'>kit</a>. 
 </p>
-<p>While it is possible to 3D generate and print a solder paste mask starting 
+<p>While it is possible to generate and 3D print a solder paste mask starting 
 from the gerber files you will get if you buy a PCB from expresspcb, I
-did the paste spreading by hand. For
+did the solder paste spreading by hand. For
 parts with leads this small, I have had better luck spreading the solder paste using a piece of 
 bare wire, #20 or #22, as a tool.
 I squeeze out a small amount of solder paste on a piece of scrap paper and dab it onto all the pads on the PCB. It will take
@@ -414,7 +415,7 @@ before you install the PCB in the console.
 </p>
 <p>
 Program the PowerMeter.ino sketch when you are happy the board is OK. 
-Do <i>not</i> change that sketch's disable 
+Do <i>not</i> change that sketch's disable of the
 watchdog timer <code>#define</code>
 unless you are willing to learn how to program the Arduino using the 6 pin ISP pads 
 on the PCB. The default bootloader in
@@ -434,7 +435,8 @@ I wanted, but if you have an ISP programmer and figure out how to use it, its ma
 modifications. Based on the comment in the OEM manual that all the Nye Viking
 "directional couplers are calibrated for complete interchangeability" I deduce
 that the resistor values as labeled on this PCB for the OEM coupler 
-will work for any Nye Viking coupler</p>
+will work for any Nye Viking coupler under the assumption that "complete interchangeability"
+ implies no internal adjustments are needed.</p>
 <p>The RFM-005's front panel power meter, however, will require modifying
 at least the <code>PwmToPwr</code> lookup table in the sketch. If 
 the meter movement in the RFM-005 happens to be 0.5mA full scale
