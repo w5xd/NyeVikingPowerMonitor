@@ -265,27 +265,33 @@ sketch accordingly.
 <h2 id='Couplers'>Couplers</h2>
 The PCB and sketch support two different couplers.
 <ol><li>The OEM 3000W coupler</li>
-<li>This build-it-yourself <a href='./coupler'>coupler</a> based on the design in the 2008 Radio Amateur's Handbook.</li></ol>
+<li>This build-it-yourself <a href='./coupler'>coupler</a> based on the design in the 2008 Radio 
+Amateur's Handbook.</li></ol>
  <p>This <a href='./coupler'>coupler's</a> detection sensistivity does not match
 the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's, and 
 some different coefficients in the sketch's ino file.
 It is enclosed in a commerically available clam shell aluminum box.
 The primary advantage of this particular coupler design from the Handbook is that its balance depends only on
-your ability to wind two identical transformers, and use well matched resistors. There are no balance or level
+your ability to wind two identical transformers, and use well matched resistors and diodes. There are 
+no balance or level
 adjustments.
-This one has a more inductive toroid transformer design (a stacked trio of T80-2 toroids instead of a single T68-2)
+This one has a more inductive toroid transformer design than the
+Handbook design (a stacked trio of T80-2 toroids instead of a 
+single T68-2)
 which improves 1.8MHz performance.
 The 40:1 turns
-ratio (which was the Handbook design, which this unit matches) gives somewhat smaller DC voltages at its detectors than the OEM 
+ratio (which was the Handbook design, which this unit matches) gives somewhat smaller DC voltages at its 
+detectors than the OEM 
 Nye Viking design. Decreasing the turns ratio would
-increase the voltage readout, but that reduction also reduces the transformer's inductive reactance. 
+increase the voltage transfer, but that reduction also reduces the transformer's inductive reactance. 
 The trio of T80-2's is already just
 barely inductive enough to be used at 1.8MHz (and I don't think the 2008 Handbook design 
 worked very well at 1.8MHz.)
 The coupler as described displays the equivalent of about 7 ohms of inductive
 reactance in series with a pure 50 ohm load at 1.8MHz which shows up as about a 1.15:1 SWR looking into the coupler from 
 the transmitter at that frequency, even though the coupler reads out 1:1. The reactance of the coupler
-measured as insignificant on all the remaining HF amateur bands 3.5MHz through 29MHz. 
+measured as insignificant on all the remaining HF amateur bands 3.5MHz through 29MHz. This coupler
+does not work acceptably above 30MHz.
 
 <p align='center'><img alt='OEM view' src='CAD/coupler/CouplerView01.jpg'/></p>
 <p>Details are in the <a href='./coupler'>coupler</a> folder.</p>

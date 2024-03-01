@@ -148,6 +148,7 @@
     <None Include="LICENSE" />
     <None Include="MeterInversionCalculations.ods" />
     <None Include="README.md" />
+    <None Include="STL\console2\ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="BeforeTransplant.jpg" />

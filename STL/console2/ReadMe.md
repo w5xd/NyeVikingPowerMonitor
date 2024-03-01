@@ -1,6 +1,8 @@
 # Console 3D print and assembly procedure
-<ul>
-The names of the parts are:
+<a href='../../CAD/console/Left-view.pdf'>Left-view.pdf</a>
+<br/><a href='../../CAD/console/Right-view.pdf'>Right-view.pdf</a>
+<p>
+The names of the parts are:</p>
 <ul>
 <li><code>Base2.stl</code> is the main part, the biggest one
 <li><code>Front Panel 2.stl</code>
