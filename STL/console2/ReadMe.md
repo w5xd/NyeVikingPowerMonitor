@@ -1,6 +1,6 @@
 # Console 3D print and assembly procedure
-<a href='../../CAD/console/Left-view.pdf'>Left-view.pdf</a>
-<br/><a href='../../CAD/console/Right-view.pdf'>Right-view.pdf</a>
+<a href='../../CAD/console/Left-view.pdf'><img src='../../CAD/console/Left-view.jpg' alt='Left-view'/></a>
+<br/><a href='../../CAD/console/Right-view.pdf'><img src='../../CAD/console/Right-view.jpg' alt='Right-view'/></a>
 <p>
 The names of the parts are:</p>
 <ul>
