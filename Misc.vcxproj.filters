@@ -19,6 +19,9 @@
     <Filter Include="coupler">
       <UniqueIdentifier>{9cd854c3-fe8d-475e-b9da-4f9e5b342c59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="STL">
+      <UniqueIdentifier>{b28f1ddf-e540-4733-940b-8d20c86e6e65}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -39,6 +42,9 @@
     </None>
     <None Include="coupler\ReadMe.md">
       <Filter>coupler</Filter>
+    </None>
+    <None Include="STL\console2\ReadMe.md">
+      <Filter>STL</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
