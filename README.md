@@ -29,7 +29,7 @@ displaying the power meter readout multiplied by 10, which the OEM won't do.)
 
 # History
 The original instrument has a single circuit board. Here is a photo with its cover removed.
-<p align='center'><img alt='AfterTransplant.jpg' src='BeforeTransplant.jpg'/></p>
+<p align='center'><img alt='BeforeTransplant.jpg' src='BeforeTransplant.jpg'/></p>
 <p> This github repo documents 
 a replacement project done in 2023 that is based on a custom printed circuit board documented
 in the PCB folder. If you want the full history, the git tag 
