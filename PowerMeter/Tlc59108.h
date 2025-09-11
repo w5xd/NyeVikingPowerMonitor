@@ -31,16 +31,16 @@ public:
     {
         Serial.print(F("Tlc at 0x"));
         Serial.println((int)I2CADDR, HEX);
-        Wire.beginTransmission(I2CADDR);
-        Wire.write(static_cast<uint8_t>(AUTO_INCREMENT) | static_cast<uint8_t>(Addr::MODE1));
-        Wire.endTransmission();
-        Wire.requestFrom(I2CADDR, static_cast<uint8_t>(Addr::REG_MAX));
         for (uint8_t i = 0; i < static_cast<uint8_t>(Addr::REG_MAX); i++)
         {
+            Wire.beginTransmission(I2CADDR);
+            Wire.write(i + static_cast<uint8_t>(Addr::MODE1));
+            Wire.endTransmission();
+            Wire.requestFrom(I2CADDR, static_cast<uint8_t>(1));
             uint8_t b = Wire.read();
-            Serial.print("i = 0x");
+            Serial.print("R 0x");
             Serial.print((int)i, HEX);
-            Serial.print(" reg = 0x");
+            Serial.print(" reg= 0x");
             Serial.println((int) b, HEX);
         }
 
@@ -80,6 +80,15 @@ public:
         Wire.endTransmission();
     }
 
+    uint8_t GetCurrent()
+    {
+        Wire.beginTransmission(I2CADDR);
+        Wire.write(static_cast<uint8_t>(Addr::IREF));
+        Wire.endTransmission();
+        Wire.requestFrom(I2CADDR, static_cast<uint8_t>(1));
+        return Wire.read();
+    }
+
     uint8_t GetErrors()
     {
         Wire.beginTransmission(I2CADDR);
@@ -102,12 +111,12 @@ protected:
         GRPFREQ,
         LEDOUT0,
         LEDOUT1,
+        AUTO_INC_STOPS_HERE = 0x11,
         IREF = 0x12,
         EFLAG = 0x13,
         REG_MAX
     };
 
     const uint8_t I2CADDR;
-
 };
 

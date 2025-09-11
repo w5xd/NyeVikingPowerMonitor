@@ -4,13 +4,19 @@
 //only one of the below
 //#define LEDS_ARE_RGY
 #define LEDS_ARE_RGB
+/* WARNING ABOUT RGB 5mm T1-3/4 diodes: THEY DO NOT ALL HAVE THE SAME PINOUT
+** I have at least two configurations, for pins 1 through 4:
+** Code below is for RABG   (pin 2 is anode)
+** also have:        RAGB   (note that the G and B leads are reversed)
+** And I managed to install some of each into the same device */
+//#define ROLL_YOUR_OWN_LED_ASSIGNMENTS
 
 class PowerMeterLeds {
 public: 
-    enum class FrontPanel { ALO_SENSE, ALO_LOCK, PEAK_SAMPLE, PEAK_HOLD, RANGE_LOW, RANGE_HIGH};
+    enum class FrontPanel : uint8_t { ALO_SENSE, LED_FIRST=ALO_SENSE, ALO_LOCK, PEAK_SAMPLE, PEAK_HOLD, RANGE_LOW, RANGE_HIGH, LED_LAST=RANGE_HIGH} ;
     PowerMeterLeds(uint8_t powerEnablePin, uint8_t Laddr = 0x41, uint8_t Raddr = 0x43);
 
-    void SetSenseLed(bool yellow);
+    void SetSenseLed(bool amber);
     void SetAloLock(bool red);
     void SetSampleLed(bool yellow);
     void SetHoldLed(bool green, bool yellow = false);
@@ -52,26 +58,35 @@ protected:
         PEAK_HOLD = 1 << HOLD_GREEN | 1 << HOLD_YELLOW,
         RANGE_LOW = 1 << LOW_GREEN | 1 << LOW_YELLOW | 1 << LOW_RED,
         RANGE_HIGH = 1 << HIGH_RED | 1 << HIGH_YELLOW | 1 << HIGH_GREEN,
+
+        SENSE_UNUSED = SENSE_YELLOW,
 };
 #endif
 #ifdef LEDS_ARE_RGB
+#ifdef ROLL_YOUR_OWN_LED_ASSIGNMENTS
+#include "RollYourOwnLeds.h"
+#else
     // wire RGB LEDS with R and G matching the RGY connections
     enum class LedChannel {
-        SENSE_BLUE = Tlc59108::LED0, SENSE_GREEN = Tlc59108::LED1, SENSE_RED = Tlc59108::LED2,
+        // these assignments for LED pinouts that are RAGB on pins 1 through 4
+        SENSE_BLUE = Tlc59108::LED1, SENSE_GREEN = Tlc59108::LED0, SENSE_RED = Tlc59108::LED2,
         LOCK_RED = Tlc59108::LED3, LOCK_BLUE = Tlc59108::LED7,
         SAMPLE_BLUE = Tlc59108::LED4, SAMPLE_RED = Tlc59108::LED5, SAMPLE_GREEN = Tlc59108::LED6,
 
-        HOLD_GREEN = Tlc59108::LED5, HOLD_RED = Tlc59108::LED4,
+        HOLD_GREEN = Tlc59108::LED5, HOLD_BLUE = Tlc59108::LED4,
         LOW_GREEN = Tlc59108::LED7, LOW_BLUE = Tlc59108::LED6, LOW_RED = Tlc59108::LED3,
         HIGH_RED = Tlc59108::LED2, HIGH_BLUE = Tlc59108::LED1, HIGH_GREEN = Tlc59108::LED0,
 
         ALO_SENSE = 1 << SENSE_GREEN | 1 << SENSE_BLUE | 1 << SENSE_RED,
         ALO_LOCK = 1 << LOCK_RED | 1 << LOCK_BLUE,
         PEAK_SAMPLE = 1 << SAMPLE_BLUE | 1 << SAMPLE_RED | 1 << SAMPLE_GREEN,
-        PEAK_HOLD = 1 << HOLD_GREEN | 1 << HOLD_RED,
+        PEAK_HOLD = 1 << HOLD_GREEN | 1 << HOLD_BLUE,
         RANGE_LOW = 1 << LOW_GREEN | 1 << LOW_BLUE | 1 << LOW_RED,
         RANGE_HIGH = 1 << HIGH_RED | 1 << HIGH_BLUE | 1 << HIGH_GREEN,
+
+        SENSE_UNUSED = SENSE_BLUE,
     };
+#endif
 #endif
     enum {NUM_CHANNELS_PER_DRIVER = 8};
 

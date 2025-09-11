@@ -1,6 +1,6 @@
 # Coupler Details
 A build-it-yourself coupler schematic is here: <a href="../PCB/schematics.pdf"><img alt='page1' src='../PCB/schematics-1.png'/></a>
- A two layer PCB documented in the PCB folder makes it easy to construct.
+The two layer PCB documented in the PCB folder makes it easy to construct.
 The hole pattern for the 1411B aluminum box sides are:
 <ul>
 <li><a href='Front-template.pdf'>Front-template.pdf</a>
@@ -55,7 +55,7 @@ divided by their difference." In the console, the SWR computation is:
 <br/>SWR = ( | V<sub>F</sub> | + | V<sub>R</sub> | ) &divide; ( | V<sub>F</sub> | - | V<sub>R</sub> | )
 </p>
 
-<p>To help verify this behavior is what we want in an SWR meter, consider 
+<p>To sanity check this behavior, consider 
 if I<sub>G</sub> happens to be matched and thus equal to  V<sub>L</sub>&nbsp;/&nbsp;Z<sub>0</sub> , then
 we can see that the forward voltage is 1/N of the load voltage
 and the reflected voltage is zero, and the SWR equation results in 1:1. This analysis is not frequency nor time dependent,
@@ -79,7 +79,7 @@ phase differences between V<sub>L</sub> and I<sub>G</sub>.)</p>
 <br/>SWR = ( |&nbsp1&nbsp;+&nbsp;Z<sub>0</sub>/Z<sub>L</sub>&nbsp| + |&nbsp1&nbsp;-&nbsp;Z<sub>0</sub>/Z<sub>L</sub>&nbsp| ) &divide; ( |&nbsp1&nbsp;+&nbsp;Z<sub>0</sub>/Z<sub>L</sub>&nbsp| - |&nbsp1&nbsp;-&nbsp;Z<sub>0</sub>/Z<sub>L</sub>&nbsp| )
 </p>
 <p align='center'><img src='coupler-swr.png' alt='coupler-swr.png'/></p>
-<p>Consider the case Z<sub>L</sub> is purely reactive, &theta; is 90 degrees, and R+ and R- are equal length and lie
+<p>Again to sanity check: consider the case Z<sub>L</sub> is purely reactive, &theta; is 90 degrees, and R+ and R- are equal length and lie
 on the Y axis. The denominator of the SWR equation is zero, and the SWR infinite.</p>
 <p>If Z<sub>L</sub> is purely resistive, &theta; is 0 degrees, and R+ and R- both lie along the X axis. Define Z
 to be the normalized impedance (where Z = 1 means Z<sub>0</sub>=Z<sub>L</sub>), then, for Z > 1, R+ is of length 1 + Z and R- is of length Z - 1, 

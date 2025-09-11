@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+# This macro is ONLY for use when console.FCStd, from the NyeVikingPowerMonitor git repo, is already loaded.
+# This macro is archived in the git repo for console.FCStd, but FreeCAD won't find it there. It must
+# be copied into FreeCAD's directory where it looks for macros. 
+#
+# Invoking this macro uses FreeCAD to create a Mesh object for each of the Part objects that make up the
+# Nye Viking Power Monitor console enclosure. The objects are created in a newly created FreeCAD document.
+# That document has nothing in it that cannot be recreated by this macro from console.FCStd.
+# Each Mesh is rotated to an appropriate angle for 3D printing on an FDM printer, and then is written
+# to an STL file in the same folder as console.FCStd.
+
+import FreeCAD
+import Mesh
+import Part
+import MeshPart
+
+__doc__ = FreeCAD.getDocument("console")
+__newdoc__ = App.newDocument()
+file_path = __doc__.FileName
+last_slash = file_path.rfind('/')
+file_folder = file_path[0:last_slash+1]
+
+def exportPart(partInternalName, userFriendly, angle) :
+	mesh=__newdoc__.addObject("Mesh::Feature","Mesh")
+	part=__doc__.getObject(partInternalName) 
+	shape=Part.getShape(part,"")
+	mesh.Mesh=MeshPart.meshFromShape(Shape=shape, LinearDeflection=0.0999998, AngularDeflection=0.523599, Relative=False)
+	mesh.Placement = App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,1,0),angle))
+	mesh.Label = userFriendly + " (Meshed)"
+	
+	objs = []
+	objs.append(mesh)
+	Mesh.export(objs, file_folder + userFriendly + ".stl")
+	
+	del objs, mesh, part, shape
+	return
+
+exportPart("Part", "console-sub panel", 90)
+exportPart("Part001", "console-front panel", 90)
+exportPart("Part002", "console-back panel", 270)
+#The lid is modeled such that the 3D printing angle needed is not explicit like the 3 other parts.
+#The angle is instead presented in a Measurements object containing an Angle object, both in
+#console.FCStd. 
+angle = __doc__.getObject("Measurements").getObject("Angle").getPropertyByName("Angle").Value + 180
+exportPart("Part003", "console-lid", angle)
+
+del __group__
+del __newdoc__
+del __doc__
+

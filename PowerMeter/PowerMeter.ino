@@ -1,4 +1,4 @@
-/* Copyright (c) 2023 by Wayne E. Wright
+/* Copyright (c) 2025 by Wayne E. Wright
  ** W5XD
  ** Round Rock, Texas, USA
  **
@@ -19,14 +19,16 @@ static_assert(sizeof(uint32_t)==4, "uint32_t");
 static_assert(sizeof(int32_t)==4, "int32_t");
 static_assert(sizeof(uint64_t)==8, "uint64_t");
 
+#define POWER_METER_INO_VERSION_STR "3.0"
+
 /* Nye Viking RF Power Meter
- * Behaves like the original analog circuit board, but on Arduino. This code was tested with the RFM-003, the 3000W model
+ * Behaves like the original analog circuit board, but on Arduino. This code was tested with the RFM-003, the 3000W model.
  * This sketch runs on an Arduino Pro Mini installed in either of two hardware configurations:
  * a) On the PCB (also documented in this repository) installed in an RFM-003 in place of the OEM analog board
  * ...OR...
  * b) On the PCB installed in an enclosure designed to mimic the OEM enclosure. 
  * 
- * Compile time #define's distinguish the arithmetic for these hardware options:
+ * Compile time #define's distinguish the arithmetic constants needed in these hardware options:
  * a) the OEM coupler 
         versus a home built coupler documented in this repo 
         (arithmetic differs from ADC to Power and SWR)
@@ -36,7 +38,7 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
  * c) RGB LEDs for the front panel 
         versus RGY.
         (which LED gets turned on when differs)
-*  d) Watchdog timer support. This is an extra reliability feature that progamming the Arduino with an ISP
+*  d) Watchdog timer support. This is an optional feature requiring progamming the Arduino with an ISP and giving more reliability.
  */
 
 // Use one of the following two. 
@@ -53,7 +55,8 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 ** We do end up with some 32 bit and 64 bit long integer arithmetic, including divides, but floating point
 ** is avoided by using the two fixed point integer typedef's below, AcquiredVolts_t and DisplayPower_t. */
 
-// There is the LEDS_ARE_RGB compile time option in PowerMeterLEDs.h
+
+// There is also the LEDS_ARE_RGB compile time option in PowerMeterLEDs.h
 
 //#define SUPPORT_WDT /* READ THE PARAGRAPH BELOW*/
 
@@ -69,6 +72,20 @@ static_assert(sizeof(uint64_t)==8, "uint64_t");
 ** AA cells. The author used a programmer ("Arduino as ISP") to replace the bootloader with the
 ** optiboot loader. That requires changes to boards.txt in the Arduino IDE and, of course,
 ** access to an Arduino as ISP programmer. */
+
+#ifdef OEM_COUPLER
+#define COUPLER_BUILD_STR "OEM COUPLER"
+#endif
+#ifdef W5XD_COUPLER
+#define COUPLER_BUILD_STR "W5XD COUPLER"
+#endif
+#ifdef OEM_METER_SCALES
+#define METER_BUILD_STR "OEM METER SCALES"
+#endif
+#ifdef CUSTOM_METER_SCALES
+#define METER_BUILD_STR "W5XD METER SCALES"
+#endif
+
 
 typedef uint16_t AcquiredVolts_t; // maxes at ADC max (1024) * VOLTS_LOW_MULTIPLIER 
 typedef uint32_t DisplayPower_t; // In units of  1/128  Watt (e.g. value 128 is 1 watt )
@@ -123,7 +140,7 @@ namespace {
 
     /* multiply the LOW and UNDIVIDED ADC readings by these two in order to put them in AcquiredVolts_t
     ** The compile time computation here enables run time calculations to scale properly in 32 bit integers (or 64, when coded that way)
-    ** and without floating point arithmetic.
+    ** and without floating point arithmetic at run time (there IS compile time floating point here.)
     ** 
     ** MULTIPLIER's are chosen so a) the results are in same units and b) an ADC count of 1023 (its max) times the multiplier fits in uint16_t
     ** NominalCouplerResistance is such that dividing into (AcquiredVolts_t * AcquiredVolts_t) gives DisplayPower_t
@@ -169,6 +186,7 @@ namespace {
     int8_t PeakSwitchPinIn = SP3TinPinIn2;
     uint16_t PowerMinToDisplay = 10; // in DisplayPower_t units, 1/128 W
     unsigned AdcMinNonzero = 4;
+    uint8_t LampsOnPwm=0xff;
 
     enum EEPROM_ASSIGNMENTS {
         EEPROM_SWR_LOCK, EEPROM_PWR_LOCK, EEPROM_FWD_CALIBRATION, EEPROM_REFL_CALIBRATION, EEPROM_POT_MAX,
@@ -176,7 +194,8 @@ namespace {
         EEPROM_IREF, EEPROM_BRIGHTNESS = EEPROM_IREF+2,
         EEPROM_SP3T_REVERSE, EEPROM_MINPWR,
         EEPROM_ADCMIN = EEPROM_MINPWR + 2,
-        EEPROM_USED = EEPROM_ADCMIN + 2
+        EEPROM_LAMPSONPWM = EEPROM_ADCMIN + 2,
+        EEPROM_USED = EEPROM_LAMPSONPWM + 1
     };
     uint8_t SwrToMeter(uint16_t swrCoded);
     void PwrToMeter(uint16_t toDisplay); // units of PWR_SCALE
@@ -293,7 +312,7 @@ namespace {
     // Voltages are in acquisition units.
     // Maximum possible is VOLTS_LOW_MULTIPLIER * ADC max, which is 
     // (less than) 2**6 times 2**10, so it fits in 16 bits, unsigned
-    //
+    
     DisplayPower_t getPeakPwr();
     DisplayPower_t getPeakHoldPwr();
     DisplayPower_t getAveragePwr();
@@ -373,13 +392,33 @@ namespace Comm {
 
 static void get_mcusr();
 
+static bool BackLightIsOn;
+static void Backlight(bool on = true)
+{
+    static int lastPinMode = -1;
+    if (LampsOnPwm == 0xFF)
+    {
+        if (lastPinMode != OUTPUT)
+            pinMode(PanelLampsPinOut, OUTPUT);
+        lastPinMode = OUTPUT;
+        digitalWrite(PanelLampsPinOut, on ? HIGH : LOW);
+    }
+    else
+    {
+        if (lastPinMode != INPUT)
+            pinMode(PanelLampsPinOut, INPUT);
+        lastPinMode = INPUT;
+        analogWrite(PanelLampsPinOut, on ? LampsOnPwm : 0);
+    }
+    BackLightIsOn = on;
+}
+
 void setup() {
 #ifdef SUPPORT_WDT
     MCUSR = 0;
     wdt_disable();
 #endif
     pinMode(couplerPowerDetectPinIn, INPUT);
-    pinMode(PanelLampsPinOut, OUTPUT);
 
     pinMode(initiateCalibratePinIn, INPUT_PULLUP); // unchanged during sleep
 
@@ -392,14 +431,15 @@ void setup() {
     sleep::pullUpPins(true);
 
     analogReference(DEFAULT); // stay on default reference, which is Vcc, which is 5V
-    /* The PCB has two power supplies, battery and linear. This code assumes their Vcc result is 
-    ** close enough that no calibration shift is required between them.
+    /* The PCB has two power supplies, battery and linear. This code assumes their Vcc is 
+    ** close enough to each other that no calibration shift is required between them.
     ** Measuremments with the PCB documented here show them within a few percent of each other. */
 
     movingAverage::clear();
 
     calibrate::SetCalibrationConstantsFromEEPROM();
-    digitalWrite(PanelLampsPinOut, HIGH); // turn on front panel lights on boot
+    EEPROM.get(static_cast<int>(EEPROM_LAMPSONPWM), LampsOnPwm);
+    Backlight(); // turn on front panel lights on boot
 
     Wire.begin();
 
@@ -423,7 +463,9 @@ void setup() {
 
     // present some info about our calibration and version number
     Serial.begin(SERIAL_BAUD);
-    Serial.println(F("W5XD PowerMeter 2.2"));
+    Serial.println(F("W5XD PowerMeter " POWER_METER_INO_VERSION_STR));
+    Serial.println(F(COUPLER_BUILD_STR));
+    Serial.println(F(METER_BUILD_STR));
     Serial.print(F("Forward CAL = 0x"));
     Serial.println(fwdCalibration, HEX);
     Serial.print(F("Reflected CAL = 0x"));
@@ -459,8 +501,11 @@ void setup() {
         AdcMinNonzero = pmin;
     Serial.print(F("ADCMIN="));
     Serial.println(AdcMinNonzero);
+    Serial.print(F("Backlight="));
+    Serial.println((int)LampsOnPwm);
 
 #ifdef SUPPORT_WDT
+    Serial.println(F("WDT enabled"));
     wdt_enable(WDTO_1S);
     /* FYI: any call to delay() for more than 1S will trigger the watchdog 
     ** unless wdt_disable() is called first. And, of course, wdt_enable */
@@ -468,7 +513,8 @@ void setup() {
 }
 
 namespace cmd {
-    enum COMMAND_ENUM { P_ON, P_OFF, P_PEAK, P_FOREVER, POTREVERSE, POTMAX, SP3TUPDOWN, PMIN, POT, IREF,LED, METERS, ADCX, BRI, DUMP, RSCALI, ADCMIN, NUM_COMMANDS};
+    enum COMMAND_ENUM { P_ON, P_OFF, P_PEAK, P_FOREVER, POTREVERSE, POTMAX, SP3TUPDOWN, PMIN, POT, IREF,LED, METERS, 
+            ADCX, BRI, DUMP, RSCALI, ADCMIN, BACKLIGHT, TESTWDT, NUM_COMMANDS};
     const int MAX_COMMAND_LEN = 12;
     const char c0[] PROGMEM = "P ON";
     const char c1[] PROGMEM = "P OFF";
@@ -487,8 +533,11 @@ namespace cmd {
     const char c14[] PROGMEM = "DUMP";
     const char c15[] PROGMEM = "RSCALI";
     const char c16[] PROGMEM = "ADCMIN=";
-    const char *const tbl[NUM_COMMANDS] PROGMEM = {c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16};
-    static_assert(NUM_COMMANDS == 17, "command table mismatch");
+    const char c17[] PROGMEM = "BACKLIGHT=";
+    const char c18[] PROGMEM = "TESTWDT";
+    const char *const tbl[NUM_COMMANDS] PROGMEM = {c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, 
+            c11, c12, c13, c14, c15, c16, c17, c18};
+    static_assert(NUM_COMMANDS == 19, "command table mismatch");
 
     int strncmp(const char *b, COMMAND_ENUM e, uint8_t len)
     {
@@ -645,6 +694,23 @@ void loop()
                 AdcMinNonzero = atoi(buf + 7);
                 EEPROM.put((int)EEPROM_ADCMIN, AdcMinNonzero);
             }
+            else if (cmd::strncmp(buf, cmd::BACKLIGHT, 10) == 0)
+            {
+                uint8_t v = atoi(buf+10);
+                Serial.print(F("BACKLIGHT="));
+                Serial.println(v);
+                LampsOnPwm = v;
+                EEPROM.put((int)EEPROM_LAMPSONPWM, LampsOnPwm);
+                Backlight(true);
+            }
+            else if (cmd::strcmp(buf, cmd::TESTWDT) == 0)
+            {
+#ifdef SUPPORT_WDT
+                Serial.println(F("WDT should reboot me shortly!"));
+                Serial.flush();
+                while (true);
+#endif
+            }
             else if (cmd::strncmp(buf, cmd::BRI, 4) == 0)
             {   /* 0-255 sets the duty cycle on the LEDS. 255 brightest*/
                 uint8_t v = atoi(buf + 4);
@@ -666,13 +732,6 @@ void loop()
                 EEPROM.write((int)EEPROM_FWD_CALIBRATION, 0xff);
                 EEPROM.write((int)EEPROM_REFL_CALIBRATION, 0xff);
             }
-#ifdef SUPPORT_WDT
-            // force the watch dog timer to trigger
-            else if (strcmp(buf, "WDTT") == 0)
-                while(true); // test watchdog timer
-	    /* the correct result is that the sketch reboots and you see the 
-            ** the printouts from the setup() routine above after 1 second */
-#endif
             numInBuf = 0;
         }
         else numInBuf += 1;
@@ -684,14 +743,32 @@ void loop()
     BackPanelPwrSwitchFwd = digitalRead(PowerForwReflSwitchPinIn) == HIGH;
     BackPanelAloSwitchSwr = digitalRead(ALOtripSwitchPinIn) == HIGH;
 
+    auto peakSwitchPinInNow = digitalRead(PeakSwitchPinIn);
+    auto averageSwitchPinInNow = digitalRead(AverageSwitchPinIn);
+#if 0 // printout when front panel SP3T changes
+    static int prevPeak;
+    static int prevAverage;
+    if ((prevPeak != peakSwitchPinInNow) || (prevAverage != averageSwitchPinInNow))
+    {
+        if (peakSwitchPinInNow == LOW)
+            Serial.println(F("SP3T PEAK"));
+        else if (averageSwitchPinInNow == LOW)
+            Serial.println(F("SP3T AVERAGE"));
+        else
+            Serial.println(F("SP3T PEAK HOLD"));
+    }
+    prevPeak = peakSwitchPinInNow;
+    prevAverage = averageSwitchPinInNow;
+#endif
+
     // CHECK FOR ENTER CALIBRATE MODE
     if (MeterMode == METER_NORMAL &&
-        digitalRead(PeakSwitchPinIn) != LOW &&
+        peakSwitchPinInNow != LOW &&
         digitalRead(initiateCalibratePinIn) == LOW)
     {
-        MeterMode = (digitalRead(AverageSwitchPinIn) == LOW) ?
+        MeterMode = (averageSwitchPinInNow == LOW) ?
             ALO_SETUP : CALIBRATE_SETUP;
-        digitalWrite(PanelLampsPinOut, HIGH);
+        Backlight();
         coupler7dot5LastHeardMillis = now;
         EnteredAloSetupModeTime = now;
     }
@@ -718,7 +795,7 @@ void loop()
     if (digitalRead(couplerPowerDetectPinIn) == LOW)
     {   // RF detect activated
         coupler7dot5LastHeardMillis = now;
-        digitalWrite(PanelLampsPinOut, HIGH);
+        Backlight();
     }
 
     if (leds.GetAloLock() &&
@@ -742,9 +819,9 @@ void loop()
         SwrUpdateTime = now;
         uint8_t swr = DisplaySwr();
         DisplayPower_t pwr;
-        if (digitalRead(PeakSwitchPinIn) == LOW)
+        if (peakSwitchPinInNow == LOW)
             pwr = getPeakPwr();
-        else if (digitalRead(AverageSwitchPinIn) == LOW)
+        else if (averageSwitchPinInNow == LOW)
             pwr = getAveragePwr();
         else
             pwr = getPeakHoldPwr();
@@ -1581,11 +1658,11 @@ namespace {
 
     bool FrontPanelLamps()
     {
-        if (digitalRead(PanelLampsPinOut) == HIGH)
+        if (BackLightIsOn)
         {
             unsigned long timeOn = millis() - coupler7dot5LastHeardMillis;
             if (timeOn > FrontPanelLampsOnMsec)
-                digitalWrite(PanelLampsPinOut, LOW);
+                Backlight(false);
             return true;
         }
         else

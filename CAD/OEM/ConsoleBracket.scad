@@ -7,27 +7,37 @@ BoostHeightToIncreasePivotAngleThou = 100;
 // The OEM bracket has two pivot holes. 3D print only the one you select
 PivotHolePosition = "bottom"; // [bottom, top]
 
-module __none__() {}
-
-// measured...
-Hole1ZoffsetThou = 1500; // from top of bracket
-Hole2ZoffsetThou = 438; // ditto
+/* [Console Measurements] */
 BracketHeightThou = 3625; 
 BracketWidthThou = 8000;    // measured
 BracketDepthThou = 3313;    // measured
-PivotThreadRecessDiameterThou = 457; // measured
-PivotThreadRecessDepthThou = 90; // measured
 ConsoleWidthThou = 7563; // measured
+// from top of bracket
+Hole1ZoffsetThou = 1500; 
+// from top of bracket
+Hole2ZoffsetThou = 438; 
+// OEM console is threaded M5
+HoleDiameterThou = 200; 
+// OEM is M5
+HeadDiameterThou = 380; 
+// OEM is M5
+HeadThicknessThou = 135; 
+PivotThreadRecessDepthThou = 90; // measured
+
+/* [Units for display and STL] */
+mmPerThou = .0254; // [0.0254:mm, 1:thou]
+
+module __none__() {}
+
+// measured...
+PivotThreadRecessDiameterThou = 457; // measured
 BracketTopRoundRadiusThou = 250;    // measured
-HoleDiameterThou = 200; // OEM console is threaded #8-32
-HeadDiameterThou = 380; // ditto
-HeadThicknessThou = 135; // ditto
 
 BracketCompensatedHeightThou = BracketHeightThou + BoostHeightToIncreasePivotAngleThou;
 
 PivotHoleZThou = PivotHolePosition == "bottom" ? (BracketCompensatedHeightThou - Hole1ZoffsetThou) : (BracketCompensatedHeightThou - Hole2ZoffsetThou);
 
-mmPerThou = .0254;
+
 
 echo ("Console screw head clearance = ", 0.5*(BracketWidthThou - ConsoleWidthThou) - BracketPrintThicknessThou, " thou");
 
@@ -65,8 +75,8 @@ scale(mmPerThou)
                         polygon(profile1);
                     polygon(profile2);
                 } 
-                translate([BracketPrintThicknessThou, 0, BracketPrintThicknessThou])
-                    cube([BracketWidthThou - 2 * BracketPrintThicknessThou, BracketDepthThou, BracketCompensatedHeightThou]);
+                translate([BracketPrintThicknessThou, -1, BracketPrintThicknessThou])
+                    cube([BracketWidthThou - 2 * BracketPrintThicknessThou, BracketDepthThou+2, BracketCompensatedHeightThou]);
             }
 
             translate([0, PivotYPos, PivotHoleZThou])
@@ -87,7 +97,7 @@ scale(mmPerThou)
                 cylinder(h=HeadThicknessThou, d = HeadDiameterThou);
             }
             rotate([0,90])
-                #cylinder(h=HeadThicknessThou, d = HeadDiameterThou);
+                cylinder(h=HeadThicknessThou, d = HeadDiameterThou);
         }  
     }
 }

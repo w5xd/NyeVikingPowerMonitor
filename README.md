@@ -22,7 +22,7 @@ Don't know about the Nye Viking Power Monitor? Here is a demonstration videoed b
 When I did the retrofit of my own two Nye Viking consoles, I took the liberty of making three
 exernally visible changes: I substituted 
 RGB diodes on the front panel, drilled a small back panel hole for a USB port, and placed a small
-momentary contact SPST switch in the back panel ALO sense adjustment hole. If you forego those three
+momentary contact SPST switch in what was the back panel ALO sense adjustment hole. If you forego those three
 substitutions, you can make it difficult to distinguish the OEM console from the retrofit&mdash;even in operation.  (Spoiler:
 feed the retrofit less than 20W and it will blink the LOW power front panel LED while simultaneously
 displaying the power meter readout multiplied by 10, which the OEM won't do.) 
@@ -34,18 +34,20 @@ The original instrument has a single circuit board. Here is a photo with its cov
 a replacement project done in 2023 that is based on a custom printed circuit board documented
 in the PCB folder. If you want the full history, the git tag 
 <a href='https://github.com/w5xd/NyeVikingPowerMonitor/tree/Final-Haywire-Prototype'>Final-Haywire-Prototype</a> 
-documents the first steps in this project back to 2016. </p>
+documents the first steps in this project back to 2016, and before the design of the custom
+PCB. </p>
 
 <h2>Construction</h2>
 The custom PCB is 2 inches by 4 inches. Its circuit diagram is <a href='PCB/schematics.pdf'>
 <img atl='page2' src='PCB/schematics-2.png'/><img alt='page3' src='PCB/schematics-3.png'/></a>The
 PCB's construction sources are 
-published here in the format supported by expresspcb.com. Parts lists
+published here in the format supported by expresspcb.com, along with gerber files that
+commercial PCB manufacturers can use to reproduce them. Parts lists
 for duplicating this retrofit are linked below. Two additional projects are documented:
 <ul>
 <li>A work-alike console can be bult using the same retrofit PCB and it fits in the 3D printed enclosure documented below.
 <li>The directional coupler documented below supports the range 1.8MHz to 29MHz and power between 5W to 3000W. 
-and the retrofit PCB will work with it, whether in an OEM console that maybe came without a coupler, or with
+The retrofit PCB will work with it, whether in an OEM console that maybe you acquired without its coupler, or with
 the work-alike console. (The only combination that doesn't work is the 
 unmodifed OEM console will <i>not</i> work with this coupler, even though the
 connectors are compatible.)
@@ -57,15 +59,16 @@ the top two screws from the left hand side to remove the top. Then the outer-mos
 To fold the front panel away, remove the bottom two screws <i>on the two side panels only</i>.
  Do not remove any
 front panel screws nor the bottom panel screws.</p>
-<p>I removed the original board by snipping each wire at its end at the circuit board. Some of the remaining wires
+<p>I removed the original board by snipping each wire at its end at the original circuit board. 
+Some of the resulting wires
 will reach to their assigned position on the new PCB, but some will not. The custom PCB
-fits onto a 3D printed bracket that has holes to match the origin four #6 screws that held the OEM
+fits onto a 3D printed bracket that has holes to match the original four #6 screws that held the OEM
 PCB in place, and that has six by 5mm LED holes to match the front panel LEDs. The bracket holds the
 custom PCB at an angle.</p>
 <p align='center'><img alt='OEM view' src='CAD/OEM/PartsView01.jpg'/></p>
 <p>A prospective builder will want to know that, while the 12VDC connector at the back
 of the RFM-003 matches the voltage (about 12V), polarity (positive on the inner pin, 2.5mm) and
-outer diameter, (5.5mm) of the Arduino, the diameters of the inner pins do NOT match. The Arduino power plugs have
+outer diameter, (5.5mm) that is standard on AVR-based Arduinos, the diameters of the inner pins do NOT match. The Arduino power plugs have
 a 2.1mm inner pin. </p>
 
 <a href='PCB/ConsolePcbMap.pdf'>Map of the console PCB</a>
@@ -77,7 +80,8 @@ a 2.1mm inner pin. </p>
 </p>
 <h2>SWR and RF Power</h2>
 The DC voltages from the OEM coupler are input on a 4 pin jack. The pins are ground, foward signal, 
-reflected signal, and battery charge. The retrofit PCB has no connection on the battery charge
+reflected signal, and battery charge. The retrofit PCB does not have a battery recharge circuit.
+Therefore there is no connection on the battery charge
 voltage on that fourth pin, but is built with a 4 pin connector that mates compatibly with OEM part.
  The forward and reflected signal voltages are processed into
  SWR and RF power readings that are presented on analog meters. The overall signal processing is
@@ -86,11 +90,12 @@ The sketch supports a compile time option to construct lookup tables for analog 
 <ol type='a'>
 <li>the OEM meters with their original scales. This is for a retrofit.
 <li>1 mA movement meters with the mA scale replaced using the printout from the MeterFaces application here.
-Without OEM meters, constructing a workalike console requires modifying commercially available meter faces.
+Without OEM meters, constructing a workalike console requires modifying commercially available meter faces
+as described below.
 </ol>
 
 <h2>Switches and Potentiometer</h2>
-This retrofit takes all the same human inputs as the original:
+This retrofit takes all the same user inputs as the original:
 <ul>
 <li>Front panel potentiometer for Hold Time
 <li>Front panel three-position switch for metering mode: Peak, Peak & Hold, Average
@@ -98,7 +103,8 @@ This retrofit takes all the same human inputs as the original:
 <li>Back panel Power selection between Forward and Reflected to drive the front panel Power meter
 <li>Back panel ALO RCA jacks that break continuity on detecting a lock out condition.
 </ul>
-<p>The retrofit adds a momentary action pushbutton switch to the back panel that is not in the OEM design. Pressing the switch places the meter 
+<p>The retrofit adds a momentary action pushbutton switch to the back panel that is not in the OEM design. Pressing 
+the button places the meter 
 in calibrate mode so that
 you can adjust, within a restricted range, the meter's power sensitivity. This feature is in lieu of the
 calibration pots on the OEM PCB. A commerically available
@@ -110,45 +116,46 @@ don't need to drill any new holes for a retrofit
 <p>
 In this retrofit design, the Forward and Reflected readings from the coupler are treated identically 
 to each other in the circuits leading up to
-the analog to digital conversion. Each signal input is fed undivided into an ADC input on the Arduino through a 100K resistor.
+the analog to digital conversion. Each signal input is fed undivided into an ADC input on the Arduino through a 
+100K resistor.
 This signal path is used for best resolution at low RF power up until the digitized voltage exceeds
-the 5V maximum at the ADC. The 100K resistor
+the 5V maximum supported by the Arduino ADC inputs. The 100K resistor
 limits current under high power signals which can range up to about 15V for this coupler, or 26V for the
-OEM 3000W coupler. The same signal is voltage divided into a second ADC input channel, with the divider set to be enough to bring
-the highest measureable power (3000W) down below the 5V maximum that can be digitized in this Arduino circuit. The program in the sketch
-tries the undivided voltage first, notes if it is maxed out and tries again with the divided input. This
-allocation of two ADC pins for each power input gives good low power resolution while still accommodating 3000W without overflowing the ADC.
+OEM 3000W coupler. The forward power signal is also voltage divided into a second ADC input channel, 
+with the divider set to be enough to bring
+the highest measureable power (3000W) down below the 5V maximum. The program in the sketch
+tries the undivided voltage first, notes if it is maxed out and then tries again with the divided input. This
+allocation of two ADC pins for each power input gives good low power resolution while still accommodating 
+3000W without overflowing the ADC.
 </p>
 
 <h2>Console DC Power</h2>
 <p>The DC power supply design here has one, but only one, important similarity to the OEM design: it can  
 accept external DC input at (about) 12VDC, and seamlessly switchover to battery power when external DC is not present. 
-The OEM design included four rechargable NiCad AA cells which served not only as the
-battery power source, but also as the voltage regulator to convert the 12VDC input to 
-regulated ~5VDC on its PCB circuits.</p>
+The OEM design required four rechargable NiCad AA cells which served not only as the
+battery power source, but also as the voltage regulator in its circuit that converts 12VDC input to 
+regulated ~5VDC.</p>
 
-This retrofit includes no recharging circuit, nor does it require any battery installed at all&mdash;they are optional.
+This retrofit, by contrast, includes no recharging circuit, nor does it require any battery installed at all&mdash;they are optional.
 The external DC jack accepts a range of input voltage from about 7VDC up to a maximum of 15V.
 Its battery power circuit, based on the LTC3525, works with pretty
 much any battery technology and voltage from about 1.0 VDC up to 5VDC. It can convert any battery voltage 
 as low as 1V up to 5VDC, but, to repeat, there is no charger in this
 design. On the other hand, it hardly needs a charger. Ninety seconds after last detecting RF power present, the 
 Arduino sketch puts the CPU into
-power down sleep mode, which consumes less than 100 micro Amps (uA). Even a very modest battery, a single AAA alkaline cell,
-will 
-last for over 1000 hours of standby. The IC maintains a steady 5VDC power supply for the monitor as the battery
+power down sleep mode, which consumes less than 10 micro Amps (uA). Even a very modest battery, a single AAA alkaline
+ cell, will last for over 1000 hours of standby. The IC maintains a steady 5VDC power supply for the monitor as the battery
 loses voltage until the battery can no longer maintain about 1V at the LTC3525, at which point the IC shuts down.
-There is no off switch. It doesn't need one.
+There is no power on/off switch. It doesn't need one.
 
 The maximum number of AA or AAA cells in a battery for the LTC8525 part is <b>three</b>.
 This limit is necessary in order to stay below
 its 6VDC absolute maximum battery voltage input for the LTC8525. The OEM meter from Nye Viking
-houses 4 AA NiCads. That battery holder can be used, but one of the cells <b>must be replaced</b> with a
-dummy AA battery to stay
-within the ratings. The original NiCads can be used (if they still work after all these years! but, again, 
+houses <b>four</b> AA NiCads. That battery holder can be retained in this retrofit,
+but it can only be used if one of the cells is replaced with a
+dummy AA cell. The original NiCads can be used (if they still work after all these years! but, again, 
 only <i>three</i> of them) and 
-they'll have to be recharged outside the
-meter.
+they'll have to be recharged outside the meter.
 
 The seamless battery power switchover is implemented by Q5, Q6, and Q7. The first two are 
 complimentary MOSFETs, P-channel
@@ -176,9 +183,9 @@ DC input pulls Q7's gate more than its gate threshold above the 5V regulated pow
 its gate threshold specification is about 2V.) The LTC3525 does not need a disconnect as its SHDN 
 input accomplishes that function.
 
-Acheiving the less-than-100uA standby current is dependent on the details of how the FT232H 
+Acheiving the less-than-10uA standby current is dependent on the details of how the FT232H 
 serial breakout is
-set up, as detailed in the following section. Also, the SJ1 solder jumper on the Arduino Pro Mini
+set up as detailed in the following section. Also, the SJ1 solder jumper on the Arduino Pro Mini
 must be separated.
 
 <p>To populate a PCB without battery power support, the following part positions on the PCB may
@@ -197,7 +204,7 @@ some simple Serial port commands that can be used to remotely monitor forward an
 upper right corner, just above the 12VDC external power jack, should you choose to drill.
 </p>
 <p> The sketch can be
-uploaded onto the Arduino using USB. (The ISP pads can also be used to program the Arduino.) 
+uploaded onto the Arduino using USB. (or the ISP pads on the PCB can alternatively be used to program the Arduino.) 
  The FT232H on the Adafruit breakout board has an EEPROM that can
 be configured using <a href='https://ftdichip.com/utilities/#ft_prog'>FTDI's FT_Prog.exe</a>, also over
  that same USB port. 
@@ -212,30 +219,30 @@ continuously as long as the FT232H is connected to a powered USB port.
  If the PCB has USB power without back panel 12V DC, this will draw down the battery much more quickly.
 Use FT_Prog to set C0 to Tristate to reduce the drain, but that setting makes it 
 more difficult to program the Arduino
-through the serial port.
+through the serial port because you have to accurate time pressing the Arduino's reset button.
 The C8 and C9 outputs driving TXLED and RXLED shown in the screen above are for 
 convenience. They make it easy to see that the 
 Arduino program upload is proceeding as expected.</p>
 
 Another ~200uA is consumed, regardless of the FT232H EEPROM settings if the DTR on 
 the FT232H's serial port is
-not asserted. This 200 uA can also be eliminated any of these ways:
+not asserted. This 200 uA can also be eliminated either of these ways:
 <ol type='a'>
 <li>Unplug the FT232H from the circuit such that there is no USB at all.
-<li>Power the FT232H's USB only while 12VDC is presented on the back panel. (Said another way: 
-if there is no 12VDC on the back panel, but there is power to the USB, the DTR pullup circuit 
-on the PCB will draw
-about 200uA from the battery.)
+<li>Power the FT232H's USB only while 12VDC is presented on the back panel. That is, if 
+the unit is on battery power, the FT232H will draw pull up current from that battery
+while a USB connector is plugged in.
 </ol>
 
 <h2>Front Panel LEDs</h2>
 <p>This PCB design employs a pair of general purpose TLC59108 LED driver chips that together can drive 
-up to 16 diodes on a common annode. The PCB routes those 16 outputs to 6 physical positions corresponding to
-the OEM console's front panel LEDs (labeled, left to right, SENSE, LOCK, SAMPLE, HOLD, LOW and HIGH.) 
+up to 16 diodes on a common annode circuit. The PCB routes those 16 outputs to 6 physical positions 
+corresponding to
+the OEM console's front panel LEDs (labeled, left to right, SENSE, LOCK, SAMPLE, HOLD, LOW and 
+HIGH.) 
 
-<p>Of the six front panel LED positions, the LOCK and the HOLD positions only support 2 color LEDs 
-(because the IC's 16 channels
-cannot support 3 channels on all 6 posiitions) </p>
+<p>Of the six front panel LED positions, the LOCK and the HOLD positions only support 2 of the LED
+colors (because the IC's 16 channels can cover all of 3 channels on each of 6 posiitions) </p>
 
 To easily retrofit into the OEM case, use size T1-3/4 diodes (5mm diameter.) Instead of the OEM's 
 specific color 
@@ -263,21 +270,22 @@ when you retrofit, and you can make this PCB successfully drive them, but you'll
 sketch accordingly. 
 
 <h2 id='Couplers'>Couplers</h2>
-The PCB and sketch support two different couplers.
+The PCB and sketch support two different coupler implementations.
 <ol><li>The OEM 3000W coupler</li>
 <li>This build-it-yourself <a href='./coupler'>coupler</a> based on the design in the 2008 Radio 
 Amateur's Handbook.</li></ol>
  <p>This <a href='./coupler'>coupler's</a> detection sensistivity does not match
-the OEM coupler, which requires different resistors in the voltage dividers feeding the Arduino ADC's, and 
+the OEM coupler, and therefore requires different resistors in the voltage dividers feeding the Arduino ADC's, and 
 some different coefficients in the sketch's ino file.
 It is enclosed in a commerically available clam shell aluminum box.
 The primary advantage of this particular coupler design from the Handbook is that its balance depends only on
-your ability to wind two identical transformers, and use well matched resistors and diodes. There are 
+your ability to wind two identical transformers (i.e. you have to be able to accurately count to 40),
+and use well matched resistors and diodes. There are 
 no balance or level
 adjustments.
 This one has a more inductive toroid transformer design than the
-Handbook design (a stacked trio of T80-2 toroids instead of a 
-single T68-2)
+Handbook design (a stacked trio of T80-2 toroids instead of the 
+single T68-2 in the Handbook)
 which improves 1.8MHz performance.
 The 40:1 turns
 ratio (which was the Handbook design, which this unit matches) gives somewhat smaller DC voltages at its 
@@ -318,31 +326,16 @@ The meter faces can be replaced using those drawn by the MeterFaces program <a h
 <img alt='swr' width='400' src='MeterFaces/Swr.jpg'/></td><td><img alt='power' width='400' src='MeterFaces/Power.jpg'/>
 </td></tr></table>
 I tried several different LED parts for the workalike. Eventually, I gave up trying to successfully mount SMT
-LEDs on the PCB. The hole pattern on the PCB supports the following two LED mounting schemes,
- but I recommend only the first:
-<ul>
-<li>RGB T1-3/4 LED lamps, which are 5mm diameter. These mount through holes in the front panel,
-and require individually routing 4 wires to each of the LEDs from the PCB edge.
-<li>SMT LEDs that match the pad layout along the edge of the PCB. 2mm end glow fiber optic cable
-transfer the light to the front panel.
-There are (at least) two different LED products that fit the SMT pad layout: one in RGB, and the other in RGY.
-The 3D enclosure has six routing tubes to accommodate fiber optic cable from the LED on the
-PCB to the front panel. 
-<br/><br/>A historical note: There is an older 3D model, <code>console.asm</code>, in this repository
-which is the SolidEdge 3D design for
-an enclosure that places the front panel and back panel of the enclosure in direct contact with the PCB.
-No fiber optic cable is needed. But I disliked the cosmetics and the difficulty of assembly. Then I designed the
-enclosure presented here, <code>console2.asm</code>. 
-It places the front panel away from the PCB edge. 
-</p><p>There is also a <code>console3.asm</code> which is 
-currently only a design concept for
-an enclosure that places the PCB inside a commercically available aluminum box if you need
- improved shielding. 
+LEDs on the PCB. The hole pattern on the PCB supports 4 pin RGB T1-3/4 LED lamps, which are 5mm diameter. 
+2 pin single color LEDs work too.
+2mm end glow fiber optic cable
+transfers the light to the front panel.
+
 The 4 layer PCB provides adequate shielding for my own shack, even with full legal limit power
 output to a tribander directly above the operating position.
-</ul>
-Its a bit of a puzzle to assemble the 3D printed enclosure. See the instructions in the 
-<a href='STL/console2'>STL/console2</a> folder.
+
+The 3D printable files for the console are in the
+<a href='STL/console'>STL/console</a> folder.
 
  <h2>Calibration</h2>
  <p>The sketch supports four calibrations in EEPROM accessible using the back panel
@@ -375,7 +368,9 @@ Two machines screws, #2 x 7/16" with nuts hold the LED holder to the bracket.
 https://www.digikey.com/en/products/detail/kingbright/WP154A4SEJ3VBDZGW-CA/6569334</a>. These
 LEDs are needed if you either retrofit an OEM console and want to use RGB LEDs, or if you build a 
 stand alone work-alike
-console.</li>
+console. Other RGB LED parts can be substituted, but look carefully at the pinout as supported
+by this PCB and sketch. Not all T1-3/4 RGB LEDs have the same pinout. The supported pinout is four pins
+with RABG in that order.</li>
 <li>To build a stand alone console, you need to populate all the connectors on the PCB and the 
 4 pin connector to the coupler.
 <a href='https://www.digikey.com/short/w12hfd9z'>https://www.digikey.com/short/w12hfd9z</a>. 
@@ -402,7 +397,8 @@ some practice to know how much paste is enough, but here is a rule: too much pas
 And it is surprising how little will work. It is not necessary for the space between the pads to be completely clear
 of paste, but don't leave any big blobs. I found that if I could get the paste to form a thing string
 from my wire tool, that one strand of that thin string laid down across the entire row of 10 pins from pins 1 through 10
- of the LED driver baked well. </p>
+ of the LED driver baked well. If a solder bridge forms while baking, I found that a fresh
+piece of copper de-soldering braid would usually remove the bridge first try. </p>
 <p>
 The SMD ICs put up with some abuse from my mistakes. I had placed the 6 pin 5V step-up IC rotated 180 
 degrees from its proper position. 

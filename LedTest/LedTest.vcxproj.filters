@@ -31,5 +31,8 @@
     <ClInclude Include="PowerMeterLEDs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RollYourOwnLeds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

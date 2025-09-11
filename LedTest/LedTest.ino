@@ -71,8 +71,12 @@ namespace {
     bool doAdcTest;
     bool printAdcTest;
     bool colorRotation;
+    bool inOrder;
     PowerMeterLeds leds(Tlc59108PowerEnablePinOut);
 }
+
+static uint8_t lamps;
+
 
 void setup() {
         pinMode(couplerPowerDetectPinIn, INPUT);
@@ -95,6 +99,7 @@ void setup() {
         analogReference(DEFAULT); // go to 5.0V reference
 
         digitalWrite(PanelLampsPinOut,  HIGH); // turn on front panel lights on boot
+        lamps = 0xff;
 
         Wire.begin();
 
@@ -110,9 +115,11 @@ void setup() {
 }
 
 static void AdcTest();
-static void ColorRotation();
+static void InOrder(unsigned long);
+static void AllBlinksOff();
 
 static bool testPot;
+
 
 void loop()
 {
@@ -146,6 +153,7 @@ void loop()
             else if (strcmp(buf, "COLOR") == 0)
             {
                 colorRotation = !colorRotation;
+                inOrder = false;
             }
             else if (strcmp(buf, "RELAY") == 0)
             {
@@ -205,7 +213,13 @@ void loop()
             {
                 int v = atoi(buf+5);
                 leds.LeftDevice().SetCurrent(v);
+                auto left =leds.LeftDevice().GetCurrent();
                 leds.RightDevice().SetCurrent(v);
+                auto right =leds.RightDevice().GetCurrent();
+                Serial.print("Setting IREF L="); 
+                Serial.print(static_cast<int>(left));
+                Serial.print(" R=");
+                Serial.println(static_cast<int>(right));
             }
             else if (strcmp(buf, "LERR") == 0)
             {
@@ -219,9 +233,34 @@ void loop()
                 Serial.println(digitalRead(ALOtripSwitchPinIn) == LOW ? "ALO: REV" : "ALO: SWR");
                 Serial.println(digitalRead(PowerForwReflSwitchPinIn) == LOW ? "Power: Reflected" : "Power: Forward");
             }
-            else if (strcmp(buf, "LAMPS") == 0)
+            else if (strncmp(buf, "LAMPS", 5) == 0)
             {
-                digitalWrite(PanelLampsPinOut, digitalRead(PanelLampsPinOut) == LOW ? HIGH : LOW);
+                if (buf[5] == '=')
+                {
+                    lamps = atoi(buf+6);
+                    analogWrite(PanelLampsPinOut, lamps);
+                    Serial.print("LAMPS="); Serial.println((int)lamps);
+                }
+                else
+                {
+                    if (lamps != 0)
+                        lamps = 0;
+                    else
+                        lamps = 0xff;
+                    digitalWrite(PanelLampsPinOut, lamps != 0 ? HIGH : LOW);
+                }
+            }
+            else if (strcmp(buf, "ALL") == 0)
+                leds.setAll(true);
+            else if (strcmp(buf, "ALLOFF") == 0)
+            {
+                AllBlinksOff();
+                leds.setAll(false);
+            }
+            else if (strcmp(buf, "ORDER") == 0)
+            {
+                    inOrder = !inOrder;
+                    colorRotation = false;
             }
             numInBuf = 0;
             Serial.println("W5XD LedTest>");
@@ -236,6 +275,9 @@ void loop()
 
     if (colorRotation)
         ColorRotation(now);
+
+    if (inOrder)
+        InOrder(now);
 
     if (testPot)
     {
@@ -337,4 +379,70 @@ static void ColorRotation(unsigned long n)
     }
     Serial.println();
     
+}
+
+static void InOrder(unsigned long n)
+{
+    static unsigned long prev;
+    if (n - prev < 1000)
+        return;
+    prev = n;
+
+    static enum State_t {IDLE, RANGE_HIGH, RANGE_LOW1, RANGE_LOW2, PEAK_HOLD1, PEAK_HOLD2, PEAK_SAMPLE,  ALO_LOCK, ALO_SENSE, DONE} state = IDLE;
+
+    switch(state)
+    {
+        case RANGE_HIGH:
+            leds.SetHighLed(true);
+            break;
+        case RANGE_LOW1:
+            leds.SetHighLed(false);
+            leds.SetLowLed(true, false);
+            break;
+        case RANGE_LOW2:
+            leds.SetLowLed(false, true);
+            break;
+        case PEAK_HOLD1:
+            leds.SetLowLed(false,false);
+            leds.SetHoldLed(true, false);
+            break;
+        case PEAK_HOLD2:
+            leds.SetHoldLed(false, true);
+            break;
+        case PEAK_SAMPLE:
+            leds.SetHoldLed(false, false);
+            leds.SetSampleLed(true);
+            break;
+        case ALO_LOCK:
+            leds.SetSampleLed(false);
+            leds.SetAloLock(true);
+            break;
+        case ALO_SENSE:
+            leds.SetAloLock(false);
+            leds.SetSenseLed(true);
+            break;
+        case DONE:
+            leds.SetSenseLed(false);
+            break;
+        case IDLE:
+            AllBlinksOff();
+            // fall through
+        default:
+            leds.setAll(false);
+            break;
+    }
+    
+    int next = static_cast<int>(state);
+    next += 1;
+    if (next >= static_cast<int>(DONE))
+        next = 0;
+    state = static_cast<State_t>(next);
+}
+
+static void AllBlinksOff()
+{
+        for (auto i = static_cast<int>(PowerMeterLeds::FrontPanel::LED_FIRST);
+                i <= static_cast<int>(PowerMeterLeds::FrontPanel::LED_LAST);
+                i += 1)
+                    leds.BlinkLed(static_cast<PowerMeterLeds::FrontPanel>(i), false);
 }

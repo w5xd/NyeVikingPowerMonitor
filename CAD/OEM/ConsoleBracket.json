@@ -1,0 +1,19 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "Console3Dprint": {
+            "BoostHeightToIncreasePivotAngleThou": "100",
+            "BracketDepthThou": "2500",
+            "BracketHeightThou": "2500",
+            "BracketPrintThicknessThou": "135",
+            "BracketWidthThou": "6732",
+            "ConsoleWidthThou": "6295",
+            "Hole1ZoffsetThou": "625",
+            "Hole2ZoffsetThou": "375",
+            "HoleDiameterThou": "235",
+            "PivotHolePosition": "bottom",
+            "PivotThreadRecessDepthThou": "0",
+            "mmPerThou": "0.025399999999999999"
+        }
+    }
+}

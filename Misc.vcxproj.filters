@@ -43,7 +43,7 @@
     <None Include="coupler\ReadMe.md">
       <Filter>coupler</Filter>
     </None>
-    <None Include="STL\console2\ReadMe.md">
+    <None Include="STL\console\ReadMe.md">
       <Filter>STL</Filter>
     </None>
   </ItemGroup>

@@ -26,6 +26,13 @@ void PowerMeterLeds::begin()
 
 static const int BLINK_MSEC = 100;
 
+#ifdef LEDS_ARE_RGB
+    static void setRGBYellow(uint8_t brightness, uint8_t &redState, uint8_t &greenState)
+    {
+            redState = greenState = brightness >> 1;
+    }
+#endif
+
 void PowerMeterLeds::loop(unsigned long now)
 {
     bool blinkChanged = false;
@@ -118,21 +125,28 @@ void PowerMeterLeds::BlinkLed(FrontPanel led, bool blink)
     }
 }
 
-void PowerMeterLeds::SetSenseLed(bool yellow)
+void PowerMeterLeds::SetSenseLed(bool amber)
 { 
+
     auto b1 = m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_GREEN)];
     auto b2 = m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_RED)];
-    if (yellow)
-    {
-        m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_GREEN)] = m_brightness >> 2;
-        m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_RED)] = m_brightness >> 1;
+    auto b3 = m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_UNUSED)];
+    if (amber)
+    {   // Simulate amber as 1.0 Red with 0.75 Green
+        m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_GREEN)] = 3 * (m_brightness >> 2);
+        m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_RED)] = m_brightness;
     }
     else
         m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_GREEN)] = m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_RED)] = 0;
+    m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_UNUSED)] = 0;
 
     if ( b1 != m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_GREEN)] ||
-            b2 != m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_RED)])
-        m_UpdateLeftMask |= (1 << static_cast<uint8_t>(LedChannel::SENSE_GREEN)) | (1 << static_cast<uint8_t>(LedChannel::SENSE_RED));
+            b2 != m_StateLeft[static_cast<uint8_t>(LedChannel::SENSE_RED)] ||
+            b3 != 0)
+        m_UpdateLeftMask |= (1 << static_cast<uint8_t>(LedChannel::SENSE_GREEN))
+            | (1 << static_cast<uint8_t>(LedChannel::SENSE_RED))
+            | (1 << static_cast<uint8_t>(LedChannel::SENSE_UNUSED));
+
 }
 
 void PowerMeterLeds::SetAloLock(bool red)
@@ -155,10 +169,17 @@ void PowerMeterLeds::SetSampleLed(bool yellow)
 #ifdef LEDS_ARE_RGB
     auto b1 = m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_RED)];
     auto b2 = m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_GREEN)];
-    m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_RED)] = m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_GREEN)] = yellow ? (m_brightness >> 1) : 0;
+    auto b3 = m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_BLUE)];
+    m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_BLUE)] = 0;
+    setRGBYellow(yellow ? m_brightness : 0, 
+        m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_RED)], m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_GREEN)]);
     if (b1 != m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_RED)] ||
-        b2 != m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_GREEN)])
-        m_UpdateLeftMask |= (1 << static_cast<uint8_t>(LedChannel::SAMPLE_RED)) | (1 << static_cast<uint8_t>(LedChannel::SAMPLE_GREEN));
+        b2 != m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_GREEN)] ||
+        b3 != 0)
+        m_UpdateLeftMask |= (1 << static_cast<uint8_t>(LedChannel::SAMPLE_RED)) 
+                | (1 << static_cast<uint8_t>(LedChannel::SAMPLE_GREEN))
+                | (1 << static_cast<uint8_t>(LedChannel::SAMPLE_BLUE))
+;
 #endif
 }
 
@@ -174,13 +195,14 @@ void PowerMeterLeds::SetHoldLed(bool green, bool yellow)
         m_UpdateRightMask |= (1 << static_cast<uint8_t>(LedChannel::HOLD_GREEN)) | (1 << static_cast<uint8_t>(LedChannel::HOLD_YELLOW));
 #endif
 #ifdef LEDS_ARE_RGB
+    // Can't fake yellow with only a green and a blue
     auto b1 = m_StateRight[static_cast<uint8_t>(LedChannel::HOLD_GREEN)];
-    auto b2 = m_StateRight[static_cast<uint8_t>(LedChannel::HOLD_RED)];
-    m_StateRight[static_cast<uint8_t>(LedChannel::HOLD_GREEN)] = green ? m_brightness : (yellow ? m_brightness >> 1 : 0);
-    m_StateRight[static_cast<uint8_t>(LedChannel::HOLD_RED)] = yellow ? m_brightness>>1 : 0;
+    auto b2 = m_StateRight[static_cast<uint8_t>(LedChannel::HOLD_BLUE)];
+    m_StateRight[static_cast<uint8_t>(LedChannel::HOLD_BLUE)] = yellow ? m_brightness >> 2 : 0;
+    m_StateRight[static_cast<uint8_t>(LedChannel::HOLD_GREEN)] = green ? m_brightness : (yellow ? m_brightness >> 1 : 0);       
     if (b1 != m_StateRight[static_cast<uint8_t>(LedChannel::HOLD_GREEN)] ||
-        b2 != m_StateRight[static_cast<uint8_t>(LedChannel::HOLD_RED)])
-        m_UpdateRightMask |= (1 << static_cast<uint8_t>(LedChannel::HOLD_GREEN)) | (1 << static_cast<uint8_t>(LedChannel::HOLD_RED));
+        b2 != m_StateRight[static_cast<uint8_t>(LedChannel::HOLD_BLUE)])
+        m_UpdateRightMask |= (1 << static_cast<uint8_t>(LedChannel::HOLD_GREEN)) | (1 << static_cast<uint8_t>(LedChannel::HOLD_BLUE));
 #endif
 }
 
@@ -197,12 +219,19 @@ void PowerMeterLeds::SetLowLed(bool green, bool yellow)
 #endif
 #ifdef LEDS_ARE_RGB
     auto b1 = m_StateRight[static_cast<uint8_t>(LedChannel::LOW_GREEN)];
-    auto b2 = m_StateRight[static_cast<uint8_t>(LedChannel::LOW_BLUE)];
+    auto b2 = m_StateRight[static_cast<uint8_t>(LedChannel::LOW_RED)];  
+    auto b3 = m_StateRight[static_cast<uint8_t>(LedChannel::LOW_BLUE)];  
+    m_StateRight[static_cast<uint8_t>(LedChannel::LOW_BLUE)] = 0;
+    m_StateRight[static_cast<uint8_t>(LedChannel::LOW_RED)] = 0;
     m_StateRight[static_cast<uint8_t>(LedChannel::LOW_GREEN)] = green ? m_brightness : 0;
-    m_StateRight[static_cast<uint8_t>(LedChannel::LOW_BLUE)] = yellow ? m_brightness : 0;
+    if (yellow)
+        setRGBYellow(m_brightness, m_StateRight[static_cast<uint8_t>(LedChannel::LOW_RED)], m_StateRight[static_cast<uint8_t>(LedChannel::LOW_GREEN)]);
     if (b1 != m_StateRight[static_cast<uint8_t>(LedChannel::LOW_GREEN)] ||
-        b2 != m_StateRight[static_cast<uint8_t>(LedChannel::LOW_BLUE)])
-        m_UpdateRightMask |= (1 << static_cast<uint8_t>(LedChannel::LOW_BLUE)) | (1 << static_cast<uint8_t>(LedChannel::LOW_GREEN));
+        b2 != m_StateRight[static_cast<uint8_t>(LedChannel::LOW_RED)] ||
+        b3 != 0)
+        m_UpdateRightMask |= (1 << static_cast<uint8_t>(LedChannel::LOW_RED)) | 
+                             (1 << static_cast<uint8_t>(LedChannel::LOW_GREEN)) | 
+                             (1 << static_cast<uint8_t>(LedChannel::LOW_BLUE));
 #endif
 }
 
@@ -239,38 +268,58 @@ void PowerMeterLeds::wake()
 }
 
 void PowerMeterLeds::SetBrightness(uint8_t b)
-{
-    m_brightness = b;
-}
+{    m_brightness = b;  }
 
 uint8_t PowerMeterLeds::GetBrightness()
 {   return m_brightness; }
 
 void PowerMeterLeds::test()
 {
-    uint8_t bright[8];
+    static const uint8_t LeftOrder[NUM_CHANNELS_PER_DRIVER] =
     {
-        for (int i = 0; i < 8; i++)
+        2, // SENSE Red
+        0, // SENSE g
+        1, // SENSE Y/B
+        3, // LOCK R
+        7, // LOCK Y/B
+        5, // SAMPLE R
+        6, // SAMPLE G
+        4, // SAMPLE Y/B
+    };
+    static const uint8_t RighttOrder[NUM_CHANNELS_PER_DRIVER] =
+    {
+        5, // HOLD G
+        4, // HOLD Y/B
+        3, // LOW R
+        7, // LOW G
+        6, // LOW Y/B
+        2, // HIGH R
+        0, // HIGH G
+        1, // HIGH YB
+    };
+    uint8_t bright[NUM_CHANNELS_PER_DRIVER];
+    {
+        for (int i = 0; i < NUM_CHANNELS_PER_DRIVER; i++)
             bright[i] = 0;
         m_BankLeft.UpdatePWM(bright);
         m_BankRight.UpdatePWM(bright);
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < NUM_CHANNELS_PER_DRIVER; i++)
         {
-            for (int j = 0; j < 8; j++)
-                    bright[j] = (j==i) ? m_brightness : 0;
+            for (int j = 0; j < NUM_CHANNELS_PER_DRIVER; j++)
+                    bright[j] = (j==LeftOrder[i]) ? m_brightness : 0;
             m_BankLeft.UpdatePWM(bright);
-            delay(400);
+            delay(1000);
         }
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < NUM_CHANNELS_PER_DRIVER; i++)
             bright[i] = 0;
         m_BankRight.UpdatePWM(bright);
         m_BankLeft.UpdatePWM(bright);
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < NUM_CHANNELS_PER_DRIVER; i++)
         {
-            for (int j = 0; j < 8; j++)
-                bright[j] = (j == i) ? m_brightness : 0;
+            for (int j = 0; j < NUM_CHANNELS_PER_DRIVER; j++)
+                bright[j] = (j == RighttOrder[i]) ? m_brightness : 0;
             m_BankRight.UpdatePWM(bright);
-            delay(400);
+            delay(1000);
         }
     }
     setAll(false);
@@ -311,8 +360,8 @@ void PowerMeterLeds::test()
 
 void PowerMeterLeds::setAll(bool turnOn)
 {
-    uint8_t bright[8];
-    for (int j = 0; j < 8; j++)
+    uint8_t bright[NUM_CHANNELS_PER_DRIVER];
+    for (int j = 0; j < NUM_CHANNELS_PER_DRIVER; j++)
         m_StateLeft[j] = m_StateRight[j] = bright[j] = turnOn ? m_brightness : 0;
     m_BankLeft.UpdatePWM(bright);
     m_BankRight.UpdatePWM(bright);
