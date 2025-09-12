@@ -37,6 +37,11 @@ in the PCB folder. If you want the full history, the git tag
 documents the first steps in this project back to 2016, and before the design of the custom
 PCB. </p>
 
+September, 2025
+
+The latest revision updates the sketch, replaces
+the console 3D printable work-alike, and updates the PCB design. 
+
 <h2>Construction</h2>
 The custom PCB is 2 inches by 4 inches. Its circuit diagram is <a href='PCB/schematics.pdf'>
 <img atl='page2' src='PCB/schematics-2.png'/><img alt='page3' src='PCB/schematics-3.png'/></a>The
@@ -239,12 +244,7 @@ while a USB connector is plugged in.
 up to 16 diodes on a common annode circuit. The PCB routes those 16 outputs to 6 physical positions 
 corresponding to
 the OEM console's front panel LEDs (labeled, left to right, SENSE, LOCK, SAMPLE, HOLD, LOW and 
-HIGH.) 
-
-<p>Of the six front panel LED positions, the LOCK and the HOLD positions only support 2 of the LED
-colors (because the IC's 16 channels can cover all of 3 channels on each of 6 posiitions) </p>
-
-To easily retrofit into the OEM case, use size T1-3/4 diodes (5mm diameter.) Instead of the OEM's 
+HIGH.) To easily retrofit into the OEM case, use size T1-3/4 diodes (5mm diameter.) Instead of the OEM's 
 specific color 
 diode at each of the six positions, I chose six identical RGB diodes (part number listed below)
  and programmed the sketch to synthesize 
@@ -253,15 +253,9 @@ the 3 colors available.
 The sketch includes compile time conditionals for supporting either six of RGB or six of RGY diodes. 
 Modify the sketch to use whatever 
 color scheme you want.
-The amber SENSE LED and the yellow SAMPLE LED on the OEM device cannot be perfectly replicated using 
-RGB. (Regardless
-of what you may have heard about being able to synthesize all visual colors from three. That is an 
-approximation
-that sometimes works because of limitations in the way the human eye reports colors to the brain. 
-There is 
-more color in the world than you can see on a computer screen, and you eye can see the difference 
-between the
-OEM single wavelength LEDs and the RGB simulation in the retrofit.) 
+
+Of the six front panel LED positions, the LOCK and the HOLD positions only support 2 of the LED
+colors because the IC's 16 channels can cover all of 3 channels on each of 6 posiitions.
 The sketch simulates an amber color using a combination of two parts red with one part green, and 
 simulates yellow with
 equal parts red and green.
