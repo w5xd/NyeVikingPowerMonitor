@@ -171,7 +171,7 @@ void PowerMeterLeds::SetSampleLed(bool yellow)
     auto b2 = m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_GREEN)];
     auto b3 = m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_BLUE)];
     m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_BLUE)] = 0;
-    setRGBYellow(yellow ? m_brightness : 0, 
+    setRGBYellow(yellow ? ((m_brightness * 2) / 3) : 0, 
         m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_RED)], m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_GREEN)]);
     if (b1 != m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_RED)] ||
         b2 != m_StateLeft[static_cast<uint8_t>(LedChannel::SAMPLE_GREEN)] ||
@@ -212,12 +212,13 @@ void PowerMeterLeds::SetLowLed(bool green, bool yellow)
     auto b1 = m_StateRight[static_cast<uint8_t>(LedChannel::LOW_GREEN)];
     auto b2 = m_StateRight[static_cast<uint8_t>(LedChannel::LOW_YELLOW)];
     m_StateRight[static_cast<uint8_t>(LedChannel::LOW_GREEN)] = green ? m_brightness : 0;
-    m_StateRight[static_cast<uint8_t>(LedChannel::LOW_YELLOW)] = yellow ? m_brightness : 0;
+    m_StateRight[static_cast<uint8_t>(LedChannel::LOW_YELLOW)] = yellow ? (m_brightness >> 1) : 0;
     if (b1 != m_StateRight[static_cast<uint8_t>(LedChannel::LOW_GREEN)] ||
         b2 != m_StateRight[static_cast<uint8_t>(LedChannel::LOW_YELLOW)])
         m_UpdateRightMask |= (1 << static_cast<uint8_t>(LedChannel::LOW_GREEN)) | (1 << static_cast<uint8_t>(LedChannel::LOW_YELLOW));
 #endif
 #ifdef LEDS_ARE_RGB
+
     auto b1 = m_StateRight[static_cast<uint8_t>(LedChannel::LOW_GREEN)];
     auto b2 = m_StateRight[static_cast<uint8_t>(LedChannel::LOW_RED)];  
     auto b3 = m_StateRight[static_cast<uint8_t>(LedChannel::LOW_BLUE)];  

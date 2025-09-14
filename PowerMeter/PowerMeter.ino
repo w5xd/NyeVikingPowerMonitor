@@ -2316,7 +2316,6 @@ namespace {
             if ((timeOn > HoldPwrLampsOnMsec) && (timeOn > HoldTimePotMsec))
             {
                 leds.SetLowLed(false);
-                leds.BlinkLed(PowerMeterLeds::FrontPanel::RANGE_LOW, false);
                 leds.SetHighLed(false);
             }
             toDisplay = 0;
@@ -2329,7 +2328,6 @@ namespace {
                 lastHighTime = now;
                 toDisplay = v / 10;
                 leds.SetLowLed(false);
-                leds.BlinkLed(PowerMeterLeds::FrontPanel::RANGE_LOW, false);
                 leds.SetHighLed(true);
             }
             else if (leds.GetHighLed())
@@ -2338,7 +2336,6 @@ namespace {
                 {
                     lastNormalTime = now;
                     leds.SetLowLed(true);
-                    leds.BlinkLed(PowerMeterLeds::FrontPanel::RANGE_LOW, false);
                     leds.SetHighLed(false);
                 }
                 else
@@ -2355,16 +2352,13 @@ namespace {
                      */
                     leds.SetHighLed(false);
                     toDisplay *= 10;
-                    // blink the low power LED
                     leds.SetLowLed(false, true);
-                    leds.BlinkLed(PowerMeterLeds::FrontPanel::RANGE_LOW, true);
                 }
             }
             else
             {
                 lastNormalTime = now;
                 leds.SetLowLed(true);
-                leds.BlinkLed(PowerMeterLeds::FrontPanel::RANGE_LOW, false);
                 leds.SetHighLed(false);
             }
         }
@@ -2444,7 +2438,6 @@ namespace Alo {
                         analogWrite(SwrMeterPinOut, EEPROM.read((int)EEPROM_SWR_LOCK));
                         analogWrite(RfMeterPinOut, EEPROM.read((int)EEPROM_PWR_LOCK));
                         leds.SetLowLed(true);
-                        leds.BlinkLed(PowerMeterLeds::FrontPanel::RANGE_LOW, false);
                         leds.SetHighLed(false);
                         return;
                 }
@@ -2470,7 +2463,6 @@ namespace Alo {
                         analogWrite(RfMeterPinOut, holdPot);
                         pwr = holdPot;
                         leds.SetLowLed(true);
-                        leds.BlinkLed(PowerMeterLeds::FrontPanel::RANGE_LOW, false);
                         leds.SetHighLed(false);
                         lastAdjust = true;
                 }
