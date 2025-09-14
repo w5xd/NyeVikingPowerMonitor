@@ -225,6 +225,9 @@ continuously as long as the FT232H is connected to a powered USB port.
 Use FT_Prog to set C0 to Tristate to reduce the drain, but that setting makes it 
 more difficult to program the Arduino
 through the serial port because you have to accurate time pressing the Arduino's reset button.
+(Why program the C0 output? It is an EEPROM setting that enables or disables the reboot of the Arduino when
+a Windows app opens the COMM port which, in turn, asserts DTR. For uploading sketches, you want the reboot, but the
+reboot is a problem if you are using the NyeVikingMonitor Windows app published here.)
 The C8 and C9 outputs driving TXLED and RXLED shown in the screen above are for 
 convenience. They make it easy to see that the 
 Arduino program upload is proceeding as expected.</p>
