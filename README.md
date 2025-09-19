@@ -24,7 +24,7 @@ exernally visible changes: I substituted
 RGB diodes on the front panel, drilled a small back panel hole for a USB port, and placed a small
 momentary contact SPST switch in what was the back panel ALO sense adjustment hole. If you forego those three
 substitutions, you can make it difficult to distinguish the OEM console from the retrofit&mdash;even in operation.  (Spoiler:
-feed the retrofit less than 20W and it will blink the LOW power front panel LED while simultaneously
+feed the retrofit less than 20W and it changes the front panel LED color and brightness while simultaneously
 displaying the power meter readout multiplied by 10, which the OEM won't do.) 
 
 # History
@@ -81,7 +81,8 @@ a 2.1mm inner pin. </p>
 <h2>Added low-low power feature</h2>
 <p>While the code (nearly) duplicates the original behavior of the analog board, there is
  one additional low power readout feature. When it detects power levels below 1/10 of full scale in the LOW RANGE, it 
- multiplies the value by 10 and flashes the LOW LED.
+ multiplies the value on the meter by 10 (so 5 watts goes to 50 on the meter scale) and 
+it changes the color of, and lowers the brightness of, the LOW LED.
 </p>
 <h2>SWR and RF Power</h2>
 The DC voltages from the OEM coupler are input on a 4 pin jack. The pins are ground, foward signal, 
